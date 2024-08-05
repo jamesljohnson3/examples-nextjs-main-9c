@@ -81,11 +81,11 @@ async function MadeForYou() {
                       <Link href={video.link} passHref>
                         <a target="_blank">
                           <AspectRatio ratio={1 / 1} className="overflow-hidden rounded-md">
-                            <img src={video.image} alt={video.title} className="object-cover transition-all hover:scale-105" />
+                            <img src={video.image} alt={video.title} className="object-cover w-36 transition-all hover:scale-105" />
                           </AspectRatio>
                           <div className="space-y-1 text-sm mt-2">
-                            <h3 className="font-medium leading-none">{video.title}</h3>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{video.duration} - {video.views}</p>
+                            <h3 className="font-medium hidden leading-none">{video.title}</h3>
+                            <p className="text-xs text-slate-500 hidden dark:text-slate-400">{video.duration} - {video.views}</p>
                           </div>
                         </a>
                       </Link>
@@ -171,8 +171,8 @@ function AlbumArtwork({ video, aspectRatio = 3 / 4, className, ...props }: Album
         </ContextMenu>
       </Link>
       <div className="space-y-1 text-sm">
-        <h3 className="font-medium leading-none">{video.title}</h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400">{video.title}</p>
+        <h3 className="font-medium hidden leading-none">{video.title}</h3>
+        <p className="text-xs hidden text-slate-500 dark:text-slate-400">{video.title}</p>
       </div>
     </div>
   );
