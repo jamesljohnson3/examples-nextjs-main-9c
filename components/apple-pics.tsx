@@ -23,7 +23,7 @@ async function MadeForYou() {
   const imageItems: string[] = imageData.assets;
   const pornhubVideos: PornhubVideo[] = pornhubData.data;
 
-  console.log('madeForYouVideos:', madeForYouVideo);
+  console.log('madeForYouVideo:', madeForYouVideo);
   console.log('imageItems:', imageItems);
   console.log('pornhubVideos:', pornhubVideos);
 
@@ -46,9 +46,8 @@ async function MadeForYou() {
             <div className="relative">
               <DemoIndicator className="top-32 right-auto left-16 z-30" />
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
-                <div className="flex space-x-4 pb-4">
-                <AlbumArtwork video={madeForYouVideo} className="w-[150px]" aspectRatio={1 / 1} />
-
+                <div className="flex space-x-4 pb-4 min-w-[150px]">
+                  <AlbumArtwork video={madeForYouVideo} className="w-[150px]" aspectRatio={1 / 1} />
                 </div>
               </div>
             </div>
@@ -59,9 +58,9 @@ async function MadeForYou() {
             <div className="relative">
               <h2 className="text-2xl font-semibold tracking-tight">Image Gallery</h2>
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
-                <div className="flex space-x-4 pb-4">
+                <div className="flex space-x-4 pb-4 min-w-[150px]">
                   {imageItems.map((image, index) => (
-                    <div key={index} className="w-[150px]">
+                    <div key={index} className="w-[150px] min-w-[150px]">
                       <img src={image} alt={`Image ${index}`} className="object-cover transition-all hover:scale-105" />
                     </div>
                   ))}
@@ -75,13 +74,13 @@ async function MadeForYou() {
             <div className="relative">
               <h2 className="text-2xl font-semibold tracking-tight">Pornhub Videos</h2>
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
-                <div className="flex space-x-4 pb-4">
+                <div className="flex space-x-4 pb-4 min-w-[150px]">
                   {pornhubVideos.map((video) => (
-                    <div key={video.id} className="w-[150px]">
+                    <div key={video.id} className="w-[150px] min-w-[150px]">
                       <Link href={video.link} passHref>
                         <a target="_blank">
                           <AspectRatio ratio={1 / 1} className="overflow-hidden rounded-md">
-                            <img src={video.image} alt={video.title} className="object-cover w-36 transition-all hover:scale-105" />
+                            <img src={video.image} alt={video.title} className="object-cover transition-all hover:scale-105" />
                           </AspectRatio>
                           <div className="space-y-1 text-sm mt-2">
                             <h3 className="font-medium hidden leading-none">{video.title}</h3>
