@@ -20,7 +20,6 @@ async function MadeForYou() {
     return <p>No data available</p>;
   }
 
-  // Ensure homeData.data is an array of VideoData
   const madeForYouVideos: VideoData[] = Array.isArray(homeData.data) ? homeData.data : [];
   const imageItems: string[] = imageData.assets;
   const pornhubVideos: PornhubVideo[] = pornhubData.data;
@@ -47,9 +46,9 @@ async function MadeForYou() {
             {/* Made For You Videos Scroll Area */}
             <div className="relative">
               <DemoIndicator className="top-32 right-auto left-16 z-30" />
-              <ScrollArea className="overflow-x-auto">
+              <ScrollArea>
                 <div className="flex space-x-4 pb-4">
-                  {madeForYouVideos.map(video => (
+                  {madeForYouVideos.map((video) => (
                     <AlbumArtwork key={video.id} video={video} className="w-[150px]" aspectRatio={1 / 1} />
                   ))}
                 </div>
@@ -62,7 +61,7 @@ async function MadeForYou() {
             {/* Image Gallery Scroll Area */}
             <div className="relative">
               <h2 className="text-2xl font-semibold tracking-tight">Image Gallery</h2>
-              <ScrollArea className="mt-4 overflow-x-auto">
+              <ScrollArea>
                 <div className="flex space-x-4 pb-4">
                   {imageItems.map((image, index) => (
                     <div key={index} className="w-[150px]">
@@ -79,7 +78,7 @@ async function MadeForYou() {
             {/* Pornhub Videos Scroll Area */}
             <div className="relative">
               <h2 className="text-2xl font-semibold tracking-tight">Pornhub Videos</h2>
-              <ScrollArea className="mt-4 overflow-x-auto">
+              <ScrollArea>
                 <div className="flex space-x-4 pb-4">
                   {pornhubVideos.map((video) => (
                     <div key={video.id} className="w-[150px]">
@@ -126,7 +125,7 @@ export function DemoIndicator({ className }: DemoIndicatorProps) {
 }
 
 interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
-  video: VideoData; // Single VideoData object
+  video: VideoData;
   aspectRatio?: number;
 }
 
