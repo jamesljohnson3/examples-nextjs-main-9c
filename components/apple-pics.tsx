@@ -19,11 +19,11 @@ async function MadeForYou() {
     return <p>No data available</p>;
   }
 
-  const madeForYouVideos: VideoData[] = Array.isArray(homeData.data) ? homeData.data : [];
+  const madeForYouVideo: VideoData = homeData.data;
   const imageItems: string[] = imageData.assets;
   const pornhubVideos: PornhubVideo[] = pornhubData.data;
 
-  console.log('madeForYouVideos:', madeForYouVideos);
+  console.log('madeForYouVideos:', madeForYouVideo);
   console.log('imageItems:', imageItems);
   console.log('pornhubVideos:', pornhubVideos);
 
@@ -47,9 +47,8 @@ async function MadeForYou() {
               <DemoIndicator className="top-32 right-auto left-16 z-30" />
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4">
-                  {madeForYouVideos.map((video) => (
-                    <AlbumArtwork key={video.id} video={video} className="w-[150px]" aspectRatio={1 / 1} />
-                  ))}
+                <AlbumArtwork video={madeForYouVideo} className="w-[150px]" aspectRatio={1 / 1} />
+
                 </div>
               </div>
             </div>
