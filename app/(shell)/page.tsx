@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import ApplePics from "@/components/apple-pics"
+import ApplePics from "@/components/apple-pics2"
 
 
 export default function Home() {
