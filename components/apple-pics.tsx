@@ -1,15 +1,14 @@
 import { getHome, getImages, getPornhubVideos } from "@/actions/home";
-import type {XVideosResponse, YouPornResponse, PornhubVideo, PornhubResponse, VideoData}  from "@/actions/home";
+import type { XVideosResponse, YouPornResponse, PornhubVideo, PornhubResponse, VideoData } from "@/actions/home";
 import * as React from "react";
 import { ListMusic, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AspectRatio } from "../components/ui/aspect-ratio";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "../components/ui/context-menu";
-import { ScrollArea, ScrollBar } from "../components/ui/scroll-area";
 import { Separator } from "../components/ui/separator";
 import Link from "next/link";
 
-export const revalidate = 3600;  
+export const revalidate = 3600;
 
 async function MadeForYou() {
   const homeData: XVideosResponse | null = await getHome();
@@ -46,14 +45,13 @@ async function MadeForYou() {
             {/* Made For You Videos Scroll Area */}
             <div className="relative">
               <DemoIndicator className="top-32 right-auto left-16 z-30" />
-              <ScrollArea>
+              <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4">
                   {madeForYouVideos.map((video) => (
                     <AlbumArtwork key={video.id} video={video} className="w-[150px]" aspectRatio={1 / 1} />
                   ))}
                 </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              </div>
             </div>
 
             <Separator className="my-4" />
@@ -61,7 +59,7 @@ async function MadeForYou() {
             {/* Image Gallery Scroll Area */}
             <div className="relative">
               <h2 className="text-2xl font-semibold tracking-tight">Image Gallery</h2>
-              <ScrollArea>
+              <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4">
                   {imageItems.map((image, index) => (
                     <div key={index} className="w-[150px]">
@@ -69,8 +67,7 @@ async function MadeForYou() {
                     </div>
                   ))}
                 </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              </div>
             </div>
 
             <Separator className="my-4" />
@@ -78,7 +75,7 @@ async function MadeForYou() {
             {/* Pornhub Videos Scroll Area */}
             <div className="relative">
               <h2 className="text-2xl font-semibold tracking-tight">Pornhub Videos</h2>
-              <ScrollArea>
+              <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4">
                   {pornhubVideos.map((video) => (
                     <div key={video.id} className="w-[150px]">
@@ -96,8 +93,7 @@ async function MadeForYou() {
                     </div>
                   ))}
                 </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
+              </div>
             </div>
           </section>
 
