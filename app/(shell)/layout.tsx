@@ -30,4 +30,4 @@ export default function RootLayout({ children }: RootLayoutProps) {
 // -----------------------------------------------------------------------------
 
 export const experimental_ppr = true;
-export const revalidate = 300;
+

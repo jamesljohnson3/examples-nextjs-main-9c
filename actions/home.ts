@@ -1,4 +1,4 @@
-"use server";
+import 'server-only';
 import { NextApiRequest, NextApiResponse } from "next";
 // Define the structure of a single Pornhub video
 export interface PornhubVideo {
@@ -47,7 +47,12 @@ export interface YouPornResponse {
   source: string;
   assets: string[];
 }
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+
+
 export async function getHome(): Promise<XVideosResponse | null> {
+  await delay(2000); // 2-second delay
   try {
     const response = await fetch('https://lust.scathach.id/xvideos/random');
     if (!response.ok) {
@@ -63,6 +68,8 @@ export async function getHome(): Promise<XVideosResponse | null> {
 }
 
 export async function getImages(): Promise<YouPornResponse | null> {
+  await delay(5000); // 2-second delay
+
   try {
     const response = await fetch('https://lust.scathach.id/youporn/random', { next: { revalidate: 60 } });
     if (!response.ok) {
@@ -77,6 +84,8 @@ export async function getImages(): Promise<YouPornResponse | null> {
   }
 }
 export async function getPornhubVideos(): Promise<PornhubResponse | null> {
+  await delay(9000); // 2-second delay
+
   try {
     const response = await fetch('https://lust.scathach.id/pornhub/search?key=ebony');
     if (!response.ok) {
