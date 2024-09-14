@@ -3,7 +3,7 @@ import {
   SidebarLayout,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-
+import Process from "./process"
 export default async function Page() {
   const { cookies } = await import("next/headers")
   return (
@@ -13,7 +13,9 @@ export default async function Page() {
       <AppSidebar />
       <main className="flex flex-1 flex-col p-2 transition-all duration-300 ease-in-out">
         <div className="h-full rounded-md border-2 border-dashed p-2">
-          <SidebarTrigger />
+        <SidebarTrigger />
+
+        <Process/>
         </div>
       </main>
     </SidebarLayout>
