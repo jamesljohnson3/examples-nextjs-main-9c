@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -8,9 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ArrowLeft, Zap, RefreshCw, Download, Sparkles, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ArrowLeft, Zap, RefreshCw, Download, Sparkles, MessageCircle, ThumbsUp, ThumbsDown, Eye, Lightbulb, TrendingUp } from 'lucide-react'
 
-export default function RefineConcept() {
+export default function EnhancedRefineConcept() {
   const [concept, setConcept] = useState({
     id: 1,
     type: 'Moodboard',
@@ -31,6 +32,27 @@ export default function RefineConcept() {
     "Consider incorporating organic shapes for a softer feel",
     "Experiment with typography to enhance the visual hierarchy",
   ])
+  const [aiAnalysis, setAiAnalysis] = useState([
+    { x: 20, y: 30, content: "Strong focal point" },
+    { x: 60, y: 70, content: "Color harmony needs improvement" },
+    { x: 80, y: 40, content: "Negative space well utilized" },
+  ])
+  const [competitorData, setCompetitorData] = useState([
+    { name: "Competitor A", strength: "Bold typography", weakness: "Cluttered layout" },
+    { name: "Competitor B", strength: "Unique color scheme", weakness: "Lack of contrast" },
+    { name: "Competitor C", strength: "Innovative use of whitespace", weakness: "Inconsistent branding" },
+  ])
+
+  useEffect(() => {
+    // Simulate AI continuously analyzing and updating suggestions
+    const interval = setInterval(() => {
+      setAiSuggestions(prev => {
+        const newSuggestion = `New insight: ${Date.now()}`
+        return [...prev.slice(1), newSuggestion]
+      })
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [])
 
   const handleRefinement = () => {
     setAIProgress(0)
@@ -43,6 +65,11 @@ export default function RefineConcept() {
             id: prev.length + 1,
             image: `/placeholder.svg?height=200&width=300&text=Iteration+${prev.length + 1}`
           }])
+          // Simulate new AI analysis
+          setAiAnalysis(prev => [
+            ...prev,
+            { x: Math.random() * 100, y: Math.random() * 100, content: "New design element detected" }
+          ])
           return 100
         }
         return prev + 10
@@ -57,17 +84,33 @@ export default function RefineConcept() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Gallery
         </Button>
-        <h1 className="text-3xl font-bold">Refine Concept: {concept.type}</h1>
+        <h1 className="text-3xl font-bold">AI-Powered Concept Refinement</h1>
       </header>
 
       <main className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Current Concept</CardTitle>
+              <CardTitle>AI Vision: Current Concept</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative">
               <img src={concept.image} alt={concept.type} className="w-full h-auto rounded-lg shadow-lg" />
+              {aiAnalysis.map((point, index) => (
+                <Popover key={index}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-8 h-8 rounded-full absolute p-0"
+                      style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64">
+                    <p>{point.content}</p>
+                  </PopoverContent>
+                </Popover>
+              ))}
               <div className="mt-4 flex justify-between items-center">
                 <Badge>{concept.type}</Badge>
                 <div className="flex space-x-2">
@@ -86,11 +129,11 @@ export default function RefineConcept() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Refinement Controls</CardTitle>
+              <CardTitle>AI Refinement Controls</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Creativity Level</label>
+                <label className="block text-sm font-medium mb-1">AI Creativity Level</label>
                 <Slider
                   min={0}
                   max={100}
@@ -101,7 +144,7 @@ export default function RefineConcept() {
                 <span className="text-sm text-gray-500">{creativityLevel}% Creative</span>
               </div>
               <Textarea
-                placeholder="Provide detailed feedback for the AI..."
+                placeholder="Provide feedback to guide the AI..."
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 rows={4}
@@ -112,7 +155,7 @@ export default function RefineConcept() {
                 ) : (
                   <Zap className="mr-2 h-4 w-4" />
                 )}
-                Generate Refinement
+                Trigger AI Refinement
               </Button>
               {aiProgress > 0 && (
                 <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
@@ -125,8 +168,9 @@ export default function RefineConcept() {
 
         <Tabs defaultValue="iterations" className="w-full">
           <TabsList>
-            <TabsTrigger value="iterations">Iterations</TabsTrigger>
-            <TabsTrigger value="ai-suggestions">AI Suggestions</TabsTrigger>
+            <TabsTrigger value="iterations">AI Iterations</TabsTrigger>
+            <TabsTrigger value="ai-suggestions">AI Insights</TabsTrigger>
+            <TabsTrigger value="competitor-analysis">Competitor Analysis</TabsTrigger>
           </TabsList>
           <TabsContent value="iterations">
             <ScrollArea className="h-72 w-full rounded-md border">
@@ -150,9 +194,27 @@ export default function RefineConcept() {
               <CardContent className="p-4">
                 <ul className="space-y-2">
                   {aiSuggestions.map((suggestion, index) => (
-                    <li key={index} className="flex items-start space-x-2">
-                      <MessageCircle className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <li key={index} className="flex items-start space-x-2 animate-fade-in">
+                      <Lightbulb className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
                       <span>{suggestion}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="competitor-analysis">
+            <Card>
+              <CardContent className="p-4">
+                <ul className="space-y-4">
+                  {competitorData.map((competitor, index) => (
+                    <li key={index} className="border-b pb-4 last:border-b-0 last:pb-0">
+                      <h3 className="font-semibold flex items-center">
+                        <TrendingUp className="h-5 w-5 mr-2 text-blue-500" />
+                        {competitor.name}
+                      </h3>
+                      <p className="text-sm text-green-600 mt-1">Strength: {competitor.strength}</p>
+                      <p className="text-sm text-red-600">Weakness: {competitor.weakness}</p>
                     </li>
                   ))}
                 </ul>
@@ -164,9 +226,9 @@ export default function RefineConcept() {
         <div className="flex justify-end space-x-4">
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
-            Export Concept
+            Export AI-Refined Concept
           </Button>
-          <Button>Save and Return to Gallery</Button>
+          <Button>Save and Return to AI Gallery</Button>
         </div>
       </main>
     </div>
