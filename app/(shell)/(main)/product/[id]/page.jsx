@@ -11,7 +11,7 @@ import {
   GET_DOMAIN, 
 } from '@/app/(shell)/(main)/queries';
 import React, { useEffect, useState } from 'react';
-import { useQuery } from '@apollo/client';
+
 
 const ProductDetails = ({ productId }) => {
   const [designElements, setDesignElements] = useState([]);
