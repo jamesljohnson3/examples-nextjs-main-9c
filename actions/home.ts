@@ -1,5 +1,5 @@
 import 'server-only';
-import { NextApiRequest, NextApiResponse } from "next";
+
 // Define the structure of a single Pornhub video
 export interface PornhubVideo {
   link: string;

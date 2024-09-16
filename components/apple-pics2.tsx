@@ -1,18 +1,12 @@
 import { getHome, getImages, getPornhubVideos } from "@/actions/home";
-import type { XVideosResponse, YouPornResponse, PornhubVideo, PornhubResponse, VideoData } from "@/actions/home";
 import * as React from "react";
-import { ListMusic, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AspectRatio } from "../components/ui/aspect-ratio";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "../components/ui/context-menu";
 import { Separator } from "../components/ui/separator";
-import Link from "next/link";
 import { HomeSection, ImageSection, PornhubSection } from "./sections";
 
 export const revalidate = 3600;
 
-const HomeData = React.lazy(() => getHome().then(data => ({ default: () => <HomeSection data={data} />})));
-const ImageData = React.lazy(() => getImages().then(data => ({ default: () => <ImageSection data={data} />})));
+
 const PornhubData = React.lazy(() => getPornhubVideos().then(data => ({ default: () => <PornhubSection data={data} />})));
 
 async function MadeForYou() {
@@ -37,7 +31,7 @@ async function MadeForYou() {
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4 min-w-[150px]">
                   <React.Suspense fallback={<div>Loading Made For You Videos...</div>}>
-                    <HomeData />
+
                   </React.Suspense>
                 </div>
               </div>
@@ -51,7 +45,7 @@ async function MadeForYou() {
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4 min-w-[150px]">
                   <React.Suspense fallback={<div>Loading Image Gallery...</div>}>
-                    <ImageData />
+
                   </React.Suspense>
                 </div>
               </div>

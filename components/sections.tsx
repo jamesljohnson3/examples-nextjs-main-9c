@@ -73,31 +73,44 @@ export function ImageSection({ fetchYouPornData }: { fetchYouPornData: () => You
     </>
   );
 }
-
 // PornhubSection Component
-export function PornhubSection({ fetchPornhubData }: { fetchPornhubData: () => PornhubResponse | null }) {
-  const [data, setData] = useState<PornhubResponse | null>(null);
+export function PornhubSection({ data }: { data: PornhubResponse | null }) {
+  const [fetchData, setFetchData] = useState<PornhubResponse | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
-      const localData = localStorage.getItem("pornhubData");
-      if (localData) {
-        setData(JSON.parse(localData));
+      // Check if data is already in localStorage
+      const cachedData = localStorage.getItem('pornhubData');
+      if (cachedData) {
+        setFetchData(JSON.parse(cachedData));
       } else {
-        const response = await fetchPornhubData(); // Fetch data asynchronously
-        if (response) {
-          localStorage.setItem("pornhubData", JSON.stringify(response));
-          setData(response);
+        // Fetch data from API
+        try {
+          const response = await fetch('https://lust.scathach.id/pornhub/search?key=ebony');
+          if (!response.ok) {
+            throw new Error(`Failed to fetch Pornhub data: ${response.statusText}`);
+          }
+          const fetchedData: PornhubResponse = await response.json();
+          // Store data in localStorage
+          localStorage.setItem('pornhubData', JSON.stringify(fetchedData));
+          setFetchData(fetchedData);
+        } catch (error) {
+          console.error('Error fetching Pornhub data:', error);
         }
       }
     };
 
-    loadData(); // Call async function inside useEffect
-  }, [fetchPornhubData]);
+    loadData();
+  }, []);
 
-  if (!data) return <p>No data available</p>;
+  // Use the data prop if available, otherwise use the fetched data
+  const effectiveData = data || fetchData;
 
-  const pornhubVideos: PornhubVideo[] = data.data;
+  if (!effectiveData) return <p>Loading...</p>;
+  if (!effectiveData.data || effectiveData.data.length === 0) return <p>No data available</p>;
+
+  const pornhubVideos: PornhubVideo[] = effectiveData.data;
+
   return (
     <>
       {pornhubVideos.map((video) => (
