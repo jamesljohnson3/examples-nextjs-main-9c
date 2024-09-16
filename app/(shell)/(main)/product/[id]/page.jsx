@@ -18,7 +18,7 @@ const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
 
 const ProductPage = () => {
   const { loading, error, data } = useQuery(GET_PRODUCT, {
-    variables: { id: productId },
+    variables: { id: PRODUCT_ID },
   });
 
   if (loading) return <p>Loading...</p>;
