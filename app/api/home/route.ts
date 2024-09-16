@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
 
     // Call locate only if rate limit check is successful
-    const data = await getPornhubVideos();
+    const data = await getImages();
 
     // Return the geolocation data as JSON response
     return new Response(JSON.stringify(data), {
