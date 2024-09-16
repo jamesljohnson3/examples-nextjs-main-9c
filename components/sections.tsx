@@ -8,47 +8,54 @@ import { AspectRatio } from "../components/ui/aspect-ratio";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "../components/ui/context-menu";
 import { Separator } from "../components/ui/separator";
 import Link from "next/link";
+ 
 
-export function HomeSection({ fetchXVideosData }: { fetchXVideosData: () => Promise<XVideosResponse | null> }) {
+// HomeSection Component
+export const HomeSection = ({ fetchXVideosData }: { fetchXVideosData: () => XVideosResponse | null }) => {
   const [data, setData] = useState<XVideosResponse | null>(null);
 
-  // Fetch from localStorage or API
   useEffect(() => {
-    const localData = localStorage.getItem("xvideosData");
-    if (localData) {
-      setData(JSON.parse(localData));
-    } else {
-      fetchXVideosData().then((response) => {
+    const loadData = async () => {
+      const localData = localStorage.getItem("xvideosData");
+      if (localData) {
+        setData(JSON.parse(localData));
+      } else {
+        const response = await fetchXVideosData(); // Fetch data asynchronously
         if (response) {
           localStorage.setItem("xvideosData", JSON.stringify(response));
           setData(response);
         }
-      });
-    }
+      }
+    };
+
+    loadData(); // Call async function inside useEffect
   }, [fetchXVideosData]);
 
   if (!data) return <p>No data available</p>;
+
   const madeForYouVideo: VideoData = data.data;
-
   return <AlbumArtwork video={madeForYouVideo} className="w-[150px]" aspectRatio={1 / 1} />;
-}
+};
 
-export function ImageSection({ fetchYouPornData }: { fetchYouPornData: () => Promise<YouPornResponse | null> }) {
+// ImageSection Component
+export const ImageSection = ({ fetchYouPornData }: { fetchYouPornData: () => YouPornResponse | null }) => {
   const [data, setData] = useState<YouPornResponse | null>(null);
 
-  // Fetch from localStorage or API
   useEffect(() => {
-    const localData = localStorage.getItem("youpornData");
-    if (localData) {
-      setData(JSON.parse(localData));
-    } else {
-      fetchYouPornData().then((response) => {
+    const loadData = async () => {
+      const localData = localStorage.getItem("youpornData");
+      if (localData) {
+        setData(JSON.parse(localData));
+      } else {
+        const response = await fetchYouPornData(); // Fetch data asynchronously
         if (response) {
           localStorage.setItem("youpornData", JSON.stringify(response));
           setData(response);
         }
-      });
-    }
+      }
+    };
+
+    loadData(); // Call async function inside useEffect
   }, [fetchYouPornData]);
 
   if (!data) return <p>No data available</p>;
@@ -63,24 +70,27 @@ export function ImageSection({ fetchYouPornData }: { fetchYouPornData: () => Pro
       ))}
     </>
   );
-}
+};
 
-export function PornhubSection({ fetchPornhubData }: { fetchPornhubData: () => Promise<PornhubResponse | null> }) {
+// PornhubSection Component
+export const PornhubSection = ({ fetchPornhubData }: { fetchPornhubData: () => PornhubResponse | null }) => {
   const [data, setData] = useState<PornhubResponse | null>(null);
 
-  // Fetch from localStorage or API
   useEffect(() => {
-    const localData = localStorage.getItem("pornhubData");
-    if (localData) {
-      setData(JSON.parse(localData));
-    } else {
-      fetchPornhubData().then((response) => {
+    const loadData = async () => {
+      const localData = localStorage.getItem("pornhubData");
+      if (localData) {
+        setData(JSON.parse(localData));
+      } else {
+        const response = await fetchPornhubData(); // Fetch data asynchronously
         if (response) {
           localStorage.setItem("pornhubData", JSON.stringify(response));
           setData(response);
         }
-      });
-    }
+      }
+    };
+
+    loadData(); // Call async function inside useEffect
   }, [fetchPornhubData]);
 
   if (!data) return <p>No data available</p>;
@@ -97,7 +107,9 @@ export function PornhubSection({ fetchPornhubData }: { fetchPornhubData: () => P
               </AspectRatio>
               <div className="space-y-1 text-sm mt-2">
                 <h3 className="font-medium hidden leading-none">{video.title}</h3>
-                <p className="text-xs text-slate-500 hidden dark:text-slate-400">{video.duration} - {video.views}</p>
+                <p className="text-xs text-slate-500 hidden dark:text-slate-400">
+                  {video.duration} - {video.views}
+                </p>
               </div>
             </a>
           </Link>
@@ -105,14 +117,15 @@ export function PornhubSection({ fetchPornhubData }: { fetchPornhubData: () => P
       ))}
     </>
   );
-}
+};
 
 interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
   video: VideoData;
   aspectRatio?: number;
 }
 
-function AlbumArtwork({ video, aspectRatio = 3 / 4, className, ...props }: AlbumArtworkProps) {
+// AlbumArtwork Component
+const AlbumArtwork = ({ video, aspectRatio = 3 / 4, className, ...props }: AlbumArtworkProps) => {
   const isVideo = video.image.endsWith(".mp4");
 
   return (
@@ -160,6 +173,6 @@ function AlbumArtwork({ video, aspectRatio = 3 / 4, className, ...props }: Album
       </Link>
     </div>
   );
-}
+};
 
 const playlists = ["Recently Added", "Top Songs 2022", "Top Songs 2023"];
