@@ -1,9 +1,9 @@
 // queries.js
 import { gql } from '@apollo/client';
 
-// Query to get basic product details
+// Fetch product details by ID
 export const GET_PRODUCT = gql`
-  query Product($productId: String!) {
+  query GetProduct($productId: String!) {
     Product(where: { id: { _eq: $productId } }) {
       id
       name
@@ -11,21 +11,21 @@ export const GET_PRODUCT = gql`
       price
       quantity
       category
+      organizationId
+      createdById
       primaryPhoto
       imageGallery
       ogImage
       metadata
-      createdById
       createdAt
       updatedAt
-      organizationId
     }
   }
 `;
 
-// Query to get product versions
+// Fetch product versions by product ID
 export const GET_PRODUCT_VERSIONS = gql`
-  query ProductVersions($productId: String!) {
+  query GetProductVersions($productId: String!) {
     ProductVersion(where: { productId: { _eq: $productId } }) {
       id
       versionNumber
@@ -36,9 +36,9 @@ export const GET_PRODUCT_VERSIONS = gql`
   }
 `;
 
-// Query to get design concepts for a product
+// Fetch design concepts by product ID
 export const GET_DESIGN_CONCEPTS = gql`
-  query DesignConcepts($productId: String!) {
+  query GetDesignConcepts($productId: String!) {
     DesignConcept(where: { productId: { _eq: $productId } }) {
       id
       title
@@ -48,9 +48,9 @@ export const GET_DESIGN_CONCEPTS = gql`
   }
 `;
 
-// Query to get AI suggestions for a product
+// Fetch AI suggestions by product ID
 export const GET_AI_SUGGESTIONS = gql`
-  query AISuggestions($productId: String!) {
+  query GetAISuggestions($productId: String!) {
     AISuggestion(where: { productId: { _eq: $productId } }) {
       id
       content
@@ -59,22 +59,23 @@ export const GET_AI_SUGGESTIONS = gql`
   }
 `;
 
-// Query to get design elements for a design concept
+// Fetch design elements by design concept ID
 export const GET_DESIGN_ELEMENTS = gql`
-  query DesignElements($designConceptId: String!) {
-    DesignElement(where: { designConcepts: { id: { _eq: $designConceptId } } }) {
+  query GetDesignElements($designConceptId: String!) {
+    DesignElement(where: { designConceptId: { _eq: $designConceptId } }) {
       id
-      domainId
       elementType
       currentVersion
+      createdAt
+      updatedAt
     }
   }
 `;
 
-// Query to get media files related to a design element
+// Fetch media files by organization ID (example query, adapt as needed)
 export const GET_MEDIA_FILES = gql`
-  query MediaFiles($designElementId: String!) {
-    MediaFile(where: { designElements: { id: { _eq: $designElementId } } }) {
+  query GetMediaFiles($organizationId: String!) {
+    MediaFile(where: { organizationId: { _eq: $organizationId } }) {
       id
       name
       url
@@ -85,9 +86,9 @@ export const GET_MEDIA_FILES = gql`
   }
 `;
 
-// Query to get user details
+// Fetch user details by user ID
 export const GET_USER_DETAILS = gql`
-  query User($userId: String!) {
+  query GetUserDetails($userId: String!) {
     User(where: { id: { _eq: $userId } }) {
       id
       username
@@ -99,6 +100,7 @@ export const GET_USER_DETAILS = gql`
     }
   }
 `;
+
 
 // Define the query
 export const GET_DASHBOARD_DATA = gql`
