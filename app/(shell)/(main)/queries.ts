@@ -50,18 +50,21 @@ export const GET_AI_SUGGESTIONS = gql`
   }
 `;
 
+
+
 export const GET_DESIGN_ELEMENTS = gql`
-  query GetDesignElements($designConceptId: String!) {
-    DesignElement(where: { designConcepts: { id: { _eq: $designConceptId } } }) {
+  query GetDesignElements($productId: String!) {
+    DesignElement(where: { productId: { _eq: $productId } }) {
       id
+      name
       domainId
-      elementType
-      currentVersion
+      elementData
       createdAt
       updatedAt
     }
   }
 `;
+
 
 export const GET_MEDIA_FILES = gql`
   query GetMediaFiles($designElementId: String!) {
