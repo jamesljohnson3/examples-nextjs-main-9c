@@ -13,18 +13,21 @@ import {
 } from '@/app/(shell)/(main)/queries';
 import DesignElementsForConcept from "./design-element"
 
-
 const ProductPage = ({ params }) => {
   const PRODUCT_ID = params.id;
 
   const [designElements, setDesignElements] = useState([]);
   const [domains, setDomains] = useState({});
+  const [designConcepts, setDesignConcepts] = useState([]);
 
   // Fetch product details
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
 
+  // Fetch design concepts for the product
+  const { data: designConceptsData, loading: designConceptsLoading, error: designConceptsError } = useQuery(GET_DESIGN_CONCEPTS, { variables: { productId: PRODUCT_ID } });
+
   // Fetch design elements for the product
-  const { data: designElementsData, loading: designElementsLoading, error: designElementsError } = useQuery(GET_DESIGN_ELEMENTS, { variables: { designConceptId: PRODUCT_ID }, skip: !PRODUCT_ID });
+  const { data: designElementsData, loading: designElementsLoading, error: designElementsError } = useQuery(GET_DESIGN_ELEMENTS, { variables: { productId: PRODUCT_ID } });
 
   useEffect(() => {
     if (designElementsData) {
@@ -33,7 +36,7 @@ const ProductPage = ({ params }) => {
       // Fetch domains for each design element
       designElementsData.DesignElement.forEach(async (element) => {
         try {
-          const { data: domainData } = await client.query({
+          const { data: domainData } = await query({
             query: GET_DOMAIN,
             variables: { domainId: element.domainId }
           });
@@ -48,8 +51,15 @@ const ProductPage = ({ params }) => {
     }
   }, [designElementsData]);
 
-  if (productLoading || designElementsLoading) return <p>Loading...</p>;
+  useEffect(() => {
+    if (designConceptsData) {
+      setDesignConcepts(designConceptsData.DesignConcept);
+    }
+  }, [designConceptsData]);
+
+  if (productLoading || designConceptsLoading || designElementsLoading) return <p>Loading...</p>;
   if (productError) return <p>Error loading product data: {productError.message}</p>;
+  if (designConceptsError) return <p>Error loading design concepts: {designConceptsError.message}</p>;
   if (designElementsError) return <p>Error loading design elements: {designElementsError.message}</p>;
 
   const product = productData?.Product?.[0] || {};
@@ -77,12 +87,25 @@ const ProductPage = ({ params }) => {
       <p>Price: ${product?.price || 'N/A'}</p>
 
       <div>
+        <h2>Design Concepts</h2>
+        {designConcepts.length > 0 ? (
+          designConcepts.map((concept) => (
+            <div key={concept.id}>
+              <h3>{concept.title}</h3>
+              <img src={concept.image} alt={concept.title} />
+            </div>
+          ))
+        ) : (
+          <p>No design concepts available.</p>
+        )}
+      </div>
+
+      <div>
         <h2>Design Elements</h2>
         {designElements.length > 0 ? (
           designElements.map((element) => (
             <div key={element.id}>
               <h3>{element.name}</h3>
-              {/* Display more properties of design elements as needed */}
               {domains[element.domainId] && (
                 <div>
                   <h4>Domain: {domains[element.domainId].name}</h4>
