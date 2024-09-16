@@ -8,7 +8,7 @@ export default function HomePage() {
   const { data, loading, error } = useQuery(GET_DASHBOARD_DATA, {
     variables: {
       organizationId: 'cm14mvrwe0000ue6ygx7gfevr', // Replace with dynamic value if needed
-      userId: 'some-user-id', // Replace with dynamic value if needed
+      userId: 'cm14mvrxe0002ue6ygbc4yyzr', // Replace with dynamic value if needed
     }, 
   });
 
