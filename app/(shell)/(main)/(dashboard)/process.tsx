@@ -7,7 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
+import {
+  SidebarLayout,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -720,7 +723,8 @@ export default function InventoryManagement() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-100 to-white  p-2 space-y-2">
   <div className="text-sm text-muted-foreground">
-            Products / {previewData.category} / {previewData.id}
+  <SidebarTrigger />
+  Products / {previewData.category} / {previewData.id}
           </div>              <div className="grid grid-cols-3 gap-2 mb-2">
                 <Card className="bg-white border-0">
                   <CardContent className="p-1">
@@ -731,7 +735,7 @@ export default function InventoryManagement() {
                 <Card className="bg-white border-0">
                   <CardContent className="p-1">
 
-            <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+            <div className="flex items-center justify-between  px-6 py-4 dark:border-gray-800">
               <div className="flex items-center gap-4">
                 <CommandIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
                 <h2 className="text-base font-semibold">{previewData.name}</h2>
