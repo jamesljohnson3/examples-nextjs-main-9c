@@ -23,11 +23,11 @@ const ProductPage = ({ params }) => {
   // Fetch product details
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
 
-  // Fetch design concepts for the product
-  const { data: designConceptsData, loading: designConceptsLoading, error: designConceptsError } = useQuery(GET_DESIGN_CONCEPTS, { variables: { productId: PRODUCT_ID } });
-
-  // Fetch design elements for the product
+  // Fetch design elements
   const { data: designElementsData, loading: designElementsLoading, error: designElementsError } = useQuery(GET_DESIGN_ELEMENTS, { variables: { productId: PRODUCT_ID } });
+
+  // Fetch design concepts
+  const { data: designConceptsData, loading: designConceptsLoading, error: designConceptsError } = useQuery(GET_DESIGN_CONCEPTS, { variables: { productId: PRODUCT_ID } });
 
   useEffect(() => {
     if (designElementsData) {
@@ -57,7 +57,7 @@ const ProductPage = ({ params }) => {
     }
   }, [designConceptsData]);
 
-  if (productLoading || designConceptsLoading || designElementsLoading) return <p>Loading...</p>;
+  if (productLoading || designElementsLoading || designConceptsLoading) return <p>Loading...</p>;
   if (productError) return <p>Error loading product data: {productError.message}</p>;
   if (designConceptsError) return <p>Error loading design concepts: {designConceptsError.message}</p>;
   if (designElementsError) return <p>Error loading design elements: {designElementsError.message}</p>;
@@ -108,7 +108,7 @@ const ProductPage = ({ params }) => {
               <h3>{element.name}</h3>
               {domains[element.domainId] && (
                 <div>
-                  <h4>Domain: {domains[element.domainId].name}</h4>
+                  <h4>Domain: {domains[element.domainId]?.name}</h4>
                   {/* Display more properties of domains as needed */}
                 </div>
               )}
