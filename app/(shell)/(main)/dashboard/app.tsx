@@ -23,6 +23,7 @@ export default function HomePage() {
           <h2>{product.name}</h2>
           <p>{product.description}</p>
           <p>Price: ${product.price}</p>
+          <a href={`/product/$${product.id}`}>edit product</a>
           {/* Render more product details */}
         </div>
       ))}

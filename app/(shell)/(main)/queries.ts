@@ -1,7 +1,6 @@
-// queries.js
 import { gql } from '@apollo/client';
 
-// Fetch product details by ID
+// Fetch product details
 export const GET_PRODUCT = gql`
   query GetProduct($productId: String!) {
     Product(where: { id: { _eq: $productId } }) {
@@ -64,6 +63,7 @@ export const GET_DESIGN_ELEMENTS = gql`
   query GetDesignElements($designConceptId: String!) {
     DesignElement(where: { designConceptId: { _eq: $designConceptId } }) {
       id
+      domainId
       elementType
       currentVersion
       createdAt
@@ -72,16 +72,15 @@ export const GET_DESIGN_ELEMENTS = gql`
   }
 `;
 
-// Fetch media files by organization ID (example query, adapt as needed)
+// Fetch media files related to a design element by design element ID
 export const GET_MEDIA_FILES = gql`
-  query GetMediaFiles($organizationId: String!) {
-    MediaFile(where: { organizationId: { _eq: $organizationId } }) {
+  query GetMediaFiles($designElementId: String!) {
+    MediaFile(where: { designElements: { id: { _eq: $designElementId } } }) {
       id
       name
       url
       type
       createdAt
-      updatedAt
     }
   }
 `;
@@ -100,6 +99,19 @@ export const GET_USER_DETAILS = gql`
     }
   }
 `;
+
+// Fetch domain details by domain ID
+export const GET_DOMAIN = gql`
+  query GetDomain($domainId: String!) {
+    Domain(where: { id: { _eq: $domainId } }) {
+      id
+      domain
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 
 
 // Define the query

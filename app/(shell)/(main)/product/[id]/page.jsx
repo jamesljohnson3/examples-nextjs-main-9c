@@ -7,110 +7,127 @@ import {
   GET_AI_SUGGESTIONS, 
   GET_DESIGN_ELEMENTS, 
   GET_MEDIA_FILES, 
-  GET_USER_DETAILS 
+  GET_USER_DETAILS,
+  GET_DESIGN_ELEMENTS, GET_DOMAIN, GET_PRODUCT 
 } from '@/app/(main)/queries';
+import React, { useEffect, useState } from 'react';
+import { useQuery } from '@apollo/client';
 
-// Constants for fixed values
-const PRODUCT_ID = 'cm14mvs2o000fue6yh6hb13yn';
-const ORGANIZATION_ID = 'cm14mvrwe0000ue6ygx7gfevr';
-const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
-const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
-const DOMAIN_ID = 'cm14mvrxe0008ue6y9xr15bph'; // Example domain ID for simplicity
-
-const ProductPage = () => {
+const ProductDetails = ({ productId }) => {
+  const [designElements, setDesignElements] = useState([]);
+  const [domains, setDomains] = useState({});
+  const [mediaFiles, setMediaFiles] = useState({});
+  
   // Fetch product details
-  const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
+  const { loading: loadingProduct, data: productData } = useQuery(GET_PRODUCT, {
+    variables: { productId }
+  });
   
   // Fetch product versions
-  const { data: versionsData, loading: versionsLoading, error: versionsError } = useQuery(GET_PRODUCT_VERSIONS, { variables: { productId: PRODUCT_ID } });
-  
+  const { data: productVersionsData } = useQuery(GET_PRODUCT_VERSIONS, {
+    variables: { productId }
+  });
+
   // Fetch design concepts
-  const { data: conceptsData, loading: conceptsLoading, error: conceptsError } = useQuery(GET_DESIGN_CONCEPTS, { variables: { productId: PRODUCT_ID } });
-  
+  const { data: designConceptsData } = useQuery(GET_DESIGN_CONCEPTS, {
+    variables: { productId }
+  });
+
   // Fetch AI suggestions
-  const { data: aiSuggestionsData, loading: aiSuggestionsLoading, error: aiSuggestionsError } = useQuery(GET_AI_SUGGESTIONS, { variables: { productId: PRODUCT_ID } });
+  const { data: aiSuggestionsData } = useQuery(GET_AI_SUGGESTIONS, {
+    variables: { productId }
+  });
 
-  // Fetch user details
-  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER_DETAILS, { variables: { userId: USER_ID } });
+  // Fetch design elements
+  const { data: designElementsData } = useQuery(GET_DESIGN_ELEMENTS, {
+    variables: { designConceptId: productId }
+  });
 
-  if (productLoading || versionsLoading || conceptsLoading || aiSuggestionsLoading || userLoading) return <p>Loading...</p>;
-  if (productError || versionsError || conceptsError || aiSuggestionsError || userError) return <p>Error loading data.</p>;
+  useEffect(() => {
+    if (designElementsData) {
+      setDesignElements(designElementsData.DesignElement);
 
-  const product = productData.Product;
+      // Fetch domains for each design element
+      designElementsData.DesignElement.forEach(async (element) => {
+        const { data: domainData } = await client.query({
+          query: GET_DOMAIN,
+          variables: { domainId: element.domainId }
+        });
+        setDomains((prevDomains) => ({
+          ...prevDomains,
+          [element.domainId]: domainData.Domain
+        }));
+
+        // Fetch media files for each design element
+        const { data: mediaFilesData } = await client.query({
+          query: GET_MEDIA_FILES,
+          variables: { designElementId: element.id }
+        });
+        setMediaFiles((prevMediaFiles) => ({
+          ...prevMediaFiles,
+          [element.id]: mediaFilesData.MediaFile
+        }));
+      });
+    }
+  }, [designElementsData]);
+
+  if (loadingProduct) return <p>Loading...</p>;
 
   return (
     <div>
-      <h1>{product.name}</h1>
-      <p>{product.description}</p>
-      <img src={product.primaryPhoto} alt={product.name} />
+      <h1>{productData?.Product[0].name}</h1>
+      <p>{productData?.Product[0].description}</p>
       <div>
-        <h2>Image Gallery</h2>
-        {product.imageGallery.map((url, index) => (
-          <img key={index} src={url} alt={`Gallery ${index}`} />
+        <h2>Product Versions</h2>
+        {productVersionsData?.ProductVersion.map((version) => (
+          <div key={version.id}>
+            <h3>Version Number: {version.versionNumber}</h3>
+            <p>Changes: {version.changes}</p>
+            <p>Created At: {version.createdAt}</p>
+          </div>
         ))}
       </div>
-
-      <h2>Versions</h2>
-      {versionsData.ProductVersion.map(version => (
-        <div key={version.id}>
-          <p>Version {version.versionNumber}</p>
-          <p>{version.changes}</p>
-        </div>
-      ))}
-
-      <h2>Design Concepts</h2>
-      {conceptsData.DesignConcept.map(concept => (
-        <div key={concept.id}>
-          <p>{concept.title}</p>
-          <img src={concept.image} alt={concept.title} />
-          {/* Fetch and render design elements for this concept */}
-        </div>
-      ))}
-      
-      {/* Example of fetching and rendering design elements for the first concept */}
-      {conceptsData.DesignConcept.length > 0 && (
-        <DesignElementsForConcept designConceptId={conceptsData.DesignConcept[0].id} />
-      )}
-      
-      <h2>AI Suggestions</h2>
-      {aiSuggestionsData.AISuggestion.map(suggestion => (
-        <div key={suggestion.id}>
-          <p>{suggestion.content}</p>
-        </div>
-      ))}
-
-      <h2>User Details</h2>
-      {userData.User && (
-        <div>
-          <p>Username: {userData.User.username}</p>
-          <p>Email: {userData.User.email}</p>
-          <p>Role: {userData.User.role}</p>
-        </div>
-      )}
+      <div>
+        <h2>Design Concepts</h2>
+        {designConceptsData?.DesignConcept.map((concept) => (
+          <div key={concept.id}>
+            <h3>{concept.title}</h3>
+            <img src={concept.image} alt={concept.title} />
+            <p>Created At: {concept.createdAt}</p>
+          </div>
+        ))}
+      </div>
+      <div>
+        <h2>AI Suggestions</h2>
+        {aiSuggestionsData?.AISuggestion.map((suggestion) => (
+          <div key={suggestion.id}>
+            <p>{suggestion.content}</p>
+            <p>Created At: {suggestion.createdAt}</p>
+          </div>
+        ))}
+      </div>
+      <div>
+        <h2>Design Elements</h2>
+        {designElements.map((element) => (
+          <div key={element.id}>
+            <h3>Element ID: {element.id}</h3>
+            <p>Type: {element.elementType}</p>
+            <p>Version: {element.currentVersion}</p>
+            <p>Domain: {domains[element.domainId]?.domain || 'Loading domain...'}</p>
+            <div>
+              <h4>Media Files</h4>
+              {mediaFiles[element.id]?.map((file) => (
+                <div key={file.id}>
+                  <p>File Name: {file.name}</p>
+                  <img src={file.url} alt={file.name} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-// Component to fetch and render design elements for a specific design concept
-const DesignElementsForConcept = ({ designConceptId }) => {
-  const { data: elementsData, loading: elementsLoading, error: elementsError } = useQuery(GET_DESIGN_ELEMENTS, { variables: { designConceptId } });
-
-  if (elementsLoading) return <p>Loading design elements...</p>;
-  if (elementsError) return <p>Error loading design elements.</p>;
-
-  return (
-    <div>
-      <h3>Design Elements</h3>
-      {elementsData.DesignElement.map(element => (
-        <div key={element.id}>
-          <p>Element Type: {element.elementType}</p>
-          <p>Current Version: {element.currentVersion}</p>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-
-
-export default ProductPage;
+export default ProductDetails;
