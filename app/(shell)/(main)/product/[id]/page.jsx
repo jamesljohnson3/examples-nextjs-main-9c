@@ -15,6 +15,7 @@ import DesignElementsForConcept from "./design-element"
 
 
 const ProductPage = () => {
+  const PRODUCT_ID = 'cm14mvs2o000fue6yh6hb13yn';
 
   // Fetch product details
   const { data, loading, error } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
