@@ -12,26 +12,38 @@ import {
   GET_DOMAIN 
 } from '@/app/(shell)/(main)/queries';
 import DesignElementsForConcept from "./design-element"
-// Constants for fixed values
-const productId = 'cm14mvs2o000fue6yh6hb13yn';
-const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
+
 
 const ProductPage = () => {
-  const { loading, error, data } = useQuery(GET_PRODUCT, {
-    variables: { id: productId },
-  });
+  // Constants for fixed values
+  const PRODUCT_ID = 'cm14mvs2o000fue6yh6hb13yn';
+  const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  // Fetch product details
+  const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
+  if (productLoading) return <p>Loading...</p>;
+  if (productError) return <p>Error loading data.</p>;
 
-  const product = data.product;
+  const product = productData?.Product;
 
   return (
     <div>
-      <h1>{product.name}</h1>
-      <p>{product.description}</p>
-      <p>Price: ${product.price}</p>
-      <p>Quantity: {product.quantity}</p>
+      
+      <h1>{product?.name}</h1>
+      <p>{product?.description}</p>
+      <img src={product?.primaryPhoto} alt={product?.name} />
+      <div>
+        <h2>Image Gallery</h2>
+        {product?.imageGallery.map((url, index) => (
+          <img key={index} src={url} alt={`Gallery ${index}`} />
+        ))}
+      </div>
+      
+      
+      
+      
+      <p>Price: ${product?.price}</p>
+
     </div>
   );
 };
