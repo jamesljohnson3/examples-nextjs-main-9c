@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
-import { GET_DASHBOARD_DATA } from './queries'; // Importing the query
+import { GET_DASHBOARD_DATA } from '@/app/(main)/queries'; // Importing the query
 
 
 export default function HomePage() {
