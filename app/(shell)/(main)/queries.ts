@@ -6,6 +6,7 @@ export const GET_PRODUCT = gql`
     Product(where: { id: { _eq: $productId } }) {
       id
       name
+      price
       description
       primaryPhoto
       imageGallery
