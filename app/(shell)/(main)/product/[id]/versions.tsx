@@ -1,6 +1,6 @@
 "use client"
 import { useState } from 'react';
-import { saveProductVersions, generateProductVersion } from '@/app/actions';
+import { saveProductVersions, generateProductVersion } from '@/app/(shell)/(main)/queries';;
 
 interface VersionProps {
   id: string;
