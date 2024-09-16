@@ -1,47 +1,37 @@
-import { gql } from '@apollo/client';
+import React from 'react';
+import { useQuery, gql } from '@apollo/client';
 
+// Define the query
 export const GET_DASHBOARD_DATA = gql`
-  query GetDashboardData(
-    $organization_id: ID!
-    $user_id: ID!
-    $workspace_id: ID!
-    $domain_id: ID!
-  ) {
-    total_products: countProducts(organizationId: $organization_id)
-    total_revenue: calculateRevenue(organizationId: $organization_id)
-    
-    recent_activities: getRecentActivities(userId: $user_id, organizationId: $organization_id) {
-      name
-      created_at
+  query {
+    totalProducts: product_aggregate {
+      aggregate {
+        count
+      }
     }
-    
-    organizations: getOrganizations(userId: $user_id) {
+    totalRevenue: sum {
+      revenue
+    }
+    recentActivities: activity(order_by: {createdAt: desc}, limit: 10) {
       id
       name
-      created_at
+      createdAt
     }
-    
-    recent_design_elements: getDesignElements(domainId: $domain_id, organizationId: $organization_id) {
+    organizations: organization(order_by: {createdAt: desc}) {
       id
-      element_type
-      created_at
+      name
+      createdAt
     }
-    
-    recent_media_files: getMediaFiles(organizationId: $organization_id) {
+    recentDesignElements: designElement(order_by: {createdAt: desc}, limit: 10) {
+      id
+      elementType
+      createdAt
+    }
+    recentMediaFiles: mediaFile(order_by: {createdAt: desc}, limit: 10) {
       id
       name
       url
-      created_at
+      createdAt
     }
   }
 `;
-
-export const GET_USERS = gql`
-  query {
-    User(order_by: { createdAt: desc }, limit: 4) {
-      id
-    }
-  }
-`;
-
-
