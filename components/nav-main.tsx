@@ -52,7 +52,7 @@ export function NavMain({
             <div className="relative flex items-center">
               <Link
                 href={item.url}
-                className="min-w-8 flex h-8 flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2"
+                className="min-w-8 flex h-8 flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-neutral-950 transition-all hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-2 dark:ring-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50"
               >
                 <item.icon className="h-4 w-4 shrink-0" />
                 <div className="flex flex-1 overflow-hidden">
@@ -62,9 +62,9 @@ export function NavMain({
               <CollapsibleTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="absolute right-1 h-6 w-6 rounded-md p-0 ring-ring transition-all focus-visible:ring-2 data-[state=open]:rotate-90"
+                  className="absolute right-1 h-6 w-6 rounded-md p-0 ring-neutral-950 transition-all focus-visible:ring-2 data-[state=open]:rotate-90 dark:ring-neutral-300"
                 >
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
                   <span className="sr-only">Toggle</span>
                 </Button>
               </CollapsibleTrigger>
@@ -75,7 +75,7 @@ export function NavMain({
                   <li key={subItem.title}>
                     <Link
                       href={subItem.url}
-                      className="min-w-8 flex h-8 items-center gap-2 overflow-hidden rounded-md px-2 text-sm font-medium text-muted-foreground ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2"
+                      className="min-w-8 flex h-8 items-center gap-2 overflow-hidden rounded-md px-2 text-sm font-medium text-neutral-500 ring-neutral-950 transition-all hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-2 dark:text-neutral-400 dark:ring-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50"
                     >
                       <div className="line-clamp-1">{subItem.title}</div>
                     </Link>
@@ -104,7 +104,7 @@ function SidebarSearch({
   if (isMobile) {
     return (
       <Drawer>
-        <DrawerTrigger className="min-w-8 flex h-8 w-full flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
+        <DrawerTrigger className="min-w-8 flex h-8 w-full flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-neutral-950 transition-all hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-2 data-[state=open]:bg-neutral-100 data-[state=open]:text-neutral-900 dark:ring-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50 dark:data-[state=open]:bg-neutral-800 dark:data-[state=open]:text-neutral-50">
           <Search className="h-4 w-4 shrink-0" />
           <div className="flex flex-1 overflow-hidden">
             <div className="line-clamp-1 pr-6">Search</div>
@@ -125,10 +125,10 @@ function SidebarSearch({
               <Link
                 href={result.url}
                 key={result.title}
-                className="rounded-md p-2.5 outline-none ring-ring hover:bg-accent hover:text-accent-foreground focus-visible:ring-2"
+                className="rounded-md p-2.5 outline-none ring-neutral-950 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-2 dark:ring-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50"
               >
                 <div className="font-medium">{result.title}</div>
-                <div className="line-clamp-2 text-muted-foreground">
+                <div className="line-clamp-2 text-neutral-500 dark:text-neutral-400">
                   {result.teaser}
                 </div>
               </Link>
@@ -136,7 +136,7 @@ function SidebarSearch({
             <Separator className="my-1.5" />
             <Link
               href="#"
-              className="rounded-md px-2.5 py-1 text-muted-foreground outline-none ring-ring hover:text-foreground focus-visible:ring-2"
+              className="rounded-md px-2.5 py-1 text-neutral-500 outline-none ring-neutral-950 hover:text-neutral-950 focus-visible:ring-2 dark:text-neutral-400 dark:ring-neutral-300 dark:hover:text-neutral-50"
             >
               See all results
             </Link>
@@ -148,7 +148,7 @@ function SidebarSearch({
 
   return (
     <Popover>
-      <PopoverTrigger className="min-w-8 flex h-8 w-full flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-ring transition-all hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground">
+      <PopoverTrigger className="min-w-8 flex h-8 w-full flex-1 items-center gap-2 overflow-hidden rounded-md px-1.5 text-sm font-medium outline-none ring-neutral-950 transition-all hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-2 data-[state=open]:bg-neutral-100 data-[state=open]:text-neutral-900 dark:ring-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50 dark:data-[state=open]:bg-neutral-800 dark:data-[state=open]:text-neutral-50">
         <Search className="h-4 w-4 shrink-0" />
         <div className="flex flex-1 overflow-hidden">
           <div className="line-clamp-1 pr-6">Search</div>
@@ -174,10 +174,10 @@ function SidebarSearch({
             <Link
               href={result.url}
               key={result.title}
-              className="rounded-md p-2.5 outline-none ring-ring hover:bg-accent hover:text-accent-foreground focus-visible:ring-2"
+              className="rounded-md p-2.5 outline-none ring-neutral-950 hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-2 dark:ring-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50"
             >
               <div className="font-medium">{result.title}</div>
-              <div className="line-clamp-2 text-muted-foreground">
+              <div className="line-clamp-2 text-neutral-500 dark:text-neutral-400">
                 {result.teaser}
               </div>
             </Link>
@@ -185,7 +185,7 @@ function SidebarSearch({
           <Separator className="my-1.5" />
           <Link
             href="#"
-            className="rounded-md px-2.5 py-1 text-muted-foreground outline-none ring-ring hover:text-foreground focus-visible:ring-2"
+            className="rounded-md px-2.5 py-1 text-neutral-500 outline-none ring-neutral-950 hover:text-neutral-950 focus-visible:ring-2 dark:text-neutral-400 dark:ring-neutral-300 dark:hover:text-neutral-50"
           >
             See all results
           </Link>

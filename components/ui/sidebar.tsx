@@ -54,7 +54,7 @@ const SidebarLayout = React.forwardRef<
           } as React.CSSProperties
         }
         className={cn(
-          "flex min-h-screen bg-accent/50 pl-0 transition-all duration-300 ease-in-out data-[sidebar=closed]:pl-0 sm:pl-[--sidebar-width]",
+          "flex min-h-screen bg-neutral-100/50 pl-0 transition-all duration-300 ease-in-out data-[sidebar=closed]:pl-0 sm:pl-[--sidebar-width] dark:bg-neutral-800/50",
           className
         )}
         {...props}
@@ -94,7 +94,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
     const sidebar = (
       <div
         ref={ref}
-        className={cn("flex h-full flex-col border-r bg-background", className)}
+        className={cn("flex h-full flex-col border-r bg-white dark:bg-neutral-950", className)}
       >
         {children}
       </div>
@@ -182,7 +182,7 @@ const SidebarLabel = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "px-1.5 text-xs font-medium text-muted-foreground",
+        "px-1.5 text-xs font-medium text-neutral-500 dark:text-neutral-400",
         className
       )}
       {...props}

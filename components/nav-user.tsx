@@ -32,7 +32,7 @@ export function NavUser({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="w-full rounded-md outline-none ring-ring hover:bg-accent focus-visible:ring-2 data-[state=open]:bg-accent">
+      <DropdownMenuTrigger className="w-full rounded-md outline-none ring-neutral-950 hover:bg-neutral-100 focus-visible:ring-2 data-[state=open]:bg-neutral-100 dark:ring-neutral-300 dark:hover:bg-neutral-800 dark:data-[state=open]:bg-neutral-800">
         <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm transition-all">
           <Avatar className="h-7 w-7 rounded-md border">
             <AvatarImage
@@ -44,11 +44,11 @@ export function NavUser({
           </Avatar>
           <div className="grid flex-1 leading-none">
             <div className="font-medium">{user.name}</div>
-            <div className="overflow-hidden text-xs text-muted-foreground">
+            <div className="overflow-hidden text-xs text-neutral-500 dark:text-neutral-400">
               <div className="line-clamp-1">{user.email}</div>
             </div>
           </div>
-          <ChevronsUpDown className="ml-auto mr-0.5 h-4 w-4 text-muted-foreground/50" />
+          <ChevronsUpDown className="ml-auto mr-0.5 h-4 w-4 text-neutral-500/50 dark:text-neutral-400/50" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -65,7 +65,7 @@ export function NavUser({
             </Avatar>
             <div className="grid flex-1">
               <div className="font-medium">{user.name}</div>
-              <div className="overflow-hidden text-xs text-muted-foreground">
+              <div className="overflow-hidden text-xs text-neutral-500 dark:text-neutral-400">
                 <div className="line-clamp-1">{user.email}</div>
               </div>
             </div>
@@ -74,21 +74,21 @@ export function NavUser({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem className="gap-2">
-            <BadgeCheck className="h-4 w-4 text-muted-foreground" />
+            <BadgeCheck className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
             Account
           </DropdownMenuItem>
           <DropdownMenuItem className="gap-2">
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
+            <CreditCard className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
             Billing
           </DropdownMenuItem>
           <DropdownMenuItem className="gap-2">
-            <Bell className="h-4 w-4 text-muted-foreground" />
+            <Bell className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
             Notifications
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="gap-2">
-          <LogOut className="h-4 w-4 text-muted-foreground" />
+          <LogOut className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
