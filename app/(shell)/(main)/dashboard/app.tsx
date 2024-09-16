@@ -13,7 +13,6 @@ const DOMAIN_ID = 'cm14mvrxe0008ue6y9xr15bph'; // Example domain ID for simplici
 const DashboardPage = () => {
   const { data, loading, error } = useQuery(GET_DASHBOARD_DATA, {
     variables: { 
-      product_id: PRODUCT_ID, 
       organization_id: ORGANIZATION_ID, 
       user_id: USER_ID, 
       workspace_id: WORKSPACE_ID, 

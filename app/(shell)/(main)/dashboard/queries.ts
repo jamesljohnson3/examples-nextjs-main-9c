@@ -2,7 +2,6 @@ import { gql } from '@apollo/client';
 
 export const GET_DASHBOARD_DATA = gql`
   query GetDashboardData(
-    $product_id: ID!
     $organization_id: ID!
     $user_id: ID!
     $workspace_id: ID!
