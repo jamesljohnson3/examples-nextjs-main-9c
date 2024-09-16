@@ -3,35 +3,41 @@ import { useQuery, gql } from '@apollo/client';
 
 // Define the query
 export const GET_DASHBOARD_DATA = gql`
-  query {
-    totalProducts: product_aggregate {
-      aggregate {
-        count
-      }
+  query MyQuery($organizationId: String!, $userId: String!) {
+    Product(
+      limit: 10
+      where: { organizationId: { _eq: $organizationId } }
+    ) {
+      id
+      name
+      description
+      price
+      quantity
+      category
+      primaryPhoto
+      imageGallery
+      ogImage
+      metadata
+      createdById
+      createdAt
+      updatedAt
+      organizationId
     }
-    totalRevenue: sum {
-      revenue
-    }
-    recentActivities: activity(order_by: {createdAt: desc}, limit: 10) {
+    Organization(
+      where: { id: { _eq: $organizationId } }
+    ) {
       id
       name
       createdAt
+      updatedAt
     }
-    organizations: organization(order_by: {createdAt: desc}) {
-      id
-      name
-      createdAt
-    }
-    recentDesignElements: designElement(order_by: {createdAt: desc}, limit: 10) {
-      id
-      elementType
-      createdAt
-    }
-    recentMediaFiles: mediaFile(order_by: {createdAt: desc}, limit: 10) {
-      id
-      name
-      url
-      createdAt
+    User(
+      where: { id: { _eq: $userId } }
+    ) {
+      username
+      email
+      organizationId
+      role
     }
   }
 `;
