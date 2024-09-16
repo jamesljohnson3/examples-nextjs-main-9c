@@ -1,4 +1,4 @@
-// pages/product/[id].js
+"use client"
 import { useQuery } from '@apollo/client';
 import { 
   GET_PRODUCT, 
