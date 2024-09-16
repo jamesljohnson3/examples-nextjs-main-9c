@@ -9,7 +9,7 @@ import {
   GET_MEDIA_FILES, 
   GET_USER_DETAILS,
   GET_DOMAIN, 
-=} from '@/app/(shell)/(main)/queries';
+} from '@/app/(shell)/(main)/queries';
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 
