@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_DESIGN_ELEMENTS, GET_DOMAIN } from '@/app/(main)/queries';
+import { GET_DESIGN_ELEMENTS, GET_DOMAIN } from '@/app/(shell)/(main)/queries';
 
 const DesignElementsForConcept = ({ designConceptId }) => {
   const [designElements, setDesignElements] = useState([]);
