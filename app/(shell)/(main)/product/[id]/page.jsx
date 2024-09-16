@@ -8,8 +8,9 @@ import {
   GET_DESIGN_ELEMENTS, 
   GET_MEDIA_FILES, 
   GET_USER_DETAILS,
-  GET_DESIGN_ELEMENTS, GET_DOMAIN, GET_PRODUCT 
-} from '@/app/(main)/queries';
+  GET_DOMAIN, 
+  GET_PRODUCT 
+} from '@/app/(shell)/(main)/queries';
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 
