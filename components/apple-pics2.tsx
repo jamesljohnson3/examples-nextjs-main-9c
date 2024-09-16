@@ -6,7 +6,8 @@ import { HomeSection, ImageSection, PornhubSection } from "./sections";
 
 export const revalidate = 3600;
 
-
+const HomeData = React.lazy(() => getHome().then(data => ({ default: () => <HomeSection data={data} />})));
+const ImageData = React.lazy(() => getImages().then(data => ({ default: () => <ImageSection data={data} />})));
 const PornhubData = React.lazy(() => getPornhubVideos().then(data => ({ default: () => <PornhubSection data={data} />})));
 
 async function MadeForYou() {
@@ -31,7 +32,7 @@ async function MadeForYou() {
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4 min-w-[150px]">
                   <React.Suspense fallback={<div>Loading Made For You Videos...</div>}>
-
+                    <HomeData />
                   </React.Suspense>
                 </div>
               </div>
@@ -45,7 +46,7 @@ async function MadeForYou() {
               <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
                 <div className="flex space-x-4 pb-4 min-w-[150px]">
                   <React.Suspense fallback={<div>Loading Image Gallery...</div>}>
-
+                    <ImageData />
                   </React.Suspense>
                 </div>
               </div>

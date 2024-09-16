@@ -11,58 +11,17 @@ import Link from "next/link";
  
 
 
-
-// HomeSection Component
-export function HomeSection({ fetchXVideosData }: { fetchXVideosData: () => XVideosResponse | null }) {
-  const [data, setData] = useState<XVideosResponse | null>(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      const localData = localStorage.getItem("xvideosData");
-      if (localData) {
-        setData(JSON.parse(localData));
-      } else {
-        const response = await fetchXVideosData(); // Fetch data asynchronously
-        if (response) {
-          localStorage.setItem("xvideosData", JSON.stringify(response));
-          setData(response);
-        }
-      }
-    };
-
-    loadData(); // Call async function inside useEffect
-  }, [fetchXVideosData]);
-
+export function HomeSection({ data }: { data: XVideosResponse | null }) {
   if (!data) return <p>No data available</p>;
-
   const madeForYouVideo: VideoData = data.data;
+
   return <AlbumArtwork video={madeForYouVideo} className="w-[150px]" aspectRatio={1 / 1} />;
 }
 
-// ImageSection Component
-export function ImageSection({ fetchYouPornData }: { fetchYouPornData: () => YouPornResponse | null }) {
-  const [data, setData] = useState<YouPornResponse | null>(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      const localData = localStorage.getItem("youpornData");
-      if (localData) {
-        setData(JSON.parse(localData));
-      } else {
-        const response = await fetchYouPornData(); // Fetch data asynchronously
-        if (response) {
-          localStorage.setItem("youpornData", JSON.stringify(response));
-          setData(response);
-        }
-      }
-    };
-
-    loadData(); // Call async function inside useEffect
-  }, [fetchYouPornData]);
-
+export function ImageSection({ data }: { data: YouPornResponse | null }) {
   if (!data) return <p>No data available</p>;
-
   const imageItems: string[] = data.assets;
+
   return (
     <>
       {imageItems.map((image, index) => (
