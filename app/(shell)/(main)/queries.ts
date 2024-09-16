@@ -1,20 +1,14 @@
 import { gql } from '@apollo/client';
 
-// Fetch product details
+// Define the queries
 export const GET_PRODUCT = gql`
   query GetProduct($productId: String!) {
     Product(where: { id: { _eq: $productId } }) {
       id
       name
       description
-      price
-      quantity
-      category
-      organizationId
-      createdById
       primaryPhoto
       imageGallery
-      ogImage
       metadata
       createdAt
       updatedAt
@@ -22,7 +16,6 @@ export const GET_PRODUCT = gql`
   }
 `;
 
-// Fetch product versions by product ID
 export const GET_PRODUCT_VERSIONS = gql`
   query GetProductVersions($productId: String!) {
     ProductVersion(where: { productId: { _eq: $productId } }) {
@@ -35,7 +28,6 @@ export const GET_PRODUCT_VERSIONS = gql`
   }
 `;
 
-// Fetch design concepts by product ID
 export const GET_DESIGN_CONCEPTS = gql`
   query GetDesignConcepts($productId: String!) {
     DesignConcept(where: { productId: { _eq: $productId } }) {
@@ -47,7 +39,6 @@ export const GET_DESIGN_CONCEPTS = gql`
   }
 `;
 
-// Fetch AI suggestions by product ID
 export const GET_AI_SUGGESTIONS = gql`
   query GetAISuggestions($productId: String!) {
     AISuggestion(where: { productId: { _eq: $productId } }) {
@@ -58,10 +49,9 @@ export const GET_AI_SUGGESTIONS = gql`
   }
 `;
 
-// Fetch design elements by design concept ID
 export const GET_DESIGN_ELEMENTS = gql`
   query GetDesignElements($designConceptId: String!) {
-    DesignElement(where: { designConceptId: { _eq: $designConceptId } }) {
+    DesignElement(where: { designConcepts: { id: { _eq: $designConceptId } } }) {
       id
       domainId
       elementType
@@ -72,10 +62,9 @@ export const GET_DESIGN_ELEMENTS = gql`
   }
 `;
 
-// Fetch media files related to a design element by design element ID
 export const GET_MEDIA_FILES = gql`
   query GetMediaFiles($designElementId: String!) {
-    MediaFile(where: { designElements: { id: { _eq: $designElementId } } }) {
+    MediaFile(where: { designElementId: { _eq: $designElementId } }) {
       id
       name
       url
@@ -85,14 +74,12 @@ export const GET_MEDIA_FILES = gql`
   }
 `;
 
-// Fetch user details by user ID
 export const GET_USER_DETAILS = gql`
   query GetUserDetails($userId: String!) {
     User(where: { id: { _eq: $userId } }) {
       id
       username
       email
-      organizationId
       role
       createdAt
       updatedAt
@@ -100,7 +87,6 @@ export const GET_USER_DETAILS = gql`
   }
 `;
 
-// Fetch domain details by domain ID
 export const GET_DOMAIN = gql`
   query GetDomain($domainId: String!) {
     Domain(where: { id: { _eq: $domainId } }) {
@@ -111,7 +97,6 @@ export const GET_DOMAIN = gql`
     }
   }
 `;
-
 
 
 // Define the query
