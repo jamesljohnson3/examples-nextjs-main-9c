@@ -10,7 +10,7 @@ import {
   GET_MEDIA_FILES, 
   GET_USER_DETAILS,
   GET_DOMAIN 
-} from '@/app/(main)/queries';
+} from '@/app/(shell)/(main)/queries';
 import DesignElementsForConcept from "./design-element"
 // Constants for fixed values
 const PRODUCT_ID = 'cm14mvs2o000fue6yh6hb13yn';
