@@ -86,7 +86,7 @@ export function PornhubSection({ data }: { data: PornhubResponse | null }) {
       } else {
         // Fetch data from API
         try {
-          const response = await fetch('https://lust.scathach.id/pornhub/search?key=ebony');
+          const response = await fetch('/api/home');
           if (!response.ok) {
             throw new Error(`Failed to fetch Pornhub data: ${response.statusText}`);
           }
