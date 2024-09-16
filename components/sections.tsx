@@ -10,8 +10,10 @@ import { Separator } from "../components/ui/separator";
 import Link from "next/link";
  
 
+
+
 // HomeSection Component
-export const HomeSection = ({ fetchXVideosData }: { fetchXVideosData: () => XVideosResponse | null }) => {
+export function HomeSection({ fetchXVideosData }: { fetchXVideosData: () => XVideosResponse | null }) {
   const [data, setData] = useState<XVideosResponse | null>(null);
 
   useEffect(() => {
@@ -35,10 +37,10 @@ export const HomeSection = ({ fetchXVideosData }: { fetchXVideosData: () => XVid
 
   const madeForYouVideo: VideoData = data.data;
   return <AlbumArtwork video={madeForYouVideo} className="w-[150px]" aspectRatio={1 / 1} />;
-};
+}
 
 // ImageSection Component
-export const ImageSection = ({ fetchYouPornData }: { fetchYouPornData: () => YouPornResponse | null }) => {
+export function ImageSection({ fetchYouPornData }: { fetchYouPornData: () => YouPornResponse | null }) {
   const [data, setData] = useState<YouPornResponse | null>(null);
 
   useEffect(() => {
@@ -70,10 +72,10 @@ export const ImageSection = ({ fetchYouPornData }: { fetchYouPornData: () => You
       ))}
     </>
   );
-};
+}
 
 // PornhubSection Component
-export const PornhubSection = ({ fetchPornhubData }: { fetchPornhubData: () => PornhubResponse | null }) => {
+export function PornhubSection({ fetchPornhubData }: { fetchPornhubData: () => PornhubResponse | null }) {
   const [data, setData] = useState<PornhubResponse | null>(null);
 
   useEffect(() => {
@@ -117,7 +119,7 @@ export const PornhubSection = ({ fetchPornhubData }: { fetchPornhubData: () => P
       ))}
     </>
   );
-};
+}
 
 interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
   video: VideoData;
@@ -125,7 +127,7 @@ interface AlbumArtworkProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 // AlbumArtwork Component
-const AlbumArtwork = ({ video, aspectRatio = 3 / 4, className, ...props }: AlbumArtworkProps) => {
+export function AlbumArtwork({ video, aspectRatio = 3 / 4, className, ...props }: AlbumArtworkProps) {
   const isVideo = video.image.endsWith(".mp4");
 
   return (
@@ -173,6 +175,6 @@ const AlbumArtwork = ({ video, aspectRatio = 3 / 4, className, ...props }: Album
       </Link>
     </div>
   );
-};
+}
 
 const playlists = ["Recently Added", "Top Songs 2022", "Top Songs 2023"];
