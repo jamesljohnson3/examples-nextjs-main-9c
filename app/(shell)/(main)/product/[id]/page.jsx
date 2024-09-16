@@ -15,37 +15,33 @@ import DesignElementsForConcept from "./design-element"
 
 
 const ProductPage = () => {
-  // Constants for fixed values
-  const PRODUCT_ID = 'cm14mvs2o000fue6yh6hb13yn';
-  const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
 
   // Fetch product details
-  const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
-  if (productLoading) return <p>Loading...</p>;
-  if (productError) return <p>Error loading data.</p>;
+  const { data, loading, error } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
 
-  const product = productData?.Product;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error loading data: {error.message}</p>;
+
+  const product = data?.Product?.[0]; // Assuming `Product` returns an array
 
   return (
     <div>
-      
-      <h1>{product?.name}</h1>
-      <p>{product?.description}</p>
-      <img src={product?.primaryPhoto} alt={product?.name} />
+      <h1>{product?.name || 'Product Name'}</h1>
+      <p>{product?.description || 'No description available.'}</p>
+      {product?.primaryPhoto && <img src={product.primaryPhoto} alt={product?.name || 'Product Image'} />}
       <div>
         <h2>Image Gallery</h2>
-        {product?.imageGallery.map((url, index) => (
-          <img key={index} src={url} alt={`Gallery ${index}`} />
-        ))}
+        {product?.imageGallery?.length > 0 ? (
+          product.imageGallery.map((url, index) => (
+            <img key={index} src={url} alt={`Gallery ${index}`} style={{ maxWidth: '200px', margin: '10px' }} />
+          ))
+        ) : (
+          <p>No images available.</p>
+        )}
       </div>
-      
-      
-      
-      
-      <p>Price: ${product?.price}</p>
-
+      <p>Price: ${product?.price || 'N/A'}</p>
     </div>
   );
 };
 
-export default ProductPage
+export default ProductPage;
