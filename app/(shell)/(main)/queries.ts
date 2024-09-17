@@ -113,7 +113,6 @@ export const GET_DESIGN_ELEMENTS = gql`
   query GetDesignElements($domainId: String!) {
     DesignElement(where: { domainId: { _eq: $domainId } }) {
       id
-      name
       domainId
       currentVersion
       createdAt
