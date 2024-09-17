@@ -60,7 +60,8 @@ const ProductPage: React.FC = () => {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [reservedRemainingFields, setReservedRemainingFields] = useState([]);
+  const [removedField, setRemovedField] = useState<FormField | null>(null);
+
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
   const [customFieldOptions, setCustomFieldOptions] = useState('');
@@ -147,26 +148,21 @@ const ProductPage: React.FC = () => {
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
     setHasUnsavedChanges(true);
   };
+
   const handleRemoveField = (index: number) => {
     setFormFields(prev => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
 
-      // Always add the removed field back to remainingFields, regardless of whether it's reserved
-      setRemainingFields(prev => 
-        [...prev, removedField]
-          .sort((a, b) => a.label.localeCompare(b.label))
-          .filter((field, index, self) => 
-            index === self.findIndex((t) => t.id === field.id)
-          )
-      );
+      // Store removed field in temporary state
+      setRemovedField(removedField);
 
       return updatedFields;
     });
 
     setHasUnsavedChanges(true);
   };
-  
+
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
     const reorderedFields = Array.from(formFields);
@@ -218,6 +214,7 @@ const ProductPage: React.FC = () => {
           productId: PRODUCT_ID,
           versionNumber,
           changes: "Updated product version",
+        
           data: productData, // Ensure productData matches the ProductInput type
           id: uuid,
         },
@@ -260,25 +257,24 @@ const ProductPage: React.FC = () => {
       alert('Failed to publish segment.');
     }
   };
+
   const handleAddCustomField = () => {
     if (!customFieldLabel.trim()) {
       alert('Field label cannot be empty.');
       return;
     }
 
-    const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, '_');
-
-    if (RESERVED_FIELDS.has(newFieldId)) {
-      alert('Cannot create a custom field with a reserved field name.');
-      return;
-    }
-
     const newField: FormField = {
-      id: newFieldId,
+      id: customFieldLabel.toLowerCase().replace(/\s+/g, '_'),
       type: customFieldType,
       label: customFieldLabel,
       options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
     };
+
+    if (RESERVED_FIELDS.has(newField.id)) {
+      alert('Cannot use reserved field ID.');
+      return;
+    }
 
     handleAddField(newField);
     setCustomFieldLabel('');
@@ -312,34 +308,35 @@ const ProductPage: React.FC = () => {
                       <CardContent>
                         <div className="flex justify-between items-center mb-2">
                           <div className="flex space-x-1">
-                            
-                          {[...remainingFields, ...reservedRemainingFields].map((field) => (
-  <Button
-    key={field.id}
-    onClick={() => handleAddField(field)}
-    className="text-xs py-1 px-2"
-  >
-     <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
-     </Button>
-))}
-                            
-                           
-                           
+                            {remainingFields.map((field) => (
+                              <Button
+                                key={field.id}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleAddField(field)}
+                                className="text-xs py-1 px-2"
+                              >
+                                <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
+                              </Button>
+                            ))}
                           </div>
                         </div>
 
                         <DragDropContext onDragEnd={onDragEnd}>
                           <Droppable droppableId="form-fields">
                             {(provided) => (
-                              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
+                              <div {...provided.droppableProps} ref={provided.innerRef}   
+ className="space-y-1">
                                 {formFields.map((field, index) => (
                                   <Draggable key={field.id} draggableId={field.id} index={index}>
                                     {(provided) => (
                                       <div
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
+                                        {...provided.dragHandleProps}   
+
+                                        className="flex items-center   
+ space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
                                       >
                                         <GripVertical className="h-3 w-3 text-muted-foreground" />
                                         <div className="flex-grow">
