@@ -60,7 +60,7 @@ const ProductPage: React.FC = () => {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
+  const [reservedRemainingFields, setReservedRemainingFields] = useState([]);
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
   const [customFieldOptions, setCustomFieldOptions] = useState('');
@@ -147,30 +147,23 @@ const ProductPage: React.FC = () => {
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
     setHasUnsavedChanges(true);
   };
-
   const handleRemoveField = (index: number) => {
     setFormFields(prev => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
-
-      // Check if the removed field is reserved
+      
       if (RESERVED_FIELDS.has(removedField.id)) {
-        // Add reserved field back to remainingFields
-        setRemainingFields(prev => [
-          ...prev.filter(field => field.id !== removedField.id),
-          removedField
-        ].sort((a, b) => a.label.localeCompare(b.label)));
+        // For reserved fields, add them to a separate state for reserved remaining fields
+        setReservedRemainingFields(prev => [...prev, removedField]);
       } else {
-        // Add non-reserved field back to remainingFields
+        // For non-reserved fields, add them back to remainingFields
         setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
       }
-
+      
       return updatedFields;
     });
-
     setHasUnsavedChanges(true);
   };
-
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
     const reorderedFields = Array.from(formFields);
@@ -315,17 +308,19 @@ const ProductPage: React.FC = () => {
                       <CardContent>
                         <div className="flex justify-between items-center mb-2">
                           <div className="flex space-x-1">
-                            {remainingFields.map((field) => (
-                              <Button
-                                key={field.id}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAddField(field)}
-                                className="text-xs py-1 px-2"
-                              >
-                                <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
-                              </Button>
-                            ))}
+                            
+                          {[...remainingFields, ...reservedRemainingFields].map((field) => (
+  <Button
+    key={field.id}
+    onClick={() => handleAddField(field)}
+    className="text-xs py-1 px-2"
+  >
+     <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
+     </Button>
+))}
+                            
+                           
+                           
                           </div>
                         </div>
 
