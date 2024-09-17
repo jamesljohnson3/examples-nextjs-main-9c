@@ -73,14 +73,13 @@ export default function ProductPage() {
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
 
   useEffect(() => {
-    if (productDataQuery?.Product) {
-      const product = productDataQuery.Product[0]; // Access the first product
-      setProductData(product);
+    if (productDataQuery?.product) {
+      setProductData(productDataQuery.product);
       // Initialize form fields based on product data
       setFormFields(
         initialAvailableFields.map(field => ({
           ...field,
-          value: product[field.id] || ''
+          value: productDataQuery.product[field.id] || ''
         }))
       );
     }
@@ -250,19 +249,19 @@ export default function ProductPage() {
 
                     {/* Add Fields Section */}
                     <div className="flex justify-between items-center mb-2">
-                      <div className="flex space-x-1">       
-                        {remainingFields.map((field) => (
-                          <Button
-                            key={field.id}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleAddField(field)}
-                            className="text-xs py-1 px-2"
-                          >
-                            <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
-                          </Button>
-                        ))}
-                      </div>
+                    <div className="flex space-x-1">       
+                {remainingFields.map((field) => (
+                        <Button
+                          key={field.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAddField(field)}
+                          className="text-xs py-1 px-2"
+                        >
+                          <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
+                        </Button>
+                      ))}
+                    </div>
                     </div>
                     {/* Custom Field Form */}
                     <div className="custom-field-form">
@@ -309,25 +308,6 @@ export default function ProductPage() {
           </Accordion>
 
           {/* Segments Tab */}
-          <div className="mt-4">
-            <Card>
-              <CardContent>
-                <h2 className="text-lg font-bold mb-2">Product Preview</h2>
-                <div className="p-4 border rounded-lg">
-                  {productData && (
-                    <div>
-                      <h3 className="text-xl font-semibold">{productData.name}</h3>
-                      <p className="text-sm text-gray-500">{productData.description}</p>
-                      <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
-                      <p className="text-sm">Quantity: {productData.quantity}</p>
-                      <p className="text-sm">Category: {productData.category}</p>
-                    </div>
-                  )}
-                  {!productData && <p>No product data available.</p>}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </Tabs>
     </div>
