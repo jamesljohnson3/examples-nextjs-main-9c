@@ -1,6 +1,41 @@
 // mutations.js or mutations.ts
 import { gql } from '@apollo/client';
 
+
+export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
+  mutation UpdateProductAndInsertSegment(
+    $productId: String!,
+    $name: String!,
+    $description: String!,
+    $segmentId: String!,
+    $slug: String!,
+    $segmentName: String!,
+    $domainId: String!,
+    $post: Json!
+  ) {
+    update_Product(
+      where: { id: { _eq: $productId } },
+      _set: { name: $name, description: $description }
+    ) {
+      affected_rows
+    }
+
+    insert_Segment_one(
+      object: {
+        id: $segmentId,
+        slug: $slug,
+        productId: $productId,
+        name: $segmentName,
+        domainId: $domainId,
+        post: $post
+      }
+    ) {
+      id
+      name
+    }
+  }
+`;
+
 // Mutation to add a new version for a design element
 export const ADD_DESIGN_ELEMENT_VERSION = gql`
   mutation AddDesignElementVersion(
