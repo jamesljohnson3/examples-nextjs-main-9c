@@ -30,9 +30,12 @@ interface ProductData {
 }
 
 const ProductPage: React.FC<{ params: { id: string } }> = ({ params }) => {
-  const PRODUCT_ID = params.id;
-  const DOMAIN_ID = 'some-domain-id'; // Replace with actual domain ID if needed
-
+  const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+  const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
+  const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
+  const ORGANIZATION_ID = 'cm14mvrwe0000ue6ygx7gfevr';
+  const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
+ 
   // Fetch product details
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
   const { data: segmentsData, loading: segmentsLoading, error: segmentsError } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
