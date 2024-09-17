@@ -40,14 +40,14 @@ const ProductPage = ({ params }) => {
   const [designElementVersions, setDesignElementVersions] = useState({});
 
   useEffect(() => {
-    if (workspaceData) {
-      setOrganizationId(workspaceData.Workspace[0]?.organization.id || null);
+    if (workspaceData && workspaceData.Workspace?.length > 0) {
+      setOrganizationId(workspaceData.Workspace[0]?.organization?.id || null);
     }
   }, [workspaceData]);
 
   useEffect(() => {
     if (designElementsData) {
-      setDesignElements(designElementsData.DesignElement);
+      setDesignElements(designElementsData.DesignElement || []);
 
       // Fetch versions for each design element
       designElementsData.DesignElement.forEach((element) => {
@@ -59,7 +59,7 @@ const ProductPage = ({ params }) => {
           if (versionsData) {
             setDesignElementVersions(prevVersions => ({
               ...prevVersions,
-              [element.id]: versionsData.DesignElementVersion
+              [element.id]: versionsData.DesignElementVersion || []
             }));
           }
 
