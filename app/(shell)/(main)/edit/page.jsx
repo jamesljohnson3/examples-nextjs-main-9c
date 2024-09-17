@@ -24,7 +24,7 @@ const ProductPage = () => {
 
   // Fetch design elements for a specific concept
   const [selectedConceptId, setSelectedConceptId] = useState(null);
-  const { data: designElementsData, loading: elementsLoading, error: elementsError } = useQuery(GET_DESIGN_ELEMENTS, { variables: { designConceptId: selectedConceptId }, skip: !selectedConceptId });
+  const { data: designElementsData, loading: elementsLoading, error: elementsError } = useQuery(GET_DESIGN_ELEMENTS, { variables: { domainId: domainId }, skip: !selectedConceptId });
 
   // Mutation to add a new design element version
   const [addDesignElementVersion, { loading: addVersionLoading, error: addVersionError }] = useMutation(ADD_DESIGN_ELEMENT_VERSION);
