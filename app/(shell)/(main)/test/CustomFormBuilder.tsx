@@ -43,7 +43,7 @@ function SinglePost({ id }: { id: string }) {
     content: JSON.stringify([{
       model: "test",
       Make: "Nissan",
-      CalltoAction: "Vehicle for sale",
+      Meta: "Vehicle for sale",
       Year: "2012",
       Mileage: "test",
       Transmission: "Auto",
