@@ -201,7 +201,7 @@ export default function ProductPage() {
   
       // Save the productVersionId to local storage
       localStorage.setItem('productVersionId', uuid);
-  
+      setHasUnsavedChanges(false);
       alert('Product version updated and saved!');
     } catch (error) {
       console.error('Error saving product:', error);
