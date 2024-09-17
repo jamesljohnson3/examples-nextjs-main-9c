@@ -55,7 +55,7 @@ export default function InventoryManagement() {
                 <span className="font-semibold">Description:</span> {product.description}
               </div>
               <div className="text-xs">
-                <span className="font-semibold">Price:</span> ${product.price.toFixed(2)}
+
               </div>
               <div className="text-xs">
                 <span className="font-semibold">Quantity:</span> {product.quantity}
