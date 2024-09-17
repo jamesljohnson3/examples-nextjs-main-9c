@@ -167,11 +167,8 @@ export default function ProductPage() {
         return;
       }
   
-      if (!segments.length) {
-        alert('No segments available to publish.');
-        return;
-      }
-  
+     
+      
       // Get the ID of the first segment
       const segmentId = segments[0]?.id;
   
