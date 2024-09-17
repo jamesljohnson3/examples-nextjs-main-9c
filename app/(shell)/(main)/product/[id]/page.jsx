@@ -130,7 +130,7 @@ const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
         {designElements.length > 0 ? (
           designElements.map((element) => (
             <div key={element.id}>
-              <h3>{element.name}</h3>
+
               <p>Current Version: {element.currentVersion || 'N/A'}</p>
               {designElementVersions[element.id] && (
                 <div>
