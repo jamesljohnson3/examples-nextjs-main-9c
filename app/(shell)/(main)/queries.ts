@@ -25,13 +25,18 @@ export const UPDATE_PRODUCT_VERSION = gql`
 
 // Mutation to publish segments
 export const PUBLISH_SEGMENTS = gql`
-  mutation PublishSegments($segments: [SegmentInput!]!) {
-    publishSegments(segments: $segments) {
-      id
-      name
-      content
-    }
+mutation MyMutation (
+  $productVersionId: String!,
+  $id: String!
+){
+  update_Segment(
+    _set: { productVersion: $productVersionId }
+    where: { id: { _eq: $id } }
+  ) {
+    affected_rows
   }
+}
+
 `;
 export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
   mutation UpdateProductAndInsertSegment(

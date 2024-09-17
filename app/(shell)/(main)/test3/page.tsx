@@ -135,6 +135,7 @@ export default function ProductPage() {
       // Generate a UUID for the id
       const id = uuidv4();
 
+      // Update product version
       await updateProductVersion({
         variables: {
           productId: PRODUCT_ID,
@@ -144,16 +145,27 @@ export default function ProductPage() {
           id: id // Use the generated UUID
         }
       });
-      alert('Product version updated!');
+
+      // Save the productVersionId to local storage
+      localStorage.setItem('productVersionId', id);
+
+      alert('Product version updated and saved!');
     } catch (error) {
       console.error('Error updating product version:', error);
     }
   };
-  
 
   const handlePublish = async () => {
     try {
-      await publishSegments({ variables: { segments } });
+      // Retrieve the productVersionId from local storage
+      const productVersionId = localStorage.getItem('productVersionId');
+
+      if (!productVersionId) {
+        alert('Product version ID not found in local storage.');
+        return;
+      }
+
+      await publishSegments({ variables: { id: segmentsData.id, productVersionId } });
       alert('Segments published!');
     } catch (error) {
       console.error('Error publishing segments:', error);
@@ -245,8 +257,8 @@ export default function ProductPage() {
                                         </SelectContent>
                                       </Select>
                                     )}
-                                     <Button  className="h-6 w-6 p-0" variant="ghost" onClick={() => handleRemoveField(index)}>
-                                      <MinusIcon className="h-3 w-3"  />
+                                     <Button className="h-6 w-6 p-0" variant="ghost" onClick={() => handleRemoveField(index)}>
+                                      <MinusIcon className="h-3 w-3" />
                                     </Button>
                                   </div>
                                 )}
