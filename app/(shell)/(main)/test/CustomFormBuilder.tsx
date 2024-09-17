@@ -1,40 +1,71 @@
 "use client"
+import { imageConfigDefault } from "next/dist/shared/lib/image-config";
 import React, { useEffect, useState } from "react";
+import { 
+  GET_PRODUCT, 
+  GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN,
+  GET_PRODUCT_VERSIONS, 
+  GET_DESIGN_CONCEPTS, 
+  GET_AI_SUGGESTIONS, 
+  GET_DESIGN_ELEMENTS, 
+  GET_MEDIA_FILES, 
+  GET_USER_DETAILS,
+  GET_DOMAIN ,
+  GET_DESIGN_ELEMENT_VERSIONS,
+  GET_WORKSPACE,
+  GET_ORGANIZATION
+} from '@/app/(shell)/(main)/queries';
+
+const USER_ID = "cm14mvrxe0002ue6ygbc4yyzr";
+
+const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph'; // Define your workspace ID here
+const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku'; // Define your domain ID here
+
+
+// Define a type for the post
+type Post = {
+  id: string;
+  content: string;
+  createdAt: string;
+};
+
+type EditedPost = {
+  [key: string]: string;
+};
 
 function SinglePost({ id }: { id: string }) {
-  const [post, setPost] = useState<any>(null);
-  const [editedPost, setEditedPost] = useState<any>({});
+  const [post, setPost] = useState<Post | null>(null);
+  const [editedPost, setEditedPost] = useState<EditedPost>({});
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [postKeys, setPostKeys] = useState<string[]>([]);
 
   // Static post data
-  const staticPostData = {
-    id: "sample-post-id",
-    author: "sample-user-id",
+  const CustomFieldData: Post = {
+    id: "sample-tableName-id",
     content: JSON.stringify([{
-      price: "test",
       model: "test",
       Make: "Nissan",
-      meta: "Vehicle for sale",
+      CalltoAction: "Vehicle for sale",
       Year: "2012",
-      Price: "test",
-      Description: "test",
       Mileage: "test",
       Transmission: "Auto",
       Passenger: "2 Door",
       Fuel: "test",
-      Type: "Truck"
+      Type: "Truck",
+      html: "",
+      image: "",
+      video: "",
+      caption: ""
     }]),
     createdAt: new Date().toISOString()
   };
 
   useEffect(() => {
     // Simulate fetching post data with static data
-    const data = staticPostData;
-    if (!data) {
-      // Handle not found logic here
-    } else {
+    const data = CustomFieldData;
+    if (data) {
       setPost(data);
       const parsedContent = JSON.parse(data.content);
       if (Array.isArray(parsedContent) && parsedContent.length > 0) {
@@ -47,27 +78,34 @@ function SinglePost({ id }: { id: string }) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditedPost({ ...editedPost, [name]: value });
+    setEditedPost(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
-    const eventtype = 'update';
+    const eventType = 'update';
     try {
-      const response = await fetch('https://unlimitpotntlj.dataplane.rudderstack.com/v1/webhook?writeKey=2a0rvNg3rm1cTepcofpRSJhKjxf', {
+      const response = await fetch('/my-api-endpoint', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...editedPost, userId: post.author, assetId: 'sample-asset-id', eventtype, campaignId: 'sample-campaign-id', postId: post.id }), // Include assetId and userId in the body
+        body: JSON.stringify({ 
+          ...editedPost, 
+          userId: "cm14mvrxe0002ue6ygbc4yyzr", 
+          assetId: 'sample-asset-id', 
+          eventType, 
+          campaignId: 'sample-campaign-id', 
+          postId: post?.id // Use optional chaining in case post is null
+        }),
       });
       if (response.ok) {
-        setSuccess(true); // Set success state to true
+        setSuccess(true);
       } else {
         throw new Error('Failed to update description');
       }
     } catch (err: any) {
       setError(err.message);
-      setSuccess(false); // Set success state to false
+      setSuccess(false);
       console.error("Error sending data to webhook:", err);
     }
   };
@@ -78,11 +116,8 @@ function SinglePost({ id }: { id: string }) {
 
   return (
     <>
-      {/* Your image display code */}
-      
       <div className="flex max-w-sm flex-col flex-1">
         <div className="px-5 py-3">
-          {/* Render input fields based on postKeys */}
           {postKeys.map((key) => (
             <div key={key}>
               <label className="block text-sm font-medium text-gray-700">
@@ -123,7 +158,7 @@ function SinglePost({ id }: { id: string }) {
           </time>
         </div>
       </div>
-      
+
       {error && <p>Error: {error}</p>}
       {success && <p>Description updated successfully!</p>}
     </>
