@@ -13,6 +13,9 @@ import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
 
+
+
+
 interface FormField {
   id: string;
   type: string;
@@ -76,23 +79,28 @@ export default function ProductPage() {
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
-      const newFields = initialAvailableFields.map(field => ({
+      
+      // Initialize formFields with fetched data
+      const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
+      
+      setFormFields(initialFields);
+      
+      // Exclude these fields from remainingFields
+      const excludedFields = new Set(initialFields.map(field => field.id));
+      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+      
+      setRemainingFields(updatedRemainingFields);
       setProductData(product);
-      setFormFields(newFields);
-
-      // Determine remaining fields by filtering out those already in formFields
-      const addedFieldIds = newFields.map(field => field.id);
-      const filteredRemainingFields = initialAvailableFields.filter(field => !addedFieldIds.includes(field.id));
-      setRemainingFields(filteredRemainingFields);
     }
   }, [productDataQuery]);
+  
 
   useEffect(() => {
-    if (segmentsData?.Segment) {
-      setSegments(segmentsData.Segment);
+    if (segmentsData?.segments) {
+      setSegments(segmentsData.segments);
     }
   }, [segmentsData]);
 
@@ -110,20 +118,29 @@ export default function ProductPage() {
   };
 
   const handleAddField = (newField: FormField) => {
+    // Add new field to formFields
     setFormFields(prev => [...prev, newField]);
+    
+    // Remove the field from remainingFields
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
+    
     setHasUnsavedChanges(true);
   };
-
+  
   const handleRemoveField = (index: number) => {
     setFormFields(prev => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
-      setRemainingFields(prev => [...prev, removedField]);
+      
+      // Add the removed field back to remainingFields
+      setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
+      
       return updatedFields;
     });
+    
     setHasUnsavedChanges(true);
   };
+  
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -139,18 +156,18 @@ export default function ProductPage() {
       alert('No product data to save!');
       return;
     }
-
+  
     const { id, name, description, price, quantity, category } = productData;
-
+  
     // Parse price and quantity correctly
     const parsedPrice = parseFloat(price as unknown as string); // Cast to string then parse
     const parsedQuantity = parseInt(quantity as unknown as string); // Cast to string then parse
-
+  
     if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
       alert('Invalid price or quantity');
       return;
     }
-
+  
     try {
       // Execute the mutation with the parsed product data
       await saveProduct({
@@ -163,13 +180,13 @@ export default function ProductPage() {
           category,
         },
       });
-
+  
       // Generate Unix timestamp for versionNumber
       const versionNumber = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
-
+  
       // Generate a UUID for the id
       const uuid = uuidv4();
-
+  
       // Update product version
       await updateProductVersion({
         variables: {
@@ -180,105 +197,168 @@ export default function ProductPage() {
           id: uuid,
         },
       });
-
-      // Save the productVersion ID to the product and publish the segment
-      await publishSegments({
-        variables: {
-          segmentId: SEGMENT_ID,
-          versionId: uuid,
-        },
-      });
-
-      alert('Product saved successfully!');
-      setHasUnsavedChanges(false);
+  
+      // Save the productVersionId to local storage
+      localStorage.setItem('productVersionId', uuid);
+  
+      alert('Product version updated and saved!');
     } catch (error) {
       console.error('Error saving product:', error);
       alert('Failed to save product.');
     }
   };
+  
+  const handlePublish = async () => {
+    try {
+      const productVersionId = localStorage.getItem('productVersionId');
+  
+      if (!productVersionId) {
+        alert('Product version ID not found in local storage.');
+        return;
+      }
+  
+      const segmentId = segments[0]?.id;
+  
+      if (!SEGMENT_ID) {
+        alert('No segment ID available.');
+        return;
+      }
+  
+      await publishSegments({
+        variables: { id: SEGMENT_ID, productVersionId }
+      });
+  
+      alert('Segment published!');
+    } catch (error) {
+      console.error('Error publishing segment:', error);
+      alert('Failed to publish segment.');
+    }
+  };
+
+  const handleAddCustomField = () => {
+    const newField: FormField = {
+      id: customFieldLabel.toLowerCase().replace(/\s+/g, '_'),
+      type: customFieldType,
+      label: customFieldLabel,
+      options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
+    };
+    handleAddField(newField);
+    setCustomFieldLabel('');
+    setCustomFieldType('text');
+    setCustomFieldOptions('');
+  };
+
+  if (loadingProduct || loadingSegments) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="product-page">
-      {loadingProduct ? (
-        <p>Loading product...</p>
-      ) : (
-        <>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="droppable">
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {formFields.map((field, index) => (
-                    <Draggable key={field.id} draggableId={field.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="form-field"
-                        >
-                          <Card>
-                            <CardContent>
-                              {field.type === 'text' && (
-                                <Input
-                                  type="text"
-                                  value={field.value as string}
-                                  onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                />
-                              )}
-                              {field.type === 'textarea' && (
-                                <Textarea
-                                  value={field.value as string}
-                                  onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                />
-                              )}
-                              {field.type === 'number' && (
-                                <Input
-                                  type="number"
-                                  value={field.value as number}
-                                  onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
-                                />
-                              )}
-                              {field.type === 'select' && (
-                                <Select
-                                  value={field.value as string}
-                                  onValueChange={(value) => handleInputChange(field.id, value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder={field.label} />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {field.options?.map(option => (
-                                      <SelectItem key={option} value={option}>
-                                        {option}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                              <Button onClick={() => handleRemoveField(index)}>
-                                <MinusIcon /> Remove
-                              </Button>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-          <div className="add-field">
-            <Select
-              value={customFieldType}
-              onValueChange={(value) => setCustomFieldType(value)}
-            >
+      <Tabs>
+        <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="form">Form Builder</TabsTrigger>
+          <TabsTrigger value="segments">Segments</TabsTrigger>
+        </TabsList>
+
+        
+        <div className="tab-content">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="product-form">
+              <AccordionTrigger>Product Form</AccordionTrigger>
+              <AccordionContent>
+                <Card>
+                  <CardContent>
+                  <div className="flex justify-between items-center mb-2">
+  <div className="flex space-x-1">
+    {remainingFields.map((field) => (
+      <Button
+        key={field.id}
+        variant="outline"
+        size="sm"
+        onClick={() => handleAddField(field)}
+        className="text-xs py-1 px-2"
+      >
+        <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
+      </Button>
+    ))}
+  </div>
+</div>
+
+                    <DragDropContext onDragEnd={onDragEnd}>
+                      <Droppable droppableId="form-fields">
+                        {(provided) => (
+                          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
+                            {formFields.map((field, index) => (
+                              <Draggable key={field.id} draggableId={field.id} index={index}>
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
+                    >
+                      <GripVertical className="h-3 w-3 text-muted-foreground" />
+                      <div className="flex-grow">
+                                      <label>{field.label}</label>
+                                      {field.type === 'text' && (
+                                        <Input
+                                          value={field.value || ''}
+                                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                        />
+                                      )}
+                                      {field.type === 'textarea' && (
+                                        <Textarea
+                                          value={field.value || ''}
+                                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                        />
+                                      )}
+                                      {field.type === 'number' && (
+                                        <Input
+                                          type="number"
+                                          value={field.value || ''}
+                                          onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
+                                        />
+                                      )}
+                                      {field.type === 'select' && (
+                                        <Select
+                                          onValueChange={(value) => handleInputChange(field.id, value)}
+                                          defaultValue={field.value as string}
+                                        >
+                                          <SelectTrigger>
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {field.options?.map((option) => (
+                                              <SelectItem key={option} value={option}>
+                                                {option}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      )}
+                                    </div>
+                                    <Button size="sm" variant="ghost" onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
+                        <MinusIcon className="h-3 w-3" />
+                      </Button>                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
+
+
+          <div className="custom-field-form">
+            <Input
+              value={customFieldLabel}
+              onChange={(e) => setCustomFieldLabel(e.target.value)}
+              placeholder="Field Label"
+            />
+            <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select field type" />
+                <SelectValue>{customFieldType}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="text">Text</SelectItem>
@@ -287,34 +367,35 @@ export default function ProductPage() {
                 <SelectItem value="select">Select</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              type="text"
-              value={customFieldLabel}
-              onChange={(e) => setCustomFieldLabel(e.target.value)}
-              placeholder="Field label"
-            />
             {customFieldType === 'select' && (
-              <Input
-                type="text"
+              <Textarea
                 value={customFieldOptions}
                 onChange={(e) => setCustomFieldOptions(e.target.value)}
-                placeholder="Options (comma separated)"
+                placeholder="Comma-separated options"
               />
             )}
-            <Button
-              onClick={() => handleAddField({
-                id: uuidv4(),
-                type: customFieldType,
-                label: customFieldLabel,
-                options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined
-              })}
-            >
-              <PlusIcon /> Add Field
+            <Button onClick={handleAddCustomField}>
+              <PlusIcon className="mr-1" /> Add Custom Field
             </Button>
           </div>
-          <Button onClick={handleSave} disabled={!hasUnsavedChanges}>Save Changes</Button>
-        </>
-      )}
+                  </CardContent>
+                </Card>
+
+
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+
+          {hasUnsavedChanges && (
+            <Button onClick={handleSave}>Save</Button>
+          )}
+          <Button onClick={handlePublish}>Publish</Button>
+
+          {/* Preview or other segments */}
+        </div>
+      </Tabs>
     </div>
   );
 }
+
