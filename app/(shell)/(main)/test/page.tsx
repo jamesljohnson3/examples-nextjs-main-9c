@@ -17,7 +17,7 @@ interface ProductData {
   id: string;
   name: string;
   description: string;
-  price?: number; // Make price optional
+  price?: number;
   quantity?: number;
   category?: string;
   primaryPhoto?: string;
@@ -99,7 +99,12 @@ export default function ProductPage() {
   }, [segmentsData]);
 
   const handleInputChange = (id: string, value: string | number) => {
-    setPreviewData(prevData => ({ ...prevData!, [id]: value }));
+    if (previewData) {
+      setPreviewData(prevData => ({
+        ...prevData,
+        [id]: value
+      }));
+    }
     setHasUnsavedChanges(true);
   };
 
@@ -129,12 +134,14 @@ export default function ProductPage() {
   };
 
   const handleSave = async () => {
-    try {
-      await updateProductVersion({ variables: { productData: previewData } });
-      setHasUnsavedChanges(false);
-      alert('Product version updated!');
-    } catch (error) {
-      console.error('Error updating product version:', error);
+    if (previewData) {
+      try {
+        await updateProductVersion({ variables: { productData: previewData } });
+        setHasUnsavedChanges(false);
+        alert('Product version updated!');
+      } catch (error) {
+        console.error('Error updating product version:', error);
+      }
     }
   };
 
@@ -153,25 +160,27 @@ export default function ProductPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          switch (type) {
-            case 'gallery':
-              setPreviewData(prev => ({
-                ...prev!,
-                imageGallery: [...(prev?.imageGallery || []), reader.result]
-              }));
-              break;
-            case 'primary':
-              setPreviewData(prev => ({
-                ...prev!,
-                primaryPhoto: reader.result
-              }));
-              break;
-            case 'og':
-              setPreviewData(prev => ({
-                ...prev!,
-                metadata: { ...prev?.metadata, ogImage: reader.result }
-              }));
-              break;
+          if (previewData) {
+            switch (type) {
+              case 'gallery':
+                setPreviewData(prev => ({
+                  ...prev!,
+                  imageGallery: [...(prev?.imageGallery || []), reader.result]
+                }));
+                break;
+              case 'primary':
+                setPreviewData(prev => ({
+                  ...prev!,
+                  primaryPhoto: reader.result
+                }));
+                break;
+              case 'og':
+                setPreviewData(prev => ({
+                  ...prev!,
+                  metadata: { ...prev.metadata, ogImage: reader.result }
+                }));
+                break;
+            }
           }
           setHasUnsavedChanges(true);
         }
@@ -181,11 +190,13 @@ export default function ProductPage() {
   };
 
   const handleMetadataChange = (key: string, value: string) => {
-    setPreviewData(prev => ({
-      ...prev!,
-      metadata: { ...prev?.metadata, [key]: value }
-    }));
-    setHasUnsavedChanges(true);
+    if (previewData) {
+      setPreviewData(prev => ({
+        ...prev!,
+        metadata: { ...prev.metadata, [key]: value }
+      }));
+      setHasUnsavedChanges(true);
+    }
   };
 
   const handleAddCustomField = () => {
@@ -222,9 +233,12 @@ export default function ProductPage() {
                 <Card>
                   <CardContent>
                     <DragDropContext onDragEnd={onDragEnd}>
-                      <Droppable droppableId="form-fields">
+                      <Droppable droppableId="droppable">
                         {(provided) => (
-                          <div {...provided.droppableProps} ref={provided.innerRef}>
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                          >
                             {formFields.map((field, index) => (
                               <Draggable key={field.id} draggableId={field.id} index={index}>
                                 {(provided) => (
