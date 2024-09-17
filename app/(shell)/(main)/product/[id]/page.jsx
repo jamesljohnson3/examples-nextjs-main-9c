@@ -14,10 +14,9 @@ const ProductPage = ({ params }) => {
   const PRODUCT_ID = params.id;
   const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph'; // Define your workspace ID here
 
-  const [organizationId, setOrganizationId] = useState(null);
-
   // Fetch workspace details
   const { data: workspaceData, loading: workspaceLoading, error: workspaceError } = useQuery(GET_WORKSPACE, { variables: { workspaceId: WORKSPACE_ID } });
+  const [organizationId, setOrganizationId] = useState(null);
 
   // Fetch organization details only when organizationId is available
   const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
@@ -41,8 +40,9 @@ const ProductPage = ({ params }) => {
   const [designElementVersions, setDesignElementVersions] = useState({});
 
   useEffect(() => {
-    if (workspaceData?.Workspace?.[0]?.organization?.id) {
-      setOrganizationId(workspaceData.Workspace[0].organization.id);
+    if (workspaceData) {
+      const fetchedOrganizationId = workspaceData.Workspace?.[0]?.organization?.id;
+      setOrganizationId(fetchedOrganizationId || null);
     }
   }, [workspaceData]);
 
@@ -52,7 +52,7 @@ const ProductPage = ({ params }) => {
 
       // Fetch versions for each design element
       designElementsData.DesignElement.forEach((element) => {
-        // Fetch design element versions
+        // Use separate query for each design element version
         // eslint-disable-next-line react-hooks/rules-of-hooks
         useQuery(GET_DESIGN_ELEMENT_VERSIONS, { 
           variables: { designElementId: element.id }
@@ -76,7 +76,7 @@ const ProductPage = ({ params }) => {
     }
   }, [designElementsData]);
 
-  if (productLoading || designConceptsLoading || workspaceLoading || designElementsLoading) {
+  if (productLoading || designConceptsLoading || workspaceLoading || designElementsLoading || organizationLoading) {
     return <p>Loading...</p>;
   }
 
