@@ -83,7 +83,7 @@ export default function ProductListHomepage() {
         </div>
       </div>
       
-      <h1 className="text-lg font-bold text-center mb-2">Product List</h1>
+
       
       <Card className="mb-2">
         <CardContent className="p-2">
@@ -125,7 +125,8 @@ export default function ProductListHomepage() {
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="font-bold">${product.price.toFixed(2)}</span>
-                          <Button size="sm">Edit Product</Button>
+                          <Button size="sm">Delete Product</Button>
+
                         </div>
                         {selectedProduct && selectedProduct.id === product.id && (
                           <Card className="mt-2">
@@ -152,6 +153,8 @@ export default function ProductListHomepage() {
                             </CardContent>
                           </Card>
                         )}
+                                                  <Button size="sm">Edit Product</Button>
+
                       </div>
                     </AccordionContent>
                   </AccordionItem>
