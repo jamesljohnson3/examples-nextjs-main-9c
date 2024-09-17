@@ -1,10 +1,9 @@
 'use client'
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -12,11 +11,8 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { 
   PlusIcon, MinusIcon, GripVertical, 
   ImageIcon, EyeIcon, BarChart3Icon, Sliders as SlidersIcon, MessageSquare, ChevronLeft, 
-  Save, FileImage, Image, GitBranch
-  } from 'lucide-react';
+  Save, FileImage, Image  } from 'lucide-react';
 import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from "@/components/ui/resizable";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Link from 'next/link';
 
 // Define interfaces for better type safety
@@ -412,122 +408,7 @@ export default function InventoryManagement() {
             </AccordionItem>
             {/* ... other AccordionItems ... */}
 
-            <AccordionItem value="image-gallery">
-              <AccordionTrigger className="text-xs font-semibold">Image Gallery</AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-white backdrop-blur-lg border-0">
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {imageGallery.map((img, index) => (
-                        <div key={index} className="w-16 h-16 relative group">
-                          <img src={img} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded-md transition-all duration-200 group-hover:opacity-75" />
-                          <Button size="sm" variant="destructive" className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 p-0" onClick={() => {
-                            const newGallery = [...imageGallery]
-                            newGallery.splice(index, 1)
-                            setImageGallery(newGallery)
-                            setHasUnsavedChanges(true)
-                          }}>
-                            <MinusIcon className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                      <label className="w-16 h-16 flex items-center justify-center bg-white rounded-md cursor-pointer transition-all duration-200 hover:bg-white/20">
-                        <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'gallery')} accept="image/*" />
-                        <PlusIcon className="h-6 w-6 text-muted-foreground" />
-                      </label>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
 
-            <AccordionItem value="primary-photo">
-              <AccordionTrigger className="text-xs font-semibold">Primary Photo</AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-white backdrop-blur-lg border-0">
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      {primaryPhoto ? (
-                        <div className="w-24 h-24 relative group">
-                          <img src={primaryPhoto} alt="Primary" className="w-full h-full object-cover rounded-md transition-all duration-200 group-hover:opacity-75" />
-                          <Button size="sm" variant="destructive" className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 p-0" onClick={() => {
-                            setPrimaryPhoto(null)
-                            setHasUnsavedChanges(true)
-                          }}>
-                            <MinusIcon className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <label className="w-24 h-24 flex items-center justify-center bg-white rounded-md cursor-pointer transition-all duration-200 hover:bg-white/20">
-                          <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'primary')} accept="image/*" />
-                          <Image className="h-6 w-6 text-muted-foreground" />
-                        </label>
-                      )}
-                      <span className="text-xs text-muted-foreground">Set as primary product image</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="og-image">
-              <AccordionTrigger className="text-xs font-semibold">OG Image</AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-white backdrop-blur-lg border-0">
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      {ogImage ? (
-                        <div className="w-24 h-24 relative group">
-                          <img src={ogImage} alt="OG" className="w-full h-full object-cover rounded-md transition-all duration-200 group-hover:opacity-75" />
-                          <Button size="sm" variant="destructive" className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 p-0" onClick={() => {
-                            setOgImage(null)
-                            setHasUnsavedChanges(true)
-                          }}>
-                            <MinusIcon className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <label className="w-24 h-24 flex items-center justify-center bg-white rounded-md cursor-pointer transition-all duration-200 hover:bg-white/20">
-                          <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'og')} accept="image/*" />
-                          <FileImage className="h-6 w-6 text-muted-foreground" />
-                        </label>
-                      )}
-                      <span className="text-xs text-muted-foreground">Set Open Graph image for social sharing</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="metadata">
-              <AccordionTrigger className="text-xs font-semibold">Metadata</AccordionTrigger>
-              <AccordionContent>
-                <Card className="bg-white backdrop-blur-lg border-0">
-                  <CardContent className="p-2 space-y-2">
-                    <div className="space-y-1">
-                      <Input 
-                        placeholder="Meta Title" 
-                        value={metadata.title}
-                        onChange={(e) => handleMetadataChange('title', e.target.value)}
-                        className="text-xs h-7"
-                      />
-                      <Textarea 
-                        placeholder="Meta Description" 
-                        value={metadata.description}
-                        onChange={(e) => handleMetadataChange('description', e.target.value)}
-                        className="text-xs h-14"
-                      />
-                      <Input 
-                        placeholder="Keywords (comma-separated)" 
-                        value={metadata.keywords}
-                        onChange={(e) => handleMetadataChange('keywords', e.target.value)}
-                        className="text-xs h-7"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
           </Accordion>
         ); 
         case 'refine':
