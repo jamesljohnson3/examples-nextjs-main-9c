@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
@@ -11,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { PlusIcon, MinusIcon } from 'lucide-react';
 
-// Define your FormField type
 interface FormField {
   id: string;
   type: string;
@@ -26,21 +24,17 @@ interface ProductData {
   price: number;
   quantity: number;
   category: string;
-  [key: string]: string | number | undefined; // Allow for custom fields
+  [key: string]: string | number | undefined;
 }
 
 const ProductPage = () => {
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
-  const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
-  const ORGANIZATION_ID = 'cm14mvrwe0000ue6ygx7gfevr';
-  const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
- 
-  // Fetch product details
-
+  
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID },
   });
+
   const { data: segmentsData, loading: segmentsLoading, error: segmentsError } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID },
   });
@@ -51,12 +45,10 @@ const ProductPage = () => {
   const product = productData?.Product?.[0] || {};
   const segments = segmentsData?.Segment || [];
 
-  // Check if product or segments are valid
   if (!product || !segments.length) {
     return <p>Product or segment data is missing or incomplete</p>;
   }
 
-  // Custom Form Builder Component
   const CustomFormBuilder: React.FC<{
     formFields: FormField[];
     setFormFields: React.Dispatch<React.SetStateAction<FormField[]>>;
@@ -66,8 +58,6 @@ const ProductPage = () => {
     hasUnsavedChanges: boolean;
     setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
     handleInputChange: (id: string, value: string | number) => void;
-    productId: string;
-    domainId: string;
   }> = ({
     formFields,
     setFormFields,
@@ -77,12 +67,9 @@ const ProductPage = () => {
     hasUnsavedChanges,
     setHasUnsavedChanges,
     handleInputChange,
-    productId,
-    domainId
   }) => {
     const [newField, setNewField] = useState<FormField>({ id: '', type: 'text', label: '' });
 
-    // Fetch segments for the product and domain
     const [publishProduct] = useMutation(DELETE_SEGMENT);
 
     useEffect(() => {
@@ -99,10 +86,7 @@ const ProductPage = () => {
     const handleAddField = () => {
       if (newField.id && newField.label) {
         const newFieldId = `customField-${Date.now()}`;
-        setFormFields([
-          ...formFields,
-          { ...newField, id: newFieldId },
-        ]);
+        setFormFields([...formFields, { ...newField, id: newFieldId }]);
         setAvailableFields(availableFields.filter(f => f.id !== newField.id));
         setNewField({ id: '', label: '', type: 'text', options: [] });
         setHasUnsavedChanges(true);
@@ -133,15 +117,10 @@ const ProductPage = () => {
     };
 
     const handlePublish = async () => {
-      // Simulate updating product version
       console.log("Publishing product version...");
-
-      // Example of using mutation to delete a segment, adjust as needed
       try {
         await publishProduct({
-          variables: {
-            id: productId,
-          },
+          variables: { id: PRODUCT_ID },
         });
         console.log("Product version updated successfully.");
       } catch (error) {
@@ -267,63 +246,37 @@ const ProductPage = () => {
           <Button onClick={handleAddField} variant="outline" size="sm">
             Add Field
           </Button>
-          <Button onClick={handlePublish} variant="primary" size="sm" disabled={!hasUnsavedChanges}>
-            {hasUnsavedChanges ? 'Publish Changes' : 'No Changes to Publish'}
+          <Button onClick={handlePublish} variant="outline" size="sm" disabled={!hasUnsavedChanges}>
+            {hasUnsavedChanges ? 'Publish Changes' : 'No Changes'}
           </Button>
         </div>
       </div>
     );
   };
 
-  // Example state for form fields and available fields
-  const [formFields, setFormFields] = useState<FormField[]>([]);
-  const [availableFields, setAvailableFields] = useState<FormField[]>(segments.map((segment: any) => ({
-    id: segment.id,
-    type: 'text',
-    label: segment.name,
-  })));
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [previewData, setPreviewData] = useState<ProductData>(product);
-
   const handleInputChange = (id: string, value: string | number) => {
-    setPreviewData(prev => ({ ...prev, [id]: value }));
-    setHasUnsavedChanges(true);
+    // Update form logic here
   };
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [availableFields, setAvailableFields] = useState<FormField[]>([]);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   return (
     <div>
-      <h1>{product.name || 'Product Name'}</h1>
-      <p>{product.description || 'No description available.'}</p>
-      {product.primaryPhoto && <img src={product.primaryPhoto} alt={product.name || 'Product Image'} />}
-      <div>
-        <h2>Image Gallery</h2>
-        {product.imageGallery && product.imageGallery.length > 0 ? (
-          product.imageGallery.map((url: string | undefined, index: React.Key | null | undefined) => (
-            <img
-              key={index}
-              src={url}
-              alt={`Gallery ${index}`}
-              style={{ maxWidth: '200px', margin: '10px' }}
-            />
-          ))
-        ) : (
-          <p>No images available.</p>
-        )}
-      </div>
-      <p>Price: ${product.price || 'N/A'}</p>
-
-      {/* Render CustomFormBuilder component */}
+      <h1>{product.name}</h1>
       <CustomFormBuilder
         formFields={formFields}
         setFormFields={setFormFields}
         availableFields={availableFields}
         setAvailableFields={setAvailableFields}
-        previewData={previewData}
+        previewData={product}
         hasUnsavedChanges={hasUnsavedChanges}
         setHasUnsavedChanges={setHasUnsavedChanges}
         handleInputChange={handleInputChange}
-        productId={PRODUCT_ID}
-        domainId={DOMAIN_ID}
       />
     </div>
   );
