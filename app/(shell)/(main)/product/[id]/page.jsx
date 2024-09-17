@@ -13,7 +13,7 @@ import {
 const ProductPage = ({ params }) => {
   const PRODUCT_ID = params.id;
   const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph'; // Define your workspace ID here
-
+const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
   const [organizationId, setOrganizationId] = useState(null);
   const [designElements, setDesignElements] = useState([]);
   const [designElementVersions, setDesignElementVersions] = useState({});
@@ -35,7 +35,7 @@ const ProductPage = ({ params }) => {
 
   // Fetch design elements only when organizationId is available
   const { data: designElementsData, loading: designElementsLoading, error: designElementsError } = useQuery(GET_DESIGN_ELEMENTS, { 
-    variables: { domainId: organizationId },
+    variables: { domainId: DOMAIN_ID },
 
   });
 
