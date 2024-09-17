@@ -18,11 +18,6 @@ import {
 
 const USER_ID = "cm14mvrxe0002ue6ygbc4yyzr";
 
-const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
-const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph'; // Define your workspace ID here
-const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku'; // Define your domain ID here
-
-
 // Define a type for the post
 type Post = {
   id: string;
@@ -40,6 +35,7 @@ function SinglePost({ id }: { id: string }) {
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [postKeys, setPostKeys] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Static post data
   const CustomFieldData: Post = {
@@ -83,6 +79,7 @@ function SinglePost({ id }: { id: string }) {
 
   const handleSubmit = async () => {
     const eventType = 'update';
+    setIsLoading(true);
     try {
       const response = await fetch('/my-api-endpoint', {
         method: 'POST',
@@ -95,7 +92,7 @@ function SinglePost({ id }: { id: string }) {
           assetId: 'sample-asset-id', 
           eventType, 
           campaignId: 'sample-campaign-id', 
-          postId: post?.id // Use optional chaining in case post is null
+          postId: post?.id ?? '' // Use nullish coalescing to provide a default value
         }),
       });
       if (response.ok) {
@@ -105,8 +102,8 @@ function SinglePost({ id }: { id: string }) {
       }
     } catch (err: any) {
       setError(err.message);
-      setSuccess(false);
-      console.error("Error sending data to webhook:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -126,7 +123,7 @@ function SinglePost({ id }: { id: string }) {
               <input
                 type="text"
                 name={key}
-                value={editedPost[key] || ""}
+                value={editedPost[key] ?? ""}
                 onChange={handleInputChange}
                 className="block w-full border rounded-md px-3 py-2 mt-2"
               />
@@ -137,7 +134,8 @@ function SinglePost({ id }: { id: string }) {
         <div className="px-2 hidden md:block mt-auto border-y p-2.5">
           <button
             onClick={handleSubmit}
-            className="hover:bg-gray-900 justify-center items-center mt-4"
+            disabled={isLoading} // Disable the button while loading
+            className={`justify-center items-center mt-4 ${isLoading ? 'bg-gray-500' : 'hover:bg-gray-900'}`}
             style={{
               backgroundColor: 'black',
               color: 'white',
@@ -148,7 +146,7 @@ function SinglePost({ id }: { id: string }) {
               width: '100%'
             }}
           >
-            Save
+            {isLoading ? 'Saving...' : 'Save'}
           </button>
           <time className="text-[11px] uppercase text-zinc-500 font-medium">
             {new Date(post.createdAt).toLocaleDateString("en-US", {
@@ -159,8 +157,8 @@ function SinglePost({ id }: { id: string }) {
         </div>
       </div>
 
-      {error && <p>Error: {error}</p>}
-      {success && <p>Description updated successfully!</p>}
+      {error && <p className="text-red-500">Error: {error}</p>}
+      {success && <p className="text-green-500">Description updated successfully!</p>}
     </>
   );
 }
