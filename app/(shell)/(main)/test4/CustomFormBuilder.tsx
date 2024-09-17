@@ -1,15 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-// Define types for the component
-type Post = {
-  id: string;
-  content: string;
-  createdAt: string;
-};
 
-type EditedPost = {
-  [key: string]: string;
-};
 // Define an enum for reserved fields
 enum ReservedFieldsEnum {
   ID = 'id',
@@ -55,16 +46,37 @@ const RESERVED_FIELDS: Set<ReservedFields> = new Set([
   ReservedFieldsEnum.SEGMENT
 ]);
 
+// Define types for the component
+type Post = {
+  id: string;
+  content: string;
+  createdAt: string;
+};
+
+type EditedPost = {
+  [key: string]: string;
+};
+
 // Sample static data
 const STATIC_PRODUCT_DATA: Post = {
-  id: 'prod123',
+  id: "my-tableName-id",
   content: JSON.stringify({
     name: 'Sample Product',
-    description: 'A sample product for demonstration.',
-    price: '99.99',
-    quantity: '10',
-    category: 'Electronics',
-    customField1: 'Custom Value 1',
+    id: "sample-tableName-id",
+
+    model: "test",
+      Make: "Nissan",
+      Meta: "Vehicle for sale",
+      Year: "2012",
+      Mileage: "test",
+      Transmission: "Auto",
+      Passenger: "2 Door",
+      Fuel: "test",
+      Type: "Truck",
+      html: "",
+      image: "",
+      video: "",
+      caption: "",
     customField2: 'Custom Value 2'
   }),
   createdAt: '2023-01-01T00:00:00Z'
@@ -75,22 +87,12 @@ const ProductEditor = () => {
   const [post, setPost] = useState<Post>(STATIC_PRODUCT_DATA);
   const [editedPost, setEditedPost] = useState<EditedPost>({});
   const [postKeys, setPostKeys] = useState<string[]>([]);
-  const [customFields, setCustomFields] = useState<EditedPost>({});
 
   useEffect(() => {
     const parseContent = () => {
       try {
         const content = JSON.parse(post.content);
         setEditedPost(content);
-
-        const customFieldsData = Object.keys(content).reduce((acc, key) => {
-          if (!RESERVED_FIELDS.has(key as ReservedFields)) {
-            acc[key] = content[key];
-          }
-          return acc;
-        }, {} as EditedPost);
-
-        setCustomFields(customFieldsData);
         setPostKeys(Object.keys(content));
       } catch (error) {
         console.error('Error parsing content:', error);
@@ -100,66 +102,35 @@ const ProductEditor = () => {
     parseContent();
   }, [post]);
 
-  const handleCustomFieldChange = (key: string, value: string) => {
-    setEditedPost((prev: any) => ({
+  const handleFieldChange = (key: string, value: string) => {
+    setEditedPost(prev => ({
       ...prev,
       [key]: value
     }));
-    setCustomFields((prev: any) => ({
-      ...prev,
-      [key]: value
-    }));
-  };
-
-  const validateCustomFields = () => {
-    for (let key of Object.keys(customFields)) {
-      if (RESERVED_FIELDS.has(key as ReservedFields)) {
-        console.error(`Custom field '${key}' is reserved and cannot be used.`);
-        return false;
-      }
-    }
-    return true;
   };
 
   const handleSubmit = () => {
-    if (validateCustomFields()) {
-      console.log('Custom fields are valid. Submit data.');
-      // Code to handle submission
-    } else {
-      console.log('Custom fields validation failed.');
-    }
+    // Update content and simulate saving
+    const updatedContent = JSON.stringify(editedPost);
+    console.log('Updated Content:', updatedContent);
+    // You can add code here to save the updated content to the backend
   };
 
   return (
     <div>
       <h1>Edit Product</h1>
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-        {postKeys.map(key => {
-          if (RESERVED_FIELDS.has(key as ReservedFields)) {
-            return (
-              <div key={key}>
-                <label>{key}:</label>
-                <input
-                  type="text"
-                  value={editedPost[key] || ''}
-                  onChange={(e) => handleCustomFieldChange(key, e.target.value)}
-                  disabled={RESERVED_FIELDS.has(key as ReservedFields)}
-                />
-              </div>
-            );
-          } else {
-            return (
-              <div key={key}>
-                <label>{key}:</label>
-                <input
-                  type="text"
-                  value={customFields[key] || ''}
-                  onChange={(e) => handleCustomFieldChange(key, e.target.value)}
-                />
-              </div>
-            );
-          }
-        })}
+        {postKeys.map(key => (
+          <div key={key}>
+            <label>{key}:</label>
+            <input
+              type="text"
+              value={editedPost[key] || ''}
+              onChange={(e) => handleFieldChange(key, e.target.value)}
+              disabled={RESERVED_FIELDS.has(key as ReservedFields)} // Disable input if it's a reserved field
+            />
+          </div>
+        ))}
         <button type="button" onClick={handleSubmit}>Save</button>
       </form>
     </div>
