@@ -12,8 +12,8 @@ import {
   GET_ORGANIZATION
 } from '@/app/(shell)/(main)/queries';
 
-const ProductPage = ({ params }) => {
-  const PRODUCT_ID = params.id;
+const ProductPage = () => {
+  const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph'; // Define your workspace ID here
 const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
   const [organizationId, setOrganizationId] = useState(null);
