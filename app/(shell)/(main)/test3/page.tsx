@@ -60,6 +60,7 @@ export default function ProductPage() {
 
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
+  const SEGMENT_ID = 'unique-segment-id';
 
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
@@ -172,13 +173,13 @@ export default function ProductPage() {
       // Get the ID of the first segment
       const segmentId = segments[0]?.id;
   
-      if (!segmentId) {
+      if (!SEGMENT_ID) {
         alert('No segment ID available.');
         return;
       }
   
       await publishSegments({
-        variables: { id: segmentId, productVersionId }
+        variables: { id: SEGMENT_ID, productVersionId }
       });
   
       alert('Segment published!');
