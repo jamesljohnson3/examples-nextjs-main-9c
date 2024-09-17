@@ -85,8 +85,18 @@ export default function ProductListHomepage() {
       
       <h1 className="text-lg font-bold text-center mb-2">Product List</h1>
       
-    
-    
+      <Card className="mb-2">
+        <CardContent className="p-2">
+          <div className="flex space-x-2 mb-2">
+            <Input placeholder="Type a command or search..." className="flex-grow h-8 text-xs" />
+            <Button variant="outline" size="sm" className="h-8">
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          
+        </CardContent>
+      </Card>
 
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={80}>
