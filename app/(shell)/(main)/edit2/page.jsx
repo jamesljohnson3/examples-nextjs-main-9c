@@ -126,9 +126,9 @@ const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
           <p>No design concepts available.</p>
         )}
       </div>
-
+<a href="/edit3">Create Segment</a>
       <div>
-        <h2>Design Elements</h2>
+        <a href="/edit1"> Go to Design Elements</a>
         {designElements.length > 0 ? (
           designElements.map((element) => (
             <div key={element.id}>
