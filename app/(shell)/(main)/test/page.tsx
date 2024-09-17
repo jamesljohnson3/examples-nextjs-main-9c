@@ -4,29 +4,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  SidebarLayout,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { 
-  PlusIcon, MinusIcon, GripVertical, Settings2Icon, BrainCircuitIcon, SparklesIcon, 
+  PlusIcon, MinusIcon, GripVertical, 
   ImageIcon, EyeIcon, BarChart3Icon, Sliders as SlidersIcon, MessageSquare, ChevronLeft, 
-  Save, FileImage, Maximize2, X, Zap, Image, RefreshCw, GitBranch, Lock, 
-  Globe, CommandIcon, WandSparkles
-} from 'lucide-react';
+  Save, FileImage, Image, GitBranch
+  } from 'lucide-react';
 import { ResizablePanel, ResizableHandle, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 // Define interfaces for better type safety
 interface FormField {
@@ -389,10 +380,6 @@ export default function InventoryManagement() {
     setActiveVersion(newVersion.id);
   };
 
-  const handlePublish = () => {
-    console.log('Publishing product...');
-    setHasUnsavedChanges(false);
-  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: string) => {
     const file = event.target.files?.[0];
@@ -423,30 +410,7 @@ export default function InventoryManagement() {
     setHasUnsavedChanges(true);
   };
 
-  const handleAiPromptSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Generating design concepts for:', aiPrompt);
-    setDesignConcepts(prevConcepts => [...prevConcepts].sort(() => Math.random() - 0.5));
-    setAiPrompt('');
-  };
 
-  const handleRefinement = () => {
-    setAIProgress(0);
-    const interval = setInterval(() => {
-      setAIProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setDesignConcepts(prevConcepts => [...prevConcepts].sort(() => Math.random() - 0.5));
-          setAiSuggestions(prevSuggestions => {
-            const newSuggestion = `New AI-generated suggestion: ${Date.now()}`;
-            return [...prevSuggestions.slice(1), newSuggestion];
-          });
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -599,100 +563,15 @@ export default function InventoryManagement() {
         ); 
         case 'refine':
           return (
-            <Accordion type="single" collapsible className="w-full space-y-2 px-2">
-      
-      
-  
-              <AccordionItem value="ai-config">
-                <AccordionTrigger className="text-xs font-semibold">AI Config</AccordionTrigger>
-                <AccordionContent>
+          
                   <Card className="bg-white backdrop-blur-lg border-0">
                     <CardContent className="p-2 space-y-2">
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                          <label className="text-xs">NLP Sensitivity</label>
-                          <Settings2Icon className="h-3 w-3 text-muted-foreground" />
-                        </div>
-                        <Slider
-                          value={[nlpSensitivity]}
-                          onValueChange={(value) => setNlpSensitivity(value[0])}
-                          max={100}
-                          step={1}
-                          className="h-1"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center">
-                          <label className="text-xs">AI Creativity</label>
-                          <BrainCircuitIcon className="h-3 w-3 text-muted-foreground" />
-                        </div>
-                        <Slider
-                          value={[aiCreativity]}
-                          onValueChange={(value) => setAiCreativity(value[0])}
-                          max={100}
-                          step={1}
-                          className="h-1"
-                        />
-                      </div>
-  
-                      <form onSubmit={handleAiPromptSubmit} className="flex space-x-1">
-                        <Input 
-                          placeholder="Enter prompt for AI design concepts..." 
-                          value={aiPrompt}
-                          onChange={(e) => setAiPrompt(e.target.value)}
-                          className="flex-grow text-xs h-7"
-                        />
-                        <Button type="submit" size="sm" className="text-xs h-7">Generate</Button>
-                      </form>
-                      <Button onClick={handleRefinement} className="w-full text-xs h-7">
-                        {aiProgress > 0 && aiProgress < 100 ? (
-                          <RefreshCw className="mr-1 h-3 w-3 animate-spin" />
-                        ) : (
-                          <Zap className="mr-1 h-3 w-3" />
-                        )}
-                        Save AI Refinement
-                      </Button>
-                      {aiProgress > 0 && (
-                        <Progress value={aiProgress} className="w-full h-1" />
-                      )}
-                    </CardContent>
-                  </Card>
-                </AccordionContent>
-              </AccordionItem>
-              <Card className=" bg-white backdrop-blur-lg border-0">
-                    <CardContent className="p-2">
-                      <ScrollArea className="h-[100px]">
-                        <ul className="space-y-1">
-                          {aiSuggestions.map((suggestion, index) => (
-                            <li key={index} className="flex items-start space-x-1 animate-fade-in">
-                              <SparklesIcon className="h-3 w-3 text-yellow-500 mt-0.5 flex-shrink-0" />
-                              <span className="text-xs">{suggestion}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
-              <Card className="bg-white mt-4 backdrop-blur-lg border-0">
-                    <CardContent className="p-2 space-y-2">
+                      heello world
                       
-                      <div className="grid grid-cols-2 gap-2">
-                        {designConcepts.map((concept) => (
-                          <div key={concept.id} className="relative group">
-                            <img src={concept.image} alt={concept.title} className="w-full h-auto rounded-md transition-all duration-200 group-hover:opacity-75" />
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button size="sm" onClick={() => setFullscreenConcept(concept)} className="text-xs">
-                                <Maximize2 className="h-3 w-3 mr-1" />
-                                Fullscreen
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
                     </CardContent>
                   </Card>
              
-            </Accordion>
+             
           )
         case 'analytics':
           return (
@@ -721,81 +600,7 @@ export default function InventoryManagement() {
     }
 
   return (
-    <div className="min-h-screen rounded-md bg-gradient-to-br from-white via-gray-100 to-white  p-2 space-y-2">
-  <div className="text-sm text-muted-foreground">
-  <SidebarTrigger />
-  Products / {previewData.category} / {previewData.id} 
-          </div>              <div className="grid grid-cols-3 gap-2 mb-2">
-                <Card className="bg-white border-0">
-                  <CardContent className="p-1">
-                    <h3 className="text-xs font-bold">Version</h3>
-                    <p className="text-xs">v2.1.3</p>
-
-                    <a href='/edit2'>Create Segment</a>
-                  </CardContent>
-                </Card>
-                <Card className="bg-white border-0">
-                  <CardContent className="p-1">
-
-            <div className="flex items-center justify-between  px-6 py-4 dark:border-gray-800">
-              <div className="flex items-center gap-4">
-                <CommandIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
-                <h2 className="text-base font-semibold">{previewData.name}</h2>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400">Status</div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500" />
-                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400">Online</div>
-                </div>
-              </div>
-            </div>                
-                  </CardContent>
-                </Card>
-                <Card className="bg-white border-0">
-                  <CardContent className="p-1">
-                    <h3 className="text-xs font-bold">Progress</h3>
-                    <Progress value={75} className="h-1" />
-                    <WandSparkles
-    className={cn(
-      "cursor-pointer my-2 text-foreground bg-background w-3 h-3",
-      isAnimating ? "" : "text-muted-foreground"
-    )}
-    onClick={() => handleRefinement()}
-  />
-                  </CardContent>
-                </Card>
-              </div>
-
-
-      <div className="max-w-6xl mx-auto space-y-2">
-        <Card className="bg-white backdrop-blur-lg border-0">
-          <CardContent 
-             // Set the ref for the command container
-             ref={commandRef}
-             // Toggle visibility on click
-             onClick={() => setShowCommandList(!showCommandList)} 
-
-          className="p-2">
-            <Command className="rounded-lg border-0 bg-transparent">
-              <CommandInput placeholder="Type a command or search..." className="text-xs" />
-             {/* Conditionally render the command list */}
-              {showCommandList && (
-                <CommandList className="text-xs">
-                  <CommandEmpty>No results found.</CommandEmpty>
-                  <CommandGroup heading="Actions">
-                    <CommandItem>Add Product</CommandItem>
-                    <CommandItem>Update Inventory</CommandItem>
-                    <CommandItem>Generate Report</CommandItem>
-                  </CommandGroup>
-                </CommandList>
-              )}
-            </Command>
-          </CardContent>
-        </Card>
-
-       
-
+   
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={70}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-10 w-full">
@@ -895,61 +700,5 @@ export default function InventoryManagement() {
             </Card>
           </ResizablePanel>
         </ResizablePanelGroup>
-        <div className="mt-8 grid grid-cols-12 gap-2">
-          <Card className="col-span-3 bg-white backdrop-blur-lg border-0">
-            <CardContent className="p-2">
-              <nav className="space-y-1">
-                {['Advanced Options' ].map((item) => (
-                  <Button key={item} variant="ghost" className="w-full justify-start text-xs py-1 px-2">
-
-                    {item}
-                  </Button>
-                ))}
-              </nav>
-            </CardContent>
-          </Card>
-
-          <Card className="col-span-9 bg-white backdrop-blur-lg border-0">
-            <CardContent className="p-2">
-             
-              <div className="grid grid-cols-4 gap-1">
-                {[
-                  
-                  { icon: Lock, label: 'Security' },
-                  { icon: Globe, label: 'Geolocation' },
-
-                  { icon: BarChart3Icon, label: 'Visitor Data' },
-                  { icon: MessageSquare, label: 'Communication' },
-                  
-                ].map((item, index) => (
-                  <Card key={index} className="bg-white border-0">
-                    <CardContent className="p-1 flex flex-col items-center justify-center">
-                      <item.icon className="h-3 w-3 mb-0.5" />
-                      <span className="text-[10px]">{item.label}</span>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-       
-       
-      </div>
-
-      {fullscreenConcept && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-2xl max-h-full overflow-auto">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-semibold">{fullscreenConcept.title}</h3>
-              <Button size="sm" variant="ghost" onClick={() => setFullscreenConcept(null)} className="h-6 w-6 p-0">
-                <X className="text-black h-4 w-4" />
-              </Button>
-            </div>
-            <img src={fullscreenConcept.image} alt={fullscreenConcept.title} className="w-full h-auto rounded-md" />
-          </div>
-        </div>
-      )}
-    </div>
   )
 }
