@@ -29,7 +29,7 @@ interface ProductData {
   [key: string]: string | number | undefined; // Allow for custom fields
 }
 
-const ProductPage: React.FC<{ params: { id: string } }> = ({ params }) => {
+const ProductPage = () => {
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
