@@ -205,11 +205,11 @@ export default function ProductPage() {
                                     {...provided.dragHandleProps}
                                     className="field-item"
                                   >
-                                    <GripVertical />
-                                    {renderFieldInput(field)}
-                                    <Button variant="ghost" onClick={() => handleRemoveField(index)}>
-                                      <MinusIcon />
-                                    </Button>
+                      <GripVertical className="h-3 w-3 text-muted-foreground" />
+                      {renderFieldInput(field)}
+                                    <Button size="sm" variant="ghost"  onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
+                        <MinusIcon className="h-3 w-3" />
+                      </Button>
                                   </div>
                                 )}
                               </Draggable>
