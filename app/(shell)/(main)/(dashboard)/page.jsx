@@ -153,7 +153,7 @@ export default function ProductListHomepage() {
                             </CardContent>
                           </Card>
                         )}
-                                                  <Button size="sm">Edit Product</Button>
+                                                <a href="/product/cm14mvs2o000fue6yh6hb13yn"><Button size="sm">Edit Product</Button></a>  
 
                       </div>
                     </AccordionContent>
