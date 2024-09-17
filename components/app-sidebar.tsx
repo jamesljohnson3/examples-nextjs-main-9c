@@ -9,6 +9,7 @@ import {
   Eclipse,
   Frame,
   History,
+  Home,
   LifeBuoy,
   Map,
   PieChart,
@@ -59,6 +60,17 @@ const data = {
   },
   navMain: [
   
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: Home,
+      items: [
+        {
+          title: "Inventory",
+          url: "/dashboard",
+        },
+      ],
+    },
     {
       title: "Settings",
       url: "#",
