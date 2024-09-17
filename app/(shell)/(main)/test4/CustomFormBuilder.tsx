@@ -1,6 +1,5 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-
 // Define types for the component
 type Post = {
   id: string;
@@ -11,16 +10,49 @@ type Post = {
 type EditedPost = {
   [key: string]: string;
 };
+// Define an enum for reserved fields
+enum ReservedFieldsEnum {
+  ID = 'id',
+  NAME = 'name',
+  DESCRIPTION = 'description',
+  PRICE = 'price',
+  QUANTITY = 'quantity',
+  CATEGORY = 'category',
+  ORGANIZATION_ID = 'organizationId',
+  CREATED_BY_ID = 'createdById',
+  PRIMARY_PHOTO = 'primaryPhoto',
+  IMAGE_GALLERY = 'imageGallery',
+  OG_IMAGE = 'ogImage',
+  METADATA = 'metadata',
+  CREATED_AT = 'createdAt',
+  UPDATED_AT = 'updatedAt',
+  DESIGN_CONCEPTS = 'designConcepts',
+  AI_SUGGESTIONS = 'aiSuggestions',
+  SEGMENT = 'Segment'
+}
 
-type ReservedFields = 'id' | 'name' | 'description' | 'price' | 'quantity' | 'category' |
-  'organizationId' | 'createdById' | 'primaryPhoto' | 'imageGallery' | 'ogImage' |
-  'metadata' | 'createdAt' | 'updatedAt' | 'designConcepts' | 'aiSuggestions' | 'Segment';
+// Define the type using the enum values
+type ReservedFields = keyof typeof ReservedFieldsEnum;
 
 // Define reserved fields as a Set for faster lookup
 const RESERVED_FIELDS: Set<ReservedFields> = new Set([
-  'id', 'name', 'description', 'price', 'quantity', 'category',
-  'organizationId', 'createdById', 'primaryPhoto', 'imageGallery', 'ogImage',
-  'metadata', 'createdAt', 'updatedAt', 'designConcepts', 'aiSuggestions', 'Segment'
+  ReservedFieldsEnum.ID,
+  ReservedFieldsEnum.NAME,
+  ReservedFieldsEnum.DESCRIPTION,
+  ReservedFieldsEnum.PRICE,
+  ReservedFieldsEnum.QUANTITY,
+  ReservedFieldsEnum.CATEGORY,
+  ReservedFieldsEnum.ORGANIZATION_ID,
+  ReservedFieldsEnum.CREATED_BY_ID,
+  ReservedFieldsEnum.PRIMARY_PHOTO,
+  ReservedFieldsEnum.IMAGE_GALLERY,
+  ReservedFieldsEnum.OG_IMAGE,
+  ReservedFieldsEnum.METADATA,
+  ReservedFieldsEnum.CREATED_AT,
+  ReservedFieldsEnum.UPDATED_AT,
+  ReservedFieldsEnum.DESIGN_CONCEPTS,
+  ReservedFieldsEnum.AI_SUGGESTIONS,
+  ReservedFieldsEnum.SEGMENT
 ]);
 
 // Sample static data
@@ -38,20 +70,19 @@ const STATIC_PRODUCT_DATA: Post = {
   createdAt: '2023-01-01T00:00:00Z'
 };
 
+// React component example
 const ProductEditor = () => {
   const [post, setPost] = useState<Post>(STATIC_PRODUCT_DATA);
   const [editedPost, setEditedPost] = useState<EditedPost>({});
   const [postKeys, setPostKeys] = useState<string[]>([]);
   const [customFields, setCustomFields] = useState<EditedPost>({});
 
-  // Parse content from static data to initialize the form fields
   useEffect(() => {
     const parseContent = () => {
       try {
         const content = JSON.parse(post.content);
         setEditedPost(content);
 
-        // Filter out reserved fields
         const customFieldsData = Object.keys(content).reduce((acc, key) => {
           if (!RESERVED_FIELDS.has(key as ReservedFields)) {
             acc[key] = content[key];
@@ -69,19 +100,17 @@ const ProductEditor = () => {
     parseContent();
   }, [post]);
 
-  // Handler for input changes in custom fields
   const handleCustomFieldChange = (key: string, value: string) => {
-    setEditedPost(prev => ({
+    setEditedPost((prev: any) => ({
       ...prev,
       [key]: value
     }));
-    setCustomFields(prev => ({
+    setCustomFields((prev: any) => ({
       ...prev,
       [key]: value
     }));
   };
 
-  // Validate custom fields to avoid overlap with reserved fields
   const validateCustomFields = () => {
     for (let key of Object.keys(customFields)) {
       if (RESERVED_FIELDS.has(key as ReservedFields)) {
@@ -92,7 +121,6 @@ const ProductEditor = () => {
     return true;
   };
 
-  // Submit handler (placeholder)
   const handleSubmit = () => {
     if (validateCustomFields()) {
       console.log('Custom fields are valid. Submit data.');
@@ -106,7 +134,6 @@ const ProductEditor = () => {
     <div>
       <h1>Edit Product</h1>
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-        {/* Display core product fields */}
         {postKeys.map(key => {
           if (RESERVED_FIELDS.has(key as ReservedFields)) {
             return (
