@@ -148,7 +148,7 @@ export default function ProductPage() {
           productId: id,
           name,
           description,
-          price: price, // Ensure price is a float
+          price: parseFloat(price), // Ensure price is a float
           quantity: quantity, // Ensure quantity is an integer
           category,
         },

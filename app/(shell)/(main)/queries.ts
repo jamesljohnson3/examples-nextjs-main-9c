@@ -3,7 +3,7 @@ import { gql } from '@apollo/client';
 
 
 export const SAVE_PRODUCT = gql`
-  mutation SaveProduct($productId: ID!, $name: String, $description: String, $price: number, $quantity: Int, $category: String) {
+  mutation SaveProduct($productId: ID!, $name: String, $description: String, $price: Float, $quantity: Int, $category: String) {
     update_Product(where: {id: {_eq: $productId}}, _set: {name: $name, description: $description, price: $price, quantity: $quantity, category: $category}) {
       returning {
         id
