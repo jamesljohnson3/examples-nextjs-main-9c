@@ -78,7 +78,13 @@ const ProductPage: React.FC = () => {
       alert('Error deleting segment.');
     }
   });
-
+  const handleDeleteSegment = async (segmentId: any) => {
+    try {
+      await deleteSegment({ variables: { segmentId } });
+    } catch (error) {
+      console.error('Error executing delete mutation:', error);
+    }
+  };
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
