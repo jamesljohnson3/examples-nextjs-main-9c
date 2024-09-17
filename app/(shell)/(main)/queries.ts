@@ -1,5 +1,15 @@
 import { gql } from '@apollo/client';
 
+export const GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN = gql`
+  query GetSegmentsByProductAndDomain($productId: String!, $domainId: String!) {
+    Segment(where: { productId: { _eq: $productId }, domainId: { _eq: $domainId } }) {
+      id
+      name
+      slug
+      post
+    }
+  }
+`;
 
 
 
