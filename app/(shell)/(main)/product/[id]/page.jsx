@@ -33,11 +33,7 @@ const ProductPage = ({ params }) => {
   const [designElements, setDesignElements] = useState([]);
   const [designElementVersions, setDesignElementVersions] = useState({});
   
-  // Fetch organization details only when organizationId is available
-  const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
-    variables: { organizationId: organizationId },
-    skip: !organizationId
-  });
+
 
   useEffect(() => {
     if (workspaceData) {
@@ -45,7 +41,10 @@ const ProductPage = ({ params }) => {
       setOrganizationId(fetchedOrganizationId || null);
     }
   }, [workspaceData]);
-
+  // Fetch organization details only when organizationId is available
+  const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
+    variables: { organizationId: organizationId },
+  });
   useEffect(() => {
     if (designElementsData) {
       setDesignElements(designElementsData.DesignElement || []);
