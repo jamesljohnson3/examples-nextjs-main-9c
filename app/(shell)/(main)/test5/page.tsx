@@ -393,6 +393,25 @@ export default function ProductPage() {
           <Button onClick={handlePublish}>Publish</Button>
 
           {/* Preview or other segments */}
+          <div className="mt-4">
+            <Card>
+              <CardContent>
+                <h2 className="text-lg font-bold mb-2">Product Preview</h2>
+                <div className="p-4 border rounded-lg">
+                  {productData && (
+                    <div>
+                      <h3 className="text-xl font-semibold">{productData.name}</h3>
+                      <p className="text-sm text-gray-500">{productData.description}</p>
+                      <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
+                      <p className="text-sm">Quantity: {productData.quantity}</p>
+                      <p className="text-sm">Category: {productData.category}</p>
+                    </div>
+                  )}
+                  {!productData && <p>No product data available.</p>}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </Tabs>
     </div>
