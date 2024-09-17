@@ -173,10 +173,10 @@ export default function ProductPage() {
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
-                                    className="field-item"
-                                  >
-                                    <GripVertical />
-                                    {field.type === 'text' && (
+                                    className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
+                                    >
+                      <GripVertical className="h-3 w-3 text-muted-foreground" />
+                      {field.type === 'text' && (
                                       <Input
                                         placeholder={field.label}
                                         value={field.value || ''}
@@ -215,8 +215,8 @@ export default function ProductPage() {
                                         </SelectContent>
                                       </Select>
                                     )}
-                                    <Button variant="ghost" onClick={() => handleRemoveField(index)}>
-                                      <MinusIcon />
+                                    <Button  className="h-6 w-6 p-0" variant="ghost" onClick={() => handleRemoveField(index)}>
+                                      <MinusIcon className="h-3 w-3"  />
                                     </Button>
                                   </div>
                                 )}
@@ -227,8 +227,8 @@ export default function ProductPage() {
                         )}
                       </Droppable>
                     </DragDropContext>
-                    <div className="add-fields">
-                      {availableFields.map((element) => (
+                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex space-x-1">                      {availableFields.map((element) => (
                         <Button
                           key={element.id}
                           variant="outline"
@@ -239,6 +239,7 @@ export default function ProductPage() {
                           <PlusIcon className="h-3 w-3 mr-1" /> {element.label}
                         </Button>
                       ))}
+                    </div>
                     </div>
                     {hasUnsavedChanges && (
                       <Button onClick={handleSave}>Save</Button>
