@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
 
 
@@ -262,6 +263,10 @@ export default function ProductPage() {
 
         
         <div className="tab-content">
+        
+          <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel defaultSize={70}>
+         
           <Accordion type="single" collapsible>
             <AccordionItem value="product-form">
               <AccordionTrigger>Product Form</AccordionTrigger>
@@ -391,8 +396,10 @@ export default function ProductPage() {
             <Button onClick={handleSave}>Save</Button>
           )}
           <Button onClick={handlePublish}>Publish</Button>
-
-          {/* Preview or other segments */}
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel defaultSize={30}>
+             {/* Preview or other segments */}
           <div className="mt-4">
             <Card>
               <CardContent>
@@ -412,6 +419,11 @@ export default function ProductPage() {
               </CardContent>
             </Card>
           </div>
+
+          </ResizablePanel>
+        </ResizablePanelGroup>
+
+        
         </div>
       </Tabs>
     </div>
