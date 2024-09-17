@@ -1,4 +1,4 @@
-// mutations.js or mutations.ts
+// mutations or queries 
 import { gql } from '@apollo/client';
 
 

@@ -10,13 +10,24 @@ import {
   GET_DESIGN_ELEMENTS, 
   GET_MEDIA_FILES, 
   GET_USER_DETAILS,
-  GET_DOMAIN ,
+  GET_DOMAIN,
   GET_DESIGN_ELEMENT_VERSIONS,
+  GET_DESIGN_ELEMENT_VERSION2S, // Added
   GET_WORKSPACE,
-  GET_ORGANIZATION
+  GET_ORGANIZATION,
+  GET_DASHBOARD_DATA, // Added
+  SAVE_PRODUCT, // Added
+  UPDATE_PRODUCT_VERSION, // Added
+  PUBLISH_SEGMENTS, // Added
+  UPDATE_PRODUCT_AND_INSERT_SEGMENT, // Added
+  ADD_DESIGN_ELEMENT_VERSION // Added
 } from '@/app/(shell)/(main)/queries';
 
+
 const USER_ID = "cm14mvrxe0002ue6ygbc4yyzr";
+const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph'; // Define your workspace ID here
+const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku'; // Define your domain ID here
 
 // Define a type for the post
 type Post = {
