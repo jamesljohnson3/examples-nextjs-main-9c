@@ -3,16 +3,20 @@ import { gql } from '@apollo/client';
 
 // Mutation to update product version
 export const UPDATE_PRODUCT_VERSION = gql`
-  mutation UpdateProductVersion($productData: ProductInput!) {
-    updateProductVersion(productData: $productData) {
-      id
+
+
+mutation UpdateProductVersion {($productData: ProductInput!)
+  insert_ProductVersion_one(object: {changes: "", data: " id
       name
       description
       price
       quantity
-      category
-    }
+      category", productId: "cm14mvs2o000fue6yh6hb13yn", versionNumber: 10, id: "test"}) {
+    id
   }
+}
+
+
 `;
 
 // Mutation to publish segments

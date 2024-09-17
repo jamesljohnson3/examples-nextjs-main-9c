@@ -38,9 +38,10 @@ interface Segment {
 
 // Initial available fields list
 const initialAvailableFields: FormField[] = [
-  { id: 'Engine Type', type: 'text', label: 'Name' },
-  { id: 'Door Count', type: 'textarea', label: 'Description' },
-  { id: 'HTML Block', type: 'number', label: 'Price' },
+  { id: 'name', type: 'text', label: 'Name' },
+  { id: 'description', type: 'textarea', label: 'Description' },
+  { id: 'price', type: 'number', label: 'Price' },
+  { id: 'quantity', type: 'number', label: 'Quantity' },
   { id: 'category', type: 'select', label: 'Category', options: ['Electronics', 'Clothing', 'Food'] },
 ];
 
