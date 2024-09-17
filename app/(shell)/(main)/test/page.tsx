@@ -24,16 +24,10 @@ interface ProductData {
   id: string;
   name: string;
   description: string;
-  price?: number;
-  quantity?: number;
-  category?: string;
-  primaryPhoto?: string;
-  imageGallery?: string[];
-  metadata?: {
-    title?: string;
-    description?: string;
-    keywords?: string;
-  };
+  price: number;
+  quantity: number;
+  category: string;
+  [key: string]: any;
 }
 
 interface Segment {
@@ -62,8 +56,6 @@ export default function ProductPage() {
   const [customFieldType, setCustomFieldType] = useState('text');
   const [customFieldOptions, setCustomFieldOptions] = useState('');
 
-  const [availableFields, setAvailableFields] = useState<FormField[]>(initialAvailableFields);
-
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
 
@@ -81,22 +73,16 @@ export default function ProductPage() {
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
 
   useEffect(() => {
-    if (productDataQuery?.product) {
-      const product = productDataQuery.product;
+    if (productDataQuery?.Product) {
+      const product = productDataQuery.Product[0]; // Access the first product
       setProductData(product);
-      
-      // Filter out fields with empty values
-      const nonEmptyFields = initialAvailableFields.filter(field => {
-        // Use product[field.id] for value lookup
-        const fieldValue = product[field.id as keyof ProductData];
-        return fieldValue !== undefined && fieldValue !== '';
-      });
-
-      setRemainingFields(nonEmptyFields);
-      setFormFields(nonEmptyFields.map(field => ({
-        ...field,
-        value: product[field.id as keyof ProductData] || ''
-      })));
+      // Initialize form fields based on product data
+      setFormFields(
+        initialAvailableFields.map(field => ({
+          ...field,
+          value: product[field.id] || ''
+        }))
+      );
     }
   }, [productDataQuery]);
 
@@ -232,16 +218,16 @@ export default function ProductPage() {
                                         onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
                                       />
                                     )}
-                                    {field.type === 'select' && field.options && (
+                                    {field.type === 'select' && (
                                       <Select
-                                        value={field.value as string}
+                                        value={field.value || ''}
                                         onValueChange={(value) => handleInputChange(field.id, value)}
                                       >
                                         <SelectTrigger>
                                           <SelectValue placeholder={field.label} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {field.options.map(option => (
+                                          {(field.options || []).map(option => (
                                             <SelectItem key={option} value={option}>
                                               {option}
                                             </SelectItem>
@@ -249,8 +235,8 @@ export default function ProductPage() {
                                         </SelectContent>
                                       </Select>
                                     )}
-                                    <Button variant="ghost" onClick={() => handleRemoveField(index)}>
-                                      <MinusIcon className="h-4 w-4 text-muted-foreground" />
+                                     <Button  className="h-6 w-6 p-0" variant="ghost" onClick={() => handleRemoveField(index)}>
+                                      <MinusIcon className="h-3 w-3"  />
                                     </Button>
                                   </div>
                                 )}
@@ -261,70 +247,86 @@ export default function ProductPage() {
                         )}
                       </Droppable>
                     </DragDropContext>
+
+                    {/* Add Fields Section */}
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex space-x-1">       
+                        {remainingFields.map((field) => (
+                          <Button
+                            key={field.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddField(field)}
+                            className="text-xs py-1 px-2"
+                          >
+                            <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Custom Field Form */}
+                    <div className="custom-field-form">
+                      <Input
+                        placeholder="Custom Field Label"
+                        value={customFieldLabel}
+                        onChange={(e) => setCustomFieldLabel(e.target.value)}
+                      />
+                      <Select
+                        value={customFieldType}
+                        onValueChange={(value) => setCustomFieldType(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Field Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">Text</SelectItem>
+                          <SelectItem value="textarea">Textarea</SelectItem>
+                          <SelectItem value="number">Number</SelectItem>
+                          <SelectItem value="select">Select</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {customFieldType === 'select' && (
+                        <Textarea
+                          placeholder="Options (comma separated)"
+                          value={customFieldOptions}
+                          onChange={(e) => setCustomFieldOptions(e.target.value)}
+                        />
+                      )}
+                      <Button onClick={handleAddCustomField}>
+                        <PlusIcon className="mr-1" /> Add Custom Field
+                      </Button>
+                    </div>
+
+                    {/* Save and Publish Buttons */}
+                    {hasUnsavedChanges && (
+                      <Button onClick={handleSave}>Save</Button>
+                    )}
+                    <Button onClick={handlePublish}>Publish</Button>
                   </CardContent>
                 </Card>
-
-                {/* Add Custom Field Form */}
-                <div className="mt-4">
-                  <Input
-                    placeholder="Field Label"
-                    value={customFieldLabel}
-                    onChange={(e) => setCustomFieldLabel(e.target.value)}
-                  />
-                  <Select
-                    value={customFieldType}
-                    onValueChange={(value) => setCustomFieldType(value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Field Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">Text</SelectItem>
-                      <SelectItem value="textarea">Textarea</SelectItem>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="select">Select</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {customFieldType === 'select' && (
-                    <Textarea
-                      placeholder="Comma-separated options"
-                      value={customFieldOptions}
-                      onChange={(e) => setCustomFieldOptions(e.target.value)}
-                    />
-                  )}
-                  <Button onClick={handleAddCustomField}>Add Field</Button>
-                </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
           {/* Segments Tab */}
-          <Accordion type="single" collapsible>
-            <AccordionItem value="product-segments">
-              <AccordionTrigger>Segments</AccordionTrigger>
-              <AccordionContent>
-                {/* Segment Display */}
-                {segments.length > 0 ? (
-                  segments.map(segment => (
-                    <Card key={segment.id} className="mb-2">
-                      <CardContent>
-                        <div className="font-semibold">{segment.name}</div>
-                        <div>{segment.content}</div>
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : (
-                  <div>No segments available</div>
-                )}
-                <Button onClick={handlePublish}>Publish Segments</Button>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-
           <div className="mt-4">
-            <Button onClick={handleSave} disabled={!hasUnsavedChanges}>
-              Save Changes
-            </Button>
+            <Card>
+              <CardContent>
+                <h2 className="text-lg font-bold mb-2">Product Preview</h2>
+                <div className="p-4 border rounded-lg">
+                  {productData && (
+                    <div>
+                      <h3 className="text-xl font-semibold">{productData.name}</h3>
+                      <p className="text-sm text-gray-500">{productData.description}</p>
+                      <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
+                      <p className="text-sm">Quantity: {productData.quantity}</p>
+                      <p className="text-sm">Category: {productData.category}</p>
+                    </div>
+                  )}
+                  {!productData && <p>No product data available.</p>}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </Tabs>

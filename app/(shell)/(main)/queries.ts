@@ -6,7 +6,7 @@ export const UPDATE_PRODUCT_VERSION = gql`mutation UpdateProductVersion(
   $productId: String!,
   $versionNumber: Int!,
   $changes: String!,
-  $data: ProductInput!
+  $data: jsonb!
 ) {
   insert_ProductVersion_one(object: {
     productId: $productId,
