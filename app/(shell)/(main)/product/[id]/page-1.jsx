@@ -3,13 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { 
   GET_PRODUCT, 
+  GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN,
   GET_PRODUCT_VERSIONS, 
   GET_DESIGN_CONCEPTS, 
   GET_AI_SUGGESTIONS, 
   GET_DESIGN_ELEMENTS, 
   GET_MEDIA_FILES, 
   GET_USER_DETAILS,
-  GET_DOMAIN 
+  GET_DOMAIN ,
+  GET_DESIGN_ELEMENT_VERSIONS,
+  GET_WORKSPACE,
+  GET_ORGANIZATION
 } from '@/app/(shell)/(main)/queries';
 import DesignElementsForConcept from "./design-element"
 
