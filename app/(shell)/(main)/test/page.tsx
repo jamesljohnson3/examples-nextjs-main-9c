@@ -2,25 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
- import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
- import { 
-  MinusIcon, GripVertical, 
-  Save,
-  PlusIcon
-  } from 'lucide-react';
+import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 
+// Define interfaces for form fields, product data, and segments
 interface FormField {
   id: string;
   type: string;
   label: string;
-  options?: string[]; // For 'select' field type
+  options?: string[];
+  value?: string | number;
 }
 
 interface ProductData {
@@ -30,6 +28,7 @@ interface ProductData {
   price: number;
   quantity: number;
   category: string;
+  [key: string]: any;
 }
 
 interface Segment {
@@ -37,7 +36,6 @@ interface Segment {
   name: string;
   content: string;
 }
-
 
 // Mocked initial available form fields
 const availableFields: FormField[] = [
@@ -71,9 +69,8 @@ export default function ProductPage() {
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
 
   useEffect(() => {
-    if (productDataQuery) {
+    if (productDataQuery?.product) {
       setProductData(productDataQuery.product);
-      // Initialize form fields based on available fields and product data
       setFormFields(availableFields.map(field => ({
         ...field,
         value: productDataQuery.product[field.id] || ''
@@ -82,16 +79,18 @@ export default function ProductPage() {
   }, [productDataQuery]);
 
   useEffect(() => {
-    if (segmentsData && Array.isArray(segmentsData.segments)) {
+    if (segmentsData?.segments) {
       setSegments(segmentsData.segments);
     }
   }, [segmentsData]);
 
   const handleInputChange = (fieldId: string, value: string | number) => {
-    setProductData(prev => ({
-      ...prev!,
-      [fieldId]: value
-    }));
+    if (productData) {
+      setProductData(prev => ({
+        ...prev!,
+        [fieldId]: value
+      }));
+    }
     setFormFields(prev =>
       prev.map(field => (field.id === fieldId ? { ...field, value } : field))
     );
@@ -241,22 +240,31 @@ export default function ProductPage() {
                         </Button>
                       ))}
                     </div>
+                    {hasUnsavedChanges && (
+                      <Button onClick={handleSave}>Save</Button>
+                    )}
+                    <Button onClick={handlePublish}>Publish</Button>
                   </CardContent>
                 </Card>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
-  
-  
-        </div>
-
-        {/* Save and Publish Actions */}
-        <div className="actions">
-          {hasUnsavedChanges && (
-            <Button onClick={handleSave}>Save</Button>
-          )}
-          <Button onClick={handlePublish}>Publish</Button>
+          {/* Segments Tab */}
+          <div>
+            {/* Render segments here if needed */}
+            <h2>Segments</h2>
+            {segments.length === 0 ? (
+              <p>No segments available.</p>
+            ) : (
+              segments.map((segment) => (
+                <div key={segment.id} className="segment-item">
+                  <h3>{segment.name}</h3>
+                  <p>{segment.content}</p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </Tabs>
     </div>
