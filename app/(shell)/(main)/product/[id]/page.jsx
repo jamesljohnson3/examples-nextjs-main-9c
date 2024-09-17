@@ -4,6 +4,7 @@ import { useQuery } from '@apollo/client';
 import { 
   GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN 
 } from '@/app/(shell)/(main)/queries';
+import { DELETE_SEGMENT } from '@/app/(shell)/(main)/mutations';  // Adjust import path as needed
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,26 @@ function ProductEditDashboard({ segment }) {
     const { name, value } = e.target;
     setProduct(prev => ({ ...prev, [name]: value }));
   };
+  const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
+    onCompleted: () => {
+      alert('Segment deleted successfully!');
+    },
+    onError: (error) => {
+      console.error('Error deleting segment:', error);
+      alert('Error deleting segment.');
+    }
+  });
+
+  const handleDeleteSegment = async (segmentId) => {
+    try {
+      await deleteSegment({ variables: { segmentId } });
+    } catch (error) {
+      console.error('Error executing delete mutation:', error);
+    }
+  };
+
+  if (deleteLoading) return <p>Deleting...</p>;
+  if (deleteError) return <p>Error deleting segment.</p>;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -137,6 +158,10 @@ function ProductEditDashboard({ segment }) {
           <div>
             <Button variant="outline" className="mr-2"><Settings2 className="mr-2 h-4 w-4" /> Advanced Options</Button>
             <Button><Save className="mr-2 h-4 w-4" /> Save</Button>
+            <div key={segment.id}>
+            <h3>{segment.name}</h3>
+            <button onClick={() => handleDeleteSegment(segment.id)}>Delete Segment</button>
+          </div>
           </div>
         </div>
       </footer>
