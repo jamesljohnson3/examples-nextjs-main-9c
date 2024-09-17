@@ -37,17 +37,24 @@ const ProductPage = () => {
   const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
  
   // Fetch product details
-  const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
+
+  const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, {
+    variables: { productId: PRODUCT_ID },
+  });
   const { data: segmentsData, loading: segmentsLoading, error: segmentsError } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID },
   });
 
   if (productLoading || segmentsLoading) return <p>Loading...</p>;
-  if (productError) return <p>Error loading product: {productError.message}</p>;
-  if (segmentsError) return <p>Error loading segments: {segmentsError.message}</p>;
+  if (productError || segmentsError) return <p>Error loading data.</p>;
 
   const product = productData?.Product?.[0] || {};
   const segments = segmentsData?.Segment || [];
+
+  // Check if product or segments are valid
+  if (!product || !segments.length) {
+    return <p>Product or segment data is missing or incomplete</p>;
+  }
 
   // Custom Form Builder Component
   const CustomFormBuilder: React.FC<{
