@@ -166,7 +166,6 @@ const ProductSegmentPage = () => {
 
   return (
     <div>
-      <h1>Segments for Product ID: {PRODUCT_ID}</h1>
       <div>
         {segments.length > 0 ? (
           segments.map((segment) => (
