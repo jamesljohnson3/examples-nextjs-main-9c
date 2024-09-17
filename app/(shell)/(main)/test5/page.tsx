@@ -267,7 +267,7 @@ export default function ProductPage() {
           <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={70}>
          
-          <Accordion type="single" collapsible>
+          <Accordion className='px-2' type="single" collapsible>
             <AccordionItem value="product-form">
               <AccordionTrigger>Product Form</AccordionTrigger>
               <AccordionContent>
@@ -404,6 +404,9 @@ export default function ProductPage() {
             <Card>
               <CardContent>
                 <h2 className="text-lg font-bold mb-2">Product Preview</h2>
+                <div className="flex items-center space-x-4">
+             {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}</div>   
+
                 <div className="p-4 border rounded-lg">
                   {productData && (
                     <div>
