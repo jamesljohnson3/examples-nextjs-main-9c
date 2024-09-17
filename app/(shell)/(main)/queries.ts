@@ -7,7 +7,7 @@ export const UPDATE_PRODUCT_VERSION = gql`
   $productId: String!,
   $versionNumber: Int!,
   $changes: String!,
-  $data: ProductInput!,
+  $data: jsonb!,
   $id: String!
 ) {
   insert_ProductVersion_one(object: {
