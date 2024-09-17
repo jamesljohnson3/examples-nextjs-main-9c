@@ -92,7 +92,7 @@ const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
   
   const product = productData?.Product?.[0] || {};
   const workspace = workspaceData?.Workspace?.[0] || {};
-  const organization = organizationData?.Organization?.[0] || {};
+  const organization = {};
 
   return (
     <div>
