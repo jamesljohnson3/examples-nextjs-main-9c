@@ -28,9 +28,8 @@ export default function HomePage() {
       <p>Downvoted: {data.downvoted}</p>
       <a href={data.source} target="_blank" rel="noopener noreferrer">Watch Source</a>
       <div>
-        {data.assets.map((asset, index) => (
-          <img key={index} src={asset} alt={`Asset ${index}`} />
-        ))}
+       
+       
       </div>
     </div>
   );
