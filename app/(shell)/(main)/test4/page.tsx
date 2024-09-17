@@ -134,61 +134,62 @@ export default function ProductPage() {
   };
 
   const handleSave = async () => {
-    try {
-      if (!productData) {
-        alert('No product data to save!');
-        return;
-      }
-
-      const { id, name, description, price, quantity, category } = productData;
-
+    if (!productData) {
+      alert('No product data to save!');
+      return;
+    }
+  
+    const { id, name, description, price, quantity, category } = productData;
+  
     // Parse price and quantity correctly
-    const parsedPrice = parseFloat(price as unknown as string);  // Cast price to string first, then parse
-    const parsedQuantity = parseInt(quantity as unknown as string); // Cast quantity to string first, then parse
-
+    const parsedPrice = parseFloat(price as unknown as string); // Cast to string then parse
+    const parsedQuantity = parseInt(quantity as unknown as string); // Cast to string then parse
+  
     if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
       alert('Invalid price or quantity');
       return;
     }
-
-    // Execute the mutation with the parsed product data
-    await saveProduct({
-      variables: {
-        productId: id,
-        name,
-        description,
-        price: parsedPrice,  // Ensure price is passed as a float
-        quantity: parsedQuantity, // Ensure quantity is passed as an integer
-        category,
-      },
-    });
+  
+    try {
+      // Execute the mutation with the parsed product data
+      await saveProduct({
+        variables: {
+          productId: id,
+          name,
+          description,
+          price: parsedPrice,
+          quantity: parsedQuantity,
+          category,
+        },
+      });
+  
       // Generate Unix timestamp for versionNumber
       const versionNumber = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
-
+  
       // Generate a UUID for the id
       const uuid = uuidv4();
-
+  
       // Update product version
       await updateProductVersion({
         variables: {
           productId: PRODUCT_ID,
-          versionNumber: versionNumber,
+          versionNumber,
           changes: "Updated product version",
           data: productData, // Ensure productData matches the ProductInput type
-          id: uuid, // Use the generated UUID
+          id: uuid,
         },
       });
-
+  
       // Save the productVersionId to local storage
       localStorage.setItem('productVersionId', uuid);
-
+  
       alert('Product version updated and saved!');
     } catch (error) {
       console.error('Error saving product:', error);
       alert('Failed to save product.');
     }
   };
-
+  
   const handlePublish = async () => {
     try {
       const productVersionId = localStorage.getItem('productVersionId');
