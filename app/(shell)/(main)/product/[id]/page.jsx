@@ -18,8 +18,6 @@ const ProductPage = ({ params }) => {
   const { data: workspaceData, loading: workspaceLoading, error: workspaceError } = useQuery(GET_WORKSPACE, { variables: { workspaceId: WORKSPACE_ID } });
   const [organizationId, setOrganizationId] = useState(null);
 
-
-
   // Fetch product details
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
 
@@ -34,6 +32,12 @@ const ProductPage = ({ params }) => {
 
   const [designElements, setDesignElements] = useState([]);
   const [designElementVersions, setDesignElementVersions] = useState({});
+  
+  // Fetch organization details only when organizationId is available
+  const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
+    variables: { organizationId: organizationId },
+    skip: !organizationId
+  });
 
   useEffect(() => {
     if (workspaceData) {
@@ -41,37 +45,34 @@ const ProductPage = ({ params }) => {
       setOrganizationId(fetchedOrganizationId || null);
     }
   }, [workspaceData]);
-  // Fetch organization details only when organizationId is available
-  const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
-    variables: { organizationId: organizationId },
-  });
-  
+
   useEffect(() => {
     if (designElementsData) {
       setDesignElements(designElementsData.DesignElement || []);
-
+      
       // Fetch versions for each design element
       designElementsData.DesignElement.forEach((element) => {
-        // Use separate query for each design element version
+        // Manually create a query to fetch design element versions
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        useQuery(GET_DESIGN_ELEMENT_VERSIONS, { 
-          variables: { designElementId: element.id }
-        }).then(({ data: versionsData, loading: versionsLoading, error: versionsError }) => {
-          if (versionsData) {
-            setDesignElementVersions(prevVersions => ({
-              ...prevVersions,
-              [element.id]: versionsData.DesignElementVersion || []
-            }));
-          }
-
-          if (versionsLoading) {
-            console.log('Loading versions for element', element.id);
-          }
-
-          if (versionsError) {
-            console.error('Error loading versions for element', element.id, versionsError);
-          }
+        const { data: versionsData, loading: versionsLoading, error: versionsError } = useQuery(GET_DESIGN_ELEMENT_VERSIONS, { 
+          variables: { designElementId: element.id },
+          skip: !element.id
         });
+
+        if (versionsData) {
+          setDesignElementVersions(prevVersions => ({
+            ...prevVersions,
+            [element.id]: versionsData.DesignElementVersion || []
+          }));
+        }
+
+        if (versionsLoading) {
+          console.log('Loading versions for element', element.id);
+        }
+
+        if (versionsError) {
+          console.error('Error loading versions for element', element.id, versionsError);
+        }
       });
     }
   }, [designElementsData]);
