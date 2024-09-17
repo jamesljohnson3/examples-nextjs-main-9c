@@ -11,7 +11,6 @@ export const UPDATE_PRODUCT_VERSION = gql`
       price
       quantity
       category
-      // Return any additional fields as needed
     }
   }
 `;
@@ -23,7 +22,6 @@ export const PUBLISH_SEGMENTS = gql`
       id
       name
       content
-      // Return any additional fields as needed
     }
   }
 `;
