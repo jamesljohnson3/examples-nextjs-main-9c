@@ -43,11 +43,8 @@ interface AnalyticsDataItem {
   icon: React.ComponentType<any>; // Type for Lucide icons
 }
 
-interface DesignConcept {
-  id: number;
-  image: string;
-  title: string;
-}
+
+
 
 interface Version {
   id: number;
@@ -79,12 +76,9 @@ const analyticsData: AnalyticsDataItem[] = [
   { label: 'Comments', value: 89, icon: MessageSquare },
 ];
 
-const sampleDesignConcepts: DesignConcept[] = [
-  { id: 1, image: 'https://res.cloudinary.com/unlimitpotential/image/upload/v1724768966/IMG_3697copy_s9irf3.jpg', title: 'Concept 1' },
-  { id: 2, image: 'https://res.cloudinary.com/unlimitpotential/image/upload/v1724768958/IMG_3692copy_fnjyaw.jpg', title: 'Concept 2' },
-  { id: 3, image: 'https://res.cloudinary.com/unlimitpotential/image/upload/v1724768964/IMG_3694_wt2bd5.jpg', title: 'Concept 3' },
-  { id: 4, image: 'https://res.cloudinary.com/unlimitpotential/image/upload/v1724768967/IMG_3698_ljblsa.jpg', title: 'Concept 4' },
-];
+
+
+
 
 const fieldTypes = [
   { value: 'text', label: 'Text' },
@@ -321,7 +315,7 @@ export default function InventoryManagement() {
   
   const [activeTab, setActiveTab] = useState('form');
   
-  
+
   const [versions, setVersions] = useState<Version[]>([
     { id: 1, timestamp: new Date().toISOString(), changes: 'Initial version' },
     { id: 2, timestamp: new Date(Date.now() - 86400000).toISOString(), changes: 'Updated product description' },
