@@ -153,8 +153,11 @@ const ProductPage: React.FC = () => {
       const removedField = updatedFields.splice(index, 1)[0];
       
       if (RESERVED_FIELDS.has(removedField.id)) {
-        // For reserved fields, add them to a separate state for reserved remaining fields
-        setReservedRemainingFields(prev => [...prev, removedField]);
+        // For reserved fields, add them to remainingFields
+        setRemainingFields(prev => [
+          ...prev.filter(field => field.id !== removedField.id),
+          removedField
+        ].sort((a, b) => a.label.localeCompare(b.label)));
       } else {
         // For non-reserved fields, add them back to remainingFields
         setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
