@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
  import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,9 +11,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
  import { 
   MinusIcon, GripVertical, 
-  Save
+  Save,
+  PlusIcon
   } from 'lucide-react';
-import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN } from '@/app/(shell)/(main)/queries';
+import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 
 interface FormField {
   id: string;
@@ -37,8 +38,9 @@ interface Segment {
   content: string;
 }
 
-// Mocked initial form fields
-const initialFormElements: FormField[] = [
+
+// Mocked initial available form fields
+const availableFields: FormField[] = [
   { id: 'name', type: 'text', label: 'Name' },
   { id: 'description', type: 'textarea', label: 'Description' },
   { id: 'price', type: 'number', label: 'Price' },
@@ -48,10 +50,10 @@ const initialFormElements: FormField[] = [
 
 export default function ProductPage() {
   const [formFields, setFormFields] = useState<FormField[]>([]);
-  const [availableFields, setAvailableFields] = useState<FormField[]>([]);
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
 
@@ -65,111 +67,80 @@ export default function ProductPage() {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
 
+  const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
+  const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
+
   useEffect(() => {
     if (productDataQuery) {
       setProductData(productDataQuery.product);
-      setFormFields(initialFormElements); // Customize initial form fields based on the product
+      // Initialize form fields based on available fields and product data
+      setFormFields(availableFields.map(field => ({
+        ...field,
+        value: productDataQuery.product[field.id] || ''
+      })));
     }
   }, [productDataQuery]);
 
   useEffect(() => {
     if (segmentsData && Array.isArray(segmentsData.segments)) {
-      setSegments(segmentsData.segments); // Ensure segments is an array
+      setSegments(segmentsData.segments);
     }
   }, [segmentsData]);
 
-  // Handle input changes in form fields
   const handleInputChange = (fieldId: string, value: string | number) => {
-    if (productData) {
-      setProductData({
-        ...productData,
-        [fieldId]: value
-      });
-      setHasUnsavedChanges(true);
-    }
+    setProductData(prev => ({
+      ...prev!,
+      [fieldId]: value
+    }));
+    setFormFields(prev =>
+      prev.map(field => (field.id === fieldId ? { ...field, value } : field))
+    );
+    setHasUnsavedChanges(true);
   };
 
-  // Handle adding a custom form field
   const handleAddField = (newField: FormField) => {
-    setFormFields([...formFields, newField]);
+    setFormFields(prev => [
+      ...prev,
+      { ...newField, value: productData ? productData[newField.id] || '' : '' }
+    ]);
     setHasUnsavedChanges(true);
   };
 
-  // Handle removing a form field
   const handleRemoveField = (index: number) => {
-    const updatedFields = [...formFields];
-    updatedFields.splice(index, 1);
-    setFormFields(updatedFields);
+    setFormFields(prev => {
+      const updatedFields = [...prev];
+      updatedFields.splice(index, 1);
+      return updatedFields;
+    });
     setHasUnsavedChanges(true);
   };
 
-  // Handle drag-and-drop form reordering
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
     const reorderedFields = Array.from(formFields);
     const [reorderedItem] = reorderedFields.splice(result.source.index, 1);
     reorderedFields.splice(result.destination.index, 0, reorderedItem);
     setFormFields(reorderedFields);
+    setHasUnsavedChanges(true);
   };
 
-  // Render the form fields dynamically based on their type
-  const renderFieldInput = (field: FormField) => {
-    switch (field.type) {
-      case 'text':
-        return (
-          <Input
-            key={field.id}
-            placeholder={field.label}
-            value={(productData as any)?.[field.id] || ''}
-            onChange={(e) => handleInputChange(field.id, e.target.value)}
-          />
-        );
-      case 'textarea':
-        return (
-          <Textarea
-            key={field.id}
-            placeholder={field.label}
-            value={(productData as any)?.[field.id] || ''}
-            onChange={(e) => handleInputChange(field.id, e.target.value)}
-          />
-        );
-      case 'number':
-        return (
-          <Input
-            key={field.id}
-            type="number"
-            placeholder={field.label}
-            value={(productData as any)?.[field.id] || ''}
-            onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
-          />
-        );
-      case 'select':
-        return (
-          <Select
-            key={field.id}
-            value={(productData as any)?.[field.id] || ''}
-            onValueChange={(value) => handleInputChange(field.id, value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={field.label} />
-            </SelectTrigger>
-            <SelectContent>
-              {(field.options || []).map((option) => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      default:
-        return null;
+  const handleSave = async () => {
+    try {
+      await updateProductVersion({ variables: { productData } });
+      setHasUnsavedChanges(false);
+      alert('Product version updated!');
+    } catch (error) {
+      console.error('Error updating product version:', error);
     }
   };
 
-  // Function to publish updates (mock mutation)
-  const handlePublish = () => {
-    // Implement your mutation logic here
-    console.log('Publishing updates:', productData, segments);
-    setHasUnsavedChanges(false);
+  const handlePublish = async () => {
+    try {
+      await publishSegments({ variables: { segments } });
+      alert('Segments published!');
+    } catch (error) {
+      console.error('Error publishing segments:', error);
+    }
   };
 
   if (loadingProduct || loadingSegments) {
@@ -205,11 +176,49 @@ export default function ProductPage() {
                                     {...provided.dragHandleProps}
                                     className="field-item"
                                   >
-                      <GripVertical className="h-3 w-3 text-muted-foreground" />
-                      {renderFieldInput(field)}
-                                    <Button size="sm" variant="ghost"  onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
-                        <MinusIcon className="h-3 w-3" />
-                      </Button>
+                                    <GripVertical />
+                                    {field.type === 'text' && (
+                                      <Input
+                                        placeholder={field.label}
+                                        value={field.value || ''}
+                                        onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                      />
+                                    )}
+                                    {field.type === 'textarea' && (
+                                      <Textarea
+                                        placeholder={field.label}
+                                        value={field.value || ''}
+                                        onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                      />
+                                    )}
+                                    {field.type === 'number' && (
+                                      <Input
+                                        type="number"
+                                        placeholder={field.label}
+                                        value={field.value || ''}
+                                        onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
+                                      />
+                                    )}
+                                    {field.type === 'select' && (
+                                      <Select
+                                        value={field.value || ''}
+                                        onValueChange={(value) => handleInputChange(field.id, value)}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue placeholder={field.label} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {(field.options || []).map(option => (
+                                            <SelectItem key={option} value={option}>
+                                              {option}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    )}
+                                    <Button variant="ghost" onClick={() => handleRemoveField(index)}>
+                                      <MinusIcon />
+                                    </Button>
                                   </div>
                                 )}
                               </Draggable>
@@ -219,6 +228,19 @@ export default function ProductPage() {
                         )}
                       </Droppable>
                     </DragDropContext>
+                    <div className="add-fields">
+                      {availableFields.map((element) => (
+                        <Button
+                          key={element.id}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAddField(element)}
+                          className="text-xs py-1 px-2"
+                        >
+                          <PlusIcon className="h-3 w-3 mr-1" /> {element.label}
+                        </Button>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               </AccordionContent>
@@ -247,13 +269,12 @@ export default function ProductPage() {
           </Accordion>
         </div>
 
-        {/* Publish Changes */}
+        {/* Save and Publish Actions */}
         <div className="actions">
           {hasUnsavedChanges && (
-            <Button onClick={handlePublish}>
-              <Save /> Publish Changes
-            </Button>
+            <Button onClick={handleSave}>Save</Button>
           )}
+          <Button onClick={handlePublish}>Publish</Button>
         </div>
       </Tabs>
     </div>
