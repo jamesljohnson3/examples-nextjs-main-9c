@@ -172,7 +172,8 @@ const ProductSegmentPage = ({params}) => {
             <ProductEditDashboard key={segment.id} segment={segment} />
           ))
         ) : (
-          <p>No segments available for this product and domain.</p>
+          <p>No segments available for this product and domain. create asegmett bubttoon or form orrsskipfor now buutton seet cookie to false for show crreatte segments?</p>
+         
         )}
       </div>
     </div>
