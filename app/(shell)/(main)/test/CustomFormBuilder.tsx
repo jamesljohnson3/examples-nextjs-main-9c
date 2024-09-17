@@ -91,7 +91,7 @@ function SinglePost({ id }: { id: string }) {
         },
         body: JSON.stringify({ 
           ...editedPost, 
-          userId: "cm14mvrxe0002ue6ygbc4yyzr", 
+          userId: USER_ID, 
           assetId: 'sample-asset-id', 
           eventType, 
           campaignId: 'sample-campaign-id', 
