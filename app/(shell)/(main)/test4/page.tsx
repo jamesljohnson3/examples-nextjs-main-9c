@@ -251,7 +251,7 @@ export default function ProductPage() {
                     <DragDropContext onDragEnd={onDragEnd}>
                       <Droppable droppableId="form-fields">
                         {(provided) => (
-                          <div {...provided.droppableProps} ref={provided.innerRef}>
+                          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
                             {formFields.map((field, index) => (
                               <Draggable key={field.id} draggableId={field.id} index={index}>
                                 {(provided) => (
@@ -259,10 +259,10 @@ export default function ProductPage() {
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
-                                    className="field-row"
-                                  >
-                                    <GripVertical className="mr-2" />
-                                    <div className="flex-grow">
+                                    className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
+                    >
+                      <GripVertical className="h-3 w-3 text-muted-foreground" />
+                      <div className="flex-grow">
                                       <label>{field.label}</label>
                                       {field.type === 'text' && (
                                         <Input
@@ -301,8 +301,9 @@ export default function ProductPage() {
                                         </Select>
                                       )}
                                     </div>
-                                    <MinusIcon className="ml-2" onClick={() => handleRemoveField(index)} />
-                                  </div>
+                                    <Button size="sm" variant="ghost" onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
+                        <MinusIcon className="h-3 w-3" />
+                      </Button>                                  </div>
                                 )}
                               </Draggable>
                             ))}
