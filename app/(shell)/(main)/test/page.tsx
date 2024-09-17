@@ -1,10 +1,10 @@
-'use client'
-
 /* eslint-disable react-hooks/rules-of-hooks */
-import React from 'react';
+'use client'
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN } from '@/app/(shell)/(main)/queries';
 import CustomFormBuilder from './CustomFormBuilder'; // Adjust path as needed
+
 
 // Define interfaces for better type safety
 interface FormField {
@@ -42,19 +42,17 @@ interface Version {
   changes: string;
 }
 
-const ProductPage = () => {
+const ProductPage: React.FC = () => {
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
-  const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
-  const ORGANIZATION_ID = 'cm14mvrwe0000ue6ygx7gfevr';
-  const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
- 
+
   // Fetch product details
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
   const { data: segmentsData, loading: segmentsLoading, error: segmentsError } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID },
   });
 
+  // Early return to handle loading and error states
   if (productLoading || segmentsLoading) return <p>Loading...</p>;
   if (productError) return <p>Error loading product: {productError.message}</p>;
   if (segmentsError) return <p>Error loading segments: {segmentsError.message}</p>;
@@ -62,16 +60,17 @@ const ProductPage = () => {
   const product = productData?.Product?.[0] || {};
   const segments = segmentsData?.Segment || [];
 
-  // Example state for form fields and available fields
-  const [formFields, setFormFields] = React.useState<FormField[]>([]);
-  const [availableFields, setAvailableFields] = React.useState<FormField[]>(segments.map((segment: any) => ({
+  // State hooks
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  const [availableFields, setAvailableFields] = useState<FormField[]>(segments.map((segment: { id: any; name: any; }) => ({
     id: segment.id,
     type: 'text',
     label: segment.name,
   })));
-  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
-  const [previewData, setPreviewData] = React.useState<ProductData>(product);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [previewData, setPreviewData] = useState<ProductData>(product);
 
+  // Handler for input changes
   const handleInputChange = (id: string, value: string | number) => {
     setPreviewData(prev => ({ ...prev, [id]: value }));
     setHasUnsavedChanges(true);
@@ -85,7 +84,7 @@ const ProductPage = () => {
       <div>
         <h2>Image Gallery</h2>
         {product.imageGallery && product.imageGallery.length > 0 ? (
-          product.imageGallery.map((url: string | undefined, index: React.Key | null | undefined) => (
+          product.imageGallery.map((url: string | undefined, index: React.Key) => (
             <img
               key={index}
               src={url}
