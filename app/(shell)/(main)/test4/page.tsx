@@ -329,11 +329,7 @@ export default function ProductPage() {
                         )}
                       </Droppable>
                     </DragDropContext>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+
 
           <div className="custom-field-form">
             <Input
@@ -363,6 +359,14 @@ export default function ProductPage() {
               <PlusIcon className="mr-1" /> Add Custom Field
             </Button>
           </div>
+                  </CardContent>
+                </Card>
+
+
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
 
           {hasUnsavedChanges && (
             <Button onClick={handleSave}>Save</Button>
