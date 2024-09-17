@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Separator } from "../components/ui/separator";
 import { HomeSection, ImageSection, PornhubSection } from "./sections";
-
+import MainPost from './main-post'
 export const revalidate = 3600;
 
 const HomeData = React.lazy(() => getHome().then(data => ({ default: () => <HomeSection data={data} />})));
@@ -15,6 +15,7 @@ async function MadeForYou() {
     <div className="flex min-h-full flex-col font-sans text-zinc-900 bg-zinc-50 dark:text-zinc-100 dark:bg-black">
       <div className="text-center">
         {/* Header or other content here */}
+        <MainPost/>
       </div>
 
       <section>
