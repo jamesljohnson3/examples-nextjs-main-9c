@@ -151,22 +151,22 @@ const ProductPage: React.FC = () => {
     setFormFields(prev => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
-      
-      if (RESERVED_FIELDS.has(removedField.id)) {
-        // For reserved fields, add them to remainingFields
-        setRemainingFields(prev => [
-          ...prev.filter(field => field.id !== removedField.id),
-          removedField
-        ].sort((a, b) => a.label.localeCompare(b.label)));
-      } else {
-        // For non-reserved fields, add them back to remainingFields
-        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
-      }
-      
+
+      // Always add the removed field back to remainingFields, regardless of whether it's reserved
+      setRemainingFields(prev => 
+        [...prev, removedField]
+          .sort((a, b) => a.label.localeCompare(b.label))
+          .filter((field, index, self) => 
+            index === self.findIndex((t) => t.id === field.id)
+          )
+      );
+
       return updatedFields;
     });
+
     setHasUnsavedChanges(true);
   };
+  
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
     const reorderedFields = Array.from(formFields);
@@ -260,24 +260,25 @@ const ProductPage: React.FC = () => {
       alert('Failed to publish segment.');
     }
   };
-
   const handleAddCustomField = () => {
     if (!customFieldLabel.trim()) {
       alert('Field label cannot be empty.');
       return;
     }
 
+    const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, '_');
+
+    if (RESERVED_FIELDS.has(newFieldId)) {
+      alert('Cannot create a custom field with a reserved field name.');
+      return;
+    }
+
     const newField: FormField = {
-      id: customFieldLabel.toLowerCase().replace(/\s+/g, '_'),
+      id: newFieldId,
       type: customFieldType,
       label: customFieldLabel,
       options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
     };
-
-    if (RESERVED_FIELDS.has(newField.id)) {
-      alert('Cannot use reserved field ID.');
-      return;
-    }
 
     handleAddField(newField);
     setCustomFieldLabel('');
