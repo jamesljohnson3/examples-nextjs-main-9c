@@ -2,16 +2,18 @@
 import { gql } from '@apollo/client';
 
 // Mutation to update product version
-export const UPDATE_PRODUCT_VERSION = gql`
-
-
-mutation UpdateProductVersion {($productData: ProductInput!)
-  insert_ProductVersion_one(object: {changes: "", data: " id
-      name
-      description
-      price
-      quantity
-      category", productId: "cm14mvs2o000fue6yh6hb13yn", versionNumber: 10, id: "test"}) {
+export const UPDATE_PRODUCT_VERSION = gql`mutation UpdateProductVersion(
+  $productId: String!,
+  $versionNumber: Int!,
+  $changes: String!,
+  $data: ProductInput!
+) {
+  insert_ProductVersion_one(object: {
+    productId: $productId,
+    versionNumber: $versionNumber,
+    changes: $changes,
+    data: $data
+  }) {
     id
   }
 }

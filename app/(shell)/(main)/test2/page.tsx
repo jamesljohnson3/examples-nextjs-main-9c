@@ -132,14 +132,23 @@ export default function ProductPage() {
 
   const handleSave = async () => {
     try {
-      await updateProductVersion({ variables: { productData } });
-      setHasUnsavedChanges(false);
-      alert('Product version updated!');
+      if (productData) {
+        await updateProductVersion({
+          variables: {
+            productId: PRODUCT_ID,
+            versionNumber: 10, // Update this as needed
+            changes: "Updated product version",
+            data: productData
+          }
+        });
+        setHasUnsavedChanges(false);
+        alert('Product version updated!');
+      }
     } catch (error) {
       console.error('Error updating product version:', error);
     }
   };
-
+  
   const handlePublish = async () => {
     try {
       await publishSegments({ variables: { segments } });
