@@ -10,10 +10,9 @@ interface ProductData {
   id: string;
   name: string;
   description: string;
-  price: number;
-  quantity: number;
-  category: string;
+  price?: number; // Make price optional
   primaryPhoto?: string;
+  imageGallery?: string[];
   metadata?: {
     title?: string;
     description?: string;
@@ -25,15 +24,15 @@ const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn"; // Example product ID
 
 export default function InventoryManagement() {
   // Fetch product data using GraphQL query
-  const { data, loading, error } = useQuery<{ Product: ProductData }>(GET_PRODUCT, {
+  const { data, loading, error } = useQuery<{ Product: ProductData[] }>(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading product data: {error.message}</div>;
 
-  // Destructure product data
-  const product = data?.Product;
+  // Extract the first product from the array
+  const product = data?.Product[0];
 
   return (
     <Card className="bg-white backdrop-blur-lg border-0">
@@ -57,22 +56,22 @@ export default function InventoryManagement() {
               <div className="text-xs">
 
               </div>
+        
+        
+
               <div className="text-xs">
-                <span className="font-semibold">Quantity:</span> {product.quantity}
-              </div>
-              <div className="text-xs">
-                <span className="font-semibold">Category:</span> {product.category}
+
               </div>
               {product.metadata && (
                 <>
                   <div className="text-xs mt-2">
-                    <span className="font-semibold">Meta Title:</span> {product.metadata.title}
+                    <span className="font-semibold">Meta Title:</span> {product.metadata.title || 'N/A'}
                   </div>
                   <div className="text-xs">
-                    <span className="font-semibold">Meta Description:</span> {product.metadata.description}
+                    <span className="font-semibold">Meta Description:</span> {product.metadata.description || 'N/A'}
                   </div>
                   <div className="text-xs">
-                    <span className="font-semibold">Keywords:</span> {product.metadata.keywords}
+                    <span className="font-semibold">Keywords:</span> {product.metadata.keywords || 'N/A'}
                   </div>
                 </>
               )}
