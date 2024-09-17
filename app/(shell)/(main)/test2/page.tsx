@@ -10,6 +10,8 @@ interface ProductData {
   id: string;
   name: string;
   description: string;
+  quantity: number;
+  category: string;
   price?: number; // Make price optional
   primaryPhoto?: string;
   imageGallery?: string[];
@@ -54,13 +56,13 @@ export default function InventoryManagement() {
                 <span className="font-semibold">Description:</span> {product.description}
               </div>
               <div className="text-xs">
-
+                <span className="font-semibold">Price:</span> ${product.price ? product.price.toFixed(2) : 'N/A'}
               </div>
-        
-        
-
               <div className="text-xs">
-
+                <span className="font-semibold">Quantity:</span> {product.quantity !== undefined ? product.quantity : 'N/A'}
+              </div>
+              <div className="text-xs">
+                <span className="font-semibold">Category:</span> {product.category || 'N/A'}
               </div>
               {product.metadata && (
                 <>

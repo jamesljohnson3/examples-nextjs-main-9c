@@ -166,6 +166,8 @@ export const GET_PRODUCT = gql`
       price
       description
       primaryPhoto
+      quantity
+      category
       imageGallery
       metadata
       createdAt
