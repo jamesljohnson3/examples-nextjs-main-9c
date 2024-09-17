@@ -85,30 +85,11 @@ export default function ProductListHomepage() {
       
       <h1 className="text-lg font-bold text-center mb-2">Product List</h1>
       
-      <Card className="mb-2">
-        <CardContent className="p-2">
-          <div className="flex space-x-2 mb-2">
-            <Input placeholder="Search products..." className="flex-grow h-8 text-xs" />
-            <Button variant="outline" size="sm" className="h-8">
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
-          <Command className="rounded-lg border shadow-md">
-            <CommandInput placeholder="Type a command or search..." className="h-8 text-xs" />
-            <CommandList className="h-24 overflow-y-auto">
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup heading="Actions">
-                <CommandItem className="text-xs">Add New Product</CommandItem>
-                <CommandItem className="text-xs">Export Product List</CommandItem>
-                <CommandItem className="text-xs">Generate Report</CommandItem>
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </CardContent>
-      </Card>
+    
+    
 
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={60}>
+        <ResizablePanel defaultSize={80}>
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Product List</CardTitle>
@@ -169,7 +150,7 @@ export default function ProductListHomepage() {
             </CardContent>
           </Card>
         </ResizablePanel>
-        <ResizablePanel defaultSize={40}>
+        <ResizablePanel defaultSize={20}>
           <Card>
             <CardHeader>
               <CardTitle className="text-sm">Quick Stats</CardTitle>
