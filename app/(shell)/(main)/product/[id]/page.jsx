@@ -27,11 +27,8 @@ const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
   // Fetch design concepts
   const { data: designConceptsData, loading: designConceptsLoading, error: designConceptsError } = useQuery(GET_DESIGN_CONCEPTS, { variables: { productId: PRODUCT_ID } });
 
-  // Fetch organization details only when organizationId is available
-  const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
-    variables: { organizationId: organizationId },
 
-  });
+  
 
   // Fetch design elements only when organizationId is available
   const { data: designElementsData, loading: designElementsLoading, error: designElementsError } = useQuery(GET_DESIGN_ELEMENTS, { 
@@ -52,6 +49,8 @@ const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
     if (organizationId) {
       // Fetch organization data when organizationId is available
       // This query is already done above, so nothing more to do here
+
+      console.log('Organization', organizationId);
     }
   }, [organizationId]);
 
