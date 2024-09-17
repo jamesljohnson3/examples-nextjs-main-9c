@@ -16,6 +16,8 @@ const ProductPage = () => {
   const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
   const ORGANIZATION_ID = 'cm14mvrwe0000ue6ygx7gfevr';
   const USER_ID = 'cm14mvrxe0002ue6ygbc4yyzr';
+ 
+  
   // Fetch product details
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
   
@@ -24,7 +26,10 @@ const ProductPage = () => {
 
   // Fetch design elements for a specific concept
   const [selectedConceptId, setSelectedConceptId] = useState(null);
-  const { data: designElementsData, loading: elementsLoading, error: elementsError } = useQuery(GET_DESIGN_ELEMENTS, { variables: { domainId: domainId }, skip: !selectedConceptId });
+  const { data: designElementsData, loading: elementsLoading, error: elementsError } = useQuery(GET_DESIGN_ELEMENTS, { 
+    variables: { domainId: DOMAIN_ID }, // Ensure you're passing the correct variable
+    skip: !selectedConceptId 
+  });
 
   // Mutation to add a new design element version
   const [addDesignElementVersion, { loading: addVersionLoading, error: addVersionError }] = useMutation(ADD_DESIGN_ELEMENT_VERSION);
