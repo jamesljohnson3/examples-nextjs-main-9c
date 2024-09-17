@@ -30,13 +30,13 @@ const ProductPage = ({ params }) => {
   // Fetch organization details only when organizationId is available
   const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
     variables: { organizationId: organizationId },
-    skip: !organizationId // Just for clarity, but you mentioned not using skip
+
   });
 
   // Fetch design elements only when organizationId is available
   const { data: designElementsData, loading: designElementsLoading, error: designElementsError } = useQuery(GET_DESIGN_ELEMENTS, { 
     variables: { domainId: organizationId },
-    skip: !organizationId // Just for clarity, but you mentioned not using skip
+
   });
 
   useEffect(() => {
