@@ -241,6 +241,21 @@ export default function ProductPage() {
           <TabsTrigger value="segments">Segments</TabsTrigger>
         </TabsList>
 
+        <div className="flex justify-between items-center mb-2">
+                      <div className="flex space-x-1">       
+                        {remainingFields.map((field) => (
+                          <Button
+                            key={field.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddField(field)}
+                            className="text-xs py-1 px-2"
+                          >
+                            <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
         <div className="tab-content">
           <Accordion type="single" collapsible>
             <AccordionItem value="product-form">
