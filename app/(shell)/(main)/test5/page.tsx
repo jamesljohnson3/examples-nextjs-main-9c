@@ -256,17 +256,17 @@ export default function ProductPage() {
   return (
     <div className="product-page">
       <Tabs>
-        <TabsList className="grid grid-cols-2">
-          <TabsTrigger value="form">Form Builder</TabsTrigger>
-          <TabsTrigger value="segments">Segments</TabsTrigger>
-        </TabsList>
-
+  
         
         <div className="tab-content">
         
           <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={70}>
-         
+          <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="form">Form Builder</TabsTrigger>
+          <TabsTrigger value="segments">Segments</TabsTrigger>
+        </TabsList>
+
           <Accordion className='px-2' type="single" collapsible>
             <AccordionItem value="product-form">
               <AccordionTrigger>Product Form</AccordionTrigger>
