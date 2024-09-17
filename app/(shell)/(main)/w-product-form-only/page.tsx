@@ -13,7 +13,7 @@ import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-
+import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
 
 
 
@@ -65,6 +65,25 @@ export default function ProductPage() {
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   const SEGMENT_ID = 'unique-segment-id';
 
+
+
+  const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
+    onCompleted: () => {
+      alert('Segment deleted successfully!');
+    },
+    onError: (error) => {
+      console.error('Error deleting segment:', error);
+      alert('Error deleting segment.');
+    }
+  });
+
+  const handleDeleteSegment = async (segmentId: any) => {
+    try {
+      await deleteSegment({ variables: { segmentId } });
+    } catch (error) {
+      console.error('Error executing delete mutation:', error);
+    }
+  };
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -253,6 +272,10 @@ export default function ProductPage() {
     return <div>Loading...</div>;
   }
 
+
+  if (deleteLoading) return <p>Deleting...</p>;
+  if (deleteError) return <p>Error deleting segment.</p>;
+  
   return (
     <div className="product-page">
       <Tabs>
@@ -419,6 +442,8 @@ export default function ProductPage() {
                   )}
                   {!productData && <p>No product data available.</p>}
                 </div>
+                <button onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
+
               </CardContent>
             </Card>
           </div>
