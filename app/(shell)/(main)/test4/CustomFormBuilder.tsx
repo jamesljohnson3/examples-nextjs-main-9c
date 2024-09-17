@@ -288,10 +288,7 @@ const ProductPage: React.FC = () => {
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="droppable">
                 {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                  >
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
                     {formFields.map((field, index) => (
                       <Draggable key={field.id} draggableId={field.id} index={index}>
                         {(provided) => (
@@ -355,14 +352,24 @@ const ProductPage: React.FC = () => {
           </div>
           <div>
             <h2>Available Fields</h2>
-            {availableFields.map(field => (
-              <Button
-                key={field.id}
-                onClick={() => handleAddField(field)}
-              >
-                Add {field.label}
-              </Button>
-            ))}
+            <div>
+              <h3>Reserved Fields</h3>
+              {reservedFields.map(field => (
+                <div key={field.id}>
+                  {field.label}
+                </div>
+              ))}
+            </div>
+            <div>
+              <h3>Custom Fields</h3>
+              <div>
+                {availableFields.map(field => (
+                  <Button key={field.id} onClick={() => handleAddField(field)}>
+                    Add {field.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
           <Accordion type="single" collapsible>
             <AccordionItem value="custom">
