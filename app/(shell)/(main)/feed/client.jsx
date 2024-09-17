@@ -1,4 +1,6 @@
 "use client"
+// pages/index.js
+
 import { useEffect, useState } from 'react';
 
 export default function HomePage() {
@@ -28,8 +30,13 @@ export default function HomePage() {
       <p>Downvoted: {data.downvoted}</p>
       <a href={data.source} target="_blank" rel="noopener noreferrer">Watch Source</a>
       <div>
-       
-       
+        {Array.isArray(data.assets) && data.assets.length > 0 ? (
+          data.assets.map((asset, index) => (
+            <img key={index} src={asset} alt={`Asset ${index}`} />
+          ))
+        ) : (
+          <p>No assets available</p>
+        )}
       </div>
     </div>
   );

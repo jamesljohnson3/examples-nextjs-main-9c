@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { 
   GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN 
 } from '@/app/(shell)/(main)/queries';
-import { DELETE_SEGMENT } from '@/app/(shell)/(main)/mutations';  // Adjust import path as needed
+import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
