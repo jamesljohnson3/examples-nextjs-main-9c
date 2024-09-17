@@ -78,13 +78,7 @@ const ProductPage: React.FC = () => {
       alert('Error deleting segment.');
     }
   });
-  const handleDeleteSegment = async (segmentId: any) => {
-    try {
-      await deleteSegment({ variables: { segmentId } });
-    } catch (error) {
-      console.error('Error executing delete mutation:', error);
-    }
-  };
+
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -153,15 +147,8 @@ const ProductPage: React.FC = () => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
 
-      // Check if the removed field is reserved
-      if (RESERVED_FIELDS.has(removedField.id)) {
-        // Add reserved field back to remainingFields
-        setRemainingFields(prev => [
-          ...prev.filter(field => field.id !== removedField.id),
-          removedField
-        ].sort((a, b) => a.label.localeCompare(b.label)));
-      } else {
-        // Add non-reserved field back to remainingFields
+      // Add the removed field back to remainingFields if it was not reserved
+      if (!RESERVED_FIELDS.has(removedField.id)) {
         setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
       }
 
@@ -240,7 +227,6 @@ const ProductPage: React.FC = () => {
   const handlePublish = async () => {
     try {
       const productVersionId = localStorage.getItem('productVersionId');
-
       if (!productVersionId) {
         alert('No product version ID found.');
         return;
@@ -253,15 +239,15 @@ const ProductPage: React.FC = () => {
             id: segment.id,
             name: segment.name,
             slug: segment.slug,
-            post: segment.post
+            post: segment.post,
           })),
         },
       });
 
       alert('Segments published successfully!');
     } catch (error) {
-      console.error('Error publishing segment:', error);
-      alert('Failed to publish segment.');
+      console.error('Error publishing segments:', error);
+      alert('Failed to publish segments.');
     }
   };
 
@@ -287,6 +273,16 @@ const ProductPage: React.FC = () => {
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setCustomFieldOptions('');
+  };
+
+  const handleDeleteSegment = async (segmentId: string) => {
+    try {
+      await deleteSegment({ variables: { segmentId } });
+      setSegments(prev => prev.filter(segment => segment.id !== segmentId));
+    } catch (error) {
+      console.error('Error deleting segment:', error);
+      alert('Failed to delete segment.');
+    }
   };
 
   if (loadingProduct || loadingSegments) {
