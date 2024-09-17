@@ -230,14 +230,8 @@ export default function ProductPage() {
             <AccordionItem value="segments">
               <AccordionTrigger>Manage Segments</AccordionTrigger>
               <AccordionContent>
-                {segments.map((segment) => (
-                  <Card key={segment.id}>
-                    <CardContent>
-                      <h3>{segment.name}</h3>
-                      <p>{segment.content}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+                
+                
               </AccordionContent>
             </AccordionItem>
           </Accordion>
