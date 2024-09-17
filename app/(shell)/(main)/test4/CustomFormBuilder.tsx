@@ -1,4 +1,5 @@
 "use client"
+"use client"
 import React, { useState, useEffect, memo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -97,7 +98,6 @@ const ProductPage: React.FC = () => {
   const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
   const [saveProduct] = useMutation(SAVE_PRODUCT);
-
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
@@ -105,16 +105,17 @@ const ProductPage: React.FC = () => {
         ...field,
         value: product[field.id] || ''
       }));
-
+  
       const reserved = initialFields.filter(field => RESERVED_FIELDS.has(field.id));
       const available = initialFields.filter(field => !RESERVED_FIELDS.has(field.id));
-
+  
       setFormFields(available);
       setReservedFields(reserved);
       setAvailableFields(initialAvailableFields.filter(field => !RESERVED_FIELDS.has(field.id)));
       setProductData(product);
     }
   }, [productDataQuery]);
+  
 
   useEffect(() => {
     if (segmentsData?.segments) {
@@ -140,24 +141,24 @@ const ProductPage: React.FC = () => {
       alert('Cannot add reserved field.');
       return;
     }
-
+  
     setFormFields(prev => [...prev, newField]);
     setAvailableFields(prev => prev.filter(field => field.id !== newField.id));
     setHasUnsavedChanges(true);
   };
-
+  
   const handleRemoveField = (index: number) => {
     const field = formFields[index];
-    setFormFields(prev => prev.filter((_, i) => i !== index));
-
     if (RESERVED_FIELDS.has(field.id)) {
-      setReservedFields(prev => [...prev, field]);
-    } else {
-      setAvailableFields(prev => [...prev, field].sort((a, b) => a.label.localeCompare(b.label)));
+      alert('Cannot remove reserved field.');
+      return;
     }
-
+  
+    setFormFields(prev => prev.filter((_, i) => i !== index));
+    setAvailableFields(prev => [...prev, field].sort((a, b) => a.label.localeCompare(b.label)));
     setHasUnsavedChanges(true);
   };
+  
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -321,20 +322,21 @@ const ProductPage: React.FC = () => {
                                   />
                                 )}
                                 {field.type === 'select' && field.options && (
-                                  <Select
-                                    value={field.value || ''}
-                                    onValueChange={(value) => handleInputChange(field.id, value)}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select an option" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {field.options.map(option => (
-                                        <SelectItem key={option} value={option}>{option}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                )}
+  <Select
+    value={field.value || ''}
+    onValueChange={(value) => handleInputChange(field.id, value)}
+  >
+    <SelectTrigger>
+      <SelectValue placeholder="Select an option" />
+    </SelectTrigger>
+    <SelectContent>
+      {field.options.map(option => (
+        <SelectItem key={option} value={option}>{option}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+)}
+
                               </div>
                               <Button onClick={() => handleRemoveField(index)}>
                                 <MinusIcon />
