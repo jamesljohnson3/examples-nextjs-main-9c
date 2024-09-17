@@ -125,6 +125,12 @@ const ProductEditor = () => {
   const handleAddCustomField = () => {
     if (!validateCustomField()) return;
 
+    // Check if the field already exists
+    if (customFields[customFieldLabel]) {
+      alert('Custom field with this label already exists.');
+      return;
+    }
+
     const newField = {
       type: customFieldType,
       options: customFieldType === 'select' ? customFieldOptions.split(',').map(option => option.trim()) : []
@@ -172,35 +178,30 @@ const ProductEditor = () => {
     <div>
       <h1>Edit Product</h1>
       <div className="custom-field-form">
-        <Input
+        <input
           value={customFieldLabel}
           onChange={(e) => setCustomFieldLabel(e.target.value)}
           placeholder="Field Label"
         />
-        <Select
+        <select
           value={customFieldType}
-          onValueChange={(value: 'text' | 'textarea' | 'number' | 'select') => setCustomFieldType(value)}
+          onChange={(e) => setCustomFieldType(e.target.value as 'text' | 'textarea' | 'number' | 'select')}
         >
-          <SelectTrigger>
-            <SelectValue>{customFieldType}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="text">Text</SelectItem>
-            <SelectItem value="textarea">Textarea</SelectItem>
-            <SelectItem value="number">Number</SelectItem>
-            <SelectItem value="select">Select</SelectItem>
-          </SelectContent>
-        </Select>
+          <option value="text">Text</option>
+          <option value="textarea">Textarea</option>
+          <option value="number">Number</option>
+          <option value="select">Select</option>
+        </select>
         {customFieldType === 'select' && (
-          <Textarea
+          <textarea
             value={customFieldOptions}
             onChange={(e) => setCustomFieldOptions(e.target.value)}
             placeholder="Comma-separated options"
           />
         )}
-        <Button onClick={handleAddCustomField}>
+        <button onClick={handleAddCustomField}>
           Add Custom Field
-        </Button>
+        </button>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
