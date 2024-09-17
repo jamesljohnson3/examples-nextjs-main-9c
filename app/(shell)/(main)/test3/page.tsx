@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
+import { v4 as uuidv4 } from 'uuid';
 
 interface FormField {
   id: string;
@@ -128,21 +129,22 @@ export default function ProductPage() {
 
   const handleSave = async () => {
     try {
-      if (productData) {
-        // Generate Unix timestamp for versionNumber
-        const versionNumber = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
-  
-        await updateProductVersion({
-          variables: {
-            productId: PRODUCT_ID,
-            versionNumber: versionNumber,
-            changes: "Updated product version",
-            data: productData
-          }
-        });
-        setHasUnsavedChanges(false);
-        alert('Product version updated!');
-      }
+      // Generate Unix timestamp for versionNumber
+      const versionNumber = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+
+      // Generate a UUID for the id
+      const id = uuidv4();
+
+      await updateProductVersion({
+        variables: {
+          productId: PRODUCT_ID,
+          versionNumber: versionNumber,
+          changes: "Updated product version",
+          data: productData, // Ensure productData matches the ProductInput type
+          id: id // Use the generated UUID
+        }
+      });
+      alert('Product version updated!');
     } catch (error) {
       console.error('Error updating product version:', error);
     }

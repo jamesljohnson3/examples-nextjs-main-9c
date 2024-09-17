@@ -2,13 +2,16 @@
 import { gql } from '@apollo/client';
 
 // Mutation to update product version
-export const UPDATE_PRODUCT_VERSION = gql`mutation UpdateProductVersion(
+export const UPDATE_PRODUCT_VERSION = gql`
+ mutation InsertOrUpdateProductVersion(
   $productId: String!,
   $versionNumber: Int!,
   $changes: String!,
-  $data: jsonb!
+  $data: ProductInput!,
+  $id: String!
 ) {
   insert_ProductVersion_one(object: {
+    id: $id,
     productId: $productId,
     versionNumber: $versionNumber,
     changes: $changes,
