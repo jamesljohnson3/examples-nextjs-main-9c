@@ -154,7 +154,7 @@ export default function ProductPage() {
       // Execute the mutation with the parsed product data
       await saveProduct({
         variables: {
-          productId: id,
+          productId: PRODUCT_ID,
           name,
           description,
           price: parsedPrice,
