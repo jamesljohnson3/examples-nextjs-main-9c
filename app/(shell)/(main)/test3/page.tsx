@@ -132,7 +132,7 @@ export default function ProductPage() {
         await updateProductVersion({
           variables: {
             productId: PRODUCT_ID,
-            versionNumber: 10, // Update this as needed
+            versionNumber: 10112, // Update this as needed
             changes: "Updated product version",
             data: productData
           }
