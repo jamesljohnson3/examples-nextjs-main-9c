@@ -40,6 +40,8 @@ export const GET_WORKSPACE = gql`
     Workspace(where: { id: { _eq: $workspaceId } }) {
       id
      organizationId
+     name
+     createdAt
     }
   }
 `;
