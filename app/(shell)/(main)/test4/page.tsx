@@ -241,7 +241,15 @@ export default function ProductPage() {
           <TabsTrigger value="segments">Segments</TabsTrigger>
         </TabsList>
 
-        <div className="flex justify-between items-center mb-2">
+        
+        <div className="tab-content">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="product-form">
+              <AccordionTrigger>Product Form</AccordionTrigger>
+              <AccordionContent>
+                <Card>
+                  <CardContent>
+                  <div className="flex justify-between items-center mb-2">
                       <div className="flex space-x-1">       
                         {remainingFields.map((field) => (
                           <Button
@@ -256,13 +264,6 @@ export default function ProductPage() {
                         ))}
                       </div>
                     </div>
-        <div className="tab-content">
-          <Accordion type="single" collapsible>
-            <AccordionItem value="product-form">
-              <AccordionTrigger>Product Form</AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent>
                     <DragDropContext onDragEnd={onDragEnd}>
                       <Droppable droppableId="form-fields">
                         {(provided) => (
