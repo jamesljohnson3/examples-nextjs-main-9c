@@ -59,24 +59,14 @@ type EditedPost = {
 
 // Sample static data
 const STATIC_PRODUCT_DATA: Post = {
-  id: "my-tableName-id",
+  id: 'prod123',
   content: JSON.stringify({
     name: 'Sample Product',
-    id: "sample-tableName-id",
-
-    model: "test",
-      Make: "Nissan",
-      Meta: "Vehicle for sale",
-      Year: "2012",
-      Mileage: "test",
-      Transmission: "Auto",
-      Passenger: "2 Door",
-      Fuel: "test",
-      Type: "Truck",
-      html: "",
-      image: "",
-      video: "",
-      caption: "",
+    description: 'A sample product for demonstration.',
+    price: '99.99',
+    quantity: '10',
+    category: 'Electronics',
+    customField1: 'Custom Value 1',
     customField2: 'Custom Value 2'
   }),
   createdAt: '2023-01-01T00:00:00Z'
