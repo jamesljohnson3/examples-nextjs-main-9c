@@ -57,8 +57,8 @@ async function MadeForYou() {
 
             {/* Pornhub Videos Scroll Area */}
             <div className="relative">
-              <h2 className="text-2xl font-semibold tracking-tight">Pornhub Videos</h2>
-              <div style={{ overflowX: 'auto', maxWidth: '720px' }}>
+              <h2 className="text-2xl text-center font-semibold tracking-tight">Pornhub Videos</h2>
+              <div style={{ overflowX: 'auto', maxWidth: '980px' }}>
                 <div className="flex space-x-4 pb-4 min-w-[150px]">
                   <React.Suspense fallback={<div>Loading Pornhub Videos...</div>}>
                     <PornhubData />
