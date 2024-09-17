@@ -14,9 +14,10 @@ const ProductPage = ({ params }) => {
   const PRODUCT_ID = params.id;
   const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph'; // Define your workspace ID here
 
+  const [organizationId, setOrganizationId] = useState(null);
+
   // Fetch workspace details
   const { data: workspaceData, loading: workspaceLoading, error: workspaceError } = useQuery(GET_WORKSPACE, { variables: { workspaceId: WORKSPACE_ID } });
-  const [organizationId, setOrganizationId] = useState(null);
 
   // Fetch organization details only when organizationId is available
   const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
@@ -40,8 +41,8 @@ const ProductPage = ({ params }) => {
   const [designElementVersions, setDesignElementVersions] = useState({});
 
   useEffect(() => {
-    if (workspaceData && workspaceData.Workspace?.length > 0) {
-      setOrganizationId(workspaceData.Workspace[0]?.organization?.id || null);
+    if (workspaceData?.Workspace?.[0]?.organization?.id) {
+      setOrganizationId(workspaceData.Workspace[0].organization.id);
     }
   }, [workspaceData]);
 
