@@ -724,12 +724,14 @@ export default function InventoryManagement() {
     <div className="min-h-screen rounded-md bg-gradient-to-br from-white via-gray-100 to-white  p-2 space-y-2">
   <div className="text-sm text-muted-foreground">
   <SidebarTrigger />
-  Products / {previewData.category} / {previewData.id}
+  Products / {previewData.category} / {previewData.id} 
           </div>              <div className="grid grid-cols-3 gap-2 mb-2">
                 <Card className="bg-white border-0">
                   <CardContent className="p-1">
                     <h3 className="text-xs font-bold">Version</h3>
                     <p className="text-xs">v2.1.3</p>
+
+                    <a href='/edit2'>Create Segment</a>
                   </CardContent>
                 </Card>
                 <Card className="bg-white border-0">

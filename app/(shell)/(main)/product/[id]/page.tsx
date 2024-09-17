@@ -3,9 +3,10 @@ import {
   SidebarLayout,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import Process from "./process"
-export default async function Page() {
+import App from "./app"
+
+export default async function Page({ params }: { params: { id: string } }) {
   const { cookies } = await import("next/headers")
-  return ( <Process/>
+  return ( <App params={params}/>
   )
 }

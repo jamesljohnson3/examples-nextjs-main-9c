@@ -2,7 +2,7 @@
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
 import { GET_DASHBOARD_DATA } from '@/app/(shell)/(main)/queries'; // Importing the query
-
+import Process from './process';
 
 export default function HomePage() {
   const { data, loading, error } = useQuery(GET_DASHBOARD_DATA, {
