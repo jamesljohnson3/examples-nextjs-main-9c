@@ -54,7 +54,7 @@ export default function ProductPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
-  
+
   // Fetch product data
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
@@ -68,13 +68,13 @@ export default function ProductPage() {
   useEffect(() => {
     if (productDataQuery) {
       setProductData(productDataQuery.product);
-      setFormFields(initialFormElements); // You can customize initial form fields based on the product
+      setFormFields(initialFormElements); // Customize initial form fields based on the product
     }
   }, [productDataQuery]);
 
   useEffect(() => {
-    if (segmentsData) {
-      setSegments(segmentsData.segments);
+    if (segmentsData && Array.isArray(segmentsData.segments)) {
+      setSegments(segmentsData.segments); // Ensure segments is an array
     }
   }, [segmentsData]);
 
@@ -121,7 +121,7 @@ export default function ProductPage() {
             key={field.id}
             placeholder={field.label}
             value={(productData as any)?.[field.id] || ''}
-            onChange={(e: { target: { value: string | number; }; }) => handleInputChange(field.id, e.target.value)}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
           />
         );
       case 'textarea':
@@ -130,7 +130,7 @@ export default function ProductPage() {
             key={field.id}
             placeholder={field.label}
             value={(productData as any)?.[field.id] || ''}
-            onChange={(e: { target: { value: string | number; }; }) => handleInputChange(field.id, e.target.value)}
+            onChange={(e) => handleInputChange(field.id, e.target.value)}
           />
         );
       case 'number':
@@ -140,7 +140,7 @@ export default function ProductPage() {
             type="number"
             placeholder={field.label}
             value={(productData as any)?.[field.id] || ''}
-            onChange={(e: { target: { value: string; }; }) => handleInputChange(field.id, parseFloat(e.target.value))}
+            onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
           />
         );
       case 'select':
@@ -148,7 +148,7 @@ export default function ProductPage() {
           <Select
             key={field.id}
             value={(productData as any)?.[field.id] || ''}
-            onValueChange={(value: string | number) => handleInputChange(field.id, value)}
+            onValueChange={(value) => handleInputChange(field.id, value)}
           >
             <SelectTrigger>
               <SelectValue placeholder={field.label} />
@@ -230,8 +230,18 @@ export default function ProductPage() {
             <AccordionItem value="segments">
               <AccordionTrigger>Manage Segments</AccordionTrigger>
               <AccordionContent>
-                
-                
+                {segments.length > 0 ? (
+                  segments.map((segment) => (
+                    <Card key={segment.id}>
+                      <CardContent>
+                        <h3>{segment.name}</h3>
+                        <p>{segment.content}</p>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <p>No segments available</p>
+                )}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
