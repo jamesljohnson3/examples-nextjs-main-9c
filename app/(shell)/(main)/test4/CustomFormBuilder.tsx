@@ -12,7 +12,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
 
 const RESERVED_FIELDS = new Set([
@@ -102,14 +101,16 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
-
       const initialFields: FormField[] = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
 
-      setFormFields(initialFields.filter(field => !RESERVED_FIELDS.has(field.id)));
-      setReservedFields(initialAvailableFields.filter(field => RESERVED_FIELDS.has(field.id)));
+      const reserved = initialFields.filter(field => RESERVED_FIELDS.has(field.id));
+      const available = initialFields.filter(field => !RESERVED_FIELDS.has(field.id));
+
+      setFormFields(available);
+      setReservedFields(reserved);
       setAvailableFields(initialAvailableFields.filter(field => !RESERVED_FIELDS.has(field.id)));
       setProductData(product);
     }
