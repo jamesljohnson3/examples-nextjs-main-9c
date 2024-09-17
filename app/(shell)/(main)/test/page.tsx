@@ -20,7 +20,8 @@ interface FormField {
   id: string;
   type: string;
   label: string;
-  options?: string[]; // For 'select' field type
+  options?: string[];
+  value?: string | number; // Add this line to handle field values
 }
 
 interface ProductData {
@@ -30,6 +31,7 @@ interface ProductData {
   price: number;
   quantity: number;
   category: string;
+  [key: string]: any; // Index signature to handle dynamic keys
 }
 
 interface Segment {
@@ -37,7 +39,6 @@ interface Segment {
   name: string;
   content: string;
 }
-
 
 // Mocked initial available form fields
 const availableFields: FormField[] = [
@@ -47,6 +48,7 @@ const availableFields: FormField[] = [
   { id: 'quantity', type: 'number', label: 'Quantity' },
   { id: 'category', type: 'select', label: 'Category', options: ['Electronics', 'Clothing', 'Food'] },
 ];
+
 
 export default function ProductPage() {
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -88,10 +90,12 @@ export default function ProductPage() {
   }, [segmentsData]);
 
   const handleInputChange = (fieldId: string, value: string | number) => {
-    setProductData(prev => ({
-      ...prev!,
-      [fieldId]: value
-    }));
+    if (productData) {
+      setProductData(prev => ({
+        ...prev!,
+        [fieldId]: value
+      }));
+    }
     setFormFields(prev =>
       prev.map(field => (field.id === fieldId ? { ...field, value } : field))
     );
@@ -241,6 +245,10 @@ export default function ProductPage() {
                         </Button>
                       ))}
                     </div>
+                    {hasUnsavedChanges && (
+                      <Button onClick={handleSave}>Save</Button>
+                    )}
+                    <Button onClick={handlePublish}>Publish</Button>
                   </CardContent>
                 </Card>
               </AccordionContent>
@@ -248,33 +256,7 @@ export default function ProductPage() {
           </Accordion>
 
           {/* Segments Tab */}
-          <Accordion type="single" collapsible>
-            <AccordionItem value="segments">
-              <AccordionTrigger>Manage Segments</AccordionTrigger>
-              <AccordionContent>
-                {segments.length > 0 ? (
-                  segments.map((segment) => (
-                    <Card key={segment.id}>
-                      <CardContent>
-                        <h3>{segment.name}</h3>
-                        <p>{segment.content}</p>
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : (
-                  <p>No segments available</p>
-                )}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-
-        {/* Save and Publish Actions */}
-        <div className="actions">
-          {hasUnsavedChanges && (
-            <Button onClick={handleSave}>Save</Button>
-          )}
-          <Button onClick={handlePublish}>Publish</Button>
+           
         </div>
       </Tabs>
     </div>
