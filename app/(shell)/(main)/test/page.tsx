@@ -1,20 +1,25 @@
 'use client'
-import React, { useEffect, useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
-import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN } from '@/app/(shell)/(main)/queries';
-import { DELETE_SEGMENT } from './mutations'; // Adjust import path as needed
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { PlusIcon, MinusIcon } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+ import { 
+  MinusIcon, GripVertical, 
+  Save
+  } from 'lucide-react';
+import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN } from '@/app/(shell)/(main)/queries';
 
 interface FormField {
   id: string;
   type: string;
   label: string;
-  options?: string[]; // Only for 'select' type
+  options?: string[]; // For 'select' field type
 }
 
 interface ProductData {
@@ -24,262 +29,229 @@ interface ProductData {
   price: number;
   quantity: number;
   category: string;
-  [key: string]: string | number | undefined;
 }
 
-const ProductPage = () => {
+interface Segment {
+  id: string;
+  name: string;
+  content: string;
+}
+
+// Mocked initial form fields
+const initialFormElements: FormField[] = [
+  { id: 'name', type: 'text', label: 'Name' },
+  { id: 'description', type: 'textarea', label: 'Description' },
+  { id: 'price', type: 'number', label: 'Price' },
+  { id: 'quantity', type: 'number', label: 'Quantity' },
+  { id: 'category', type: 'select', label: 'Category', options: ['Electronics', 'Clothing', 'Food'] },
+];
+
+export default function ProductPage() {
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  const [availableFields, setAvailableFields] = useState<FormField[]>([]);
+  const [productData, setProductData] = useState<ProductData | null>(null);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   
-  const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, {
-    variables: { productId: PRODUCT_ID },
+  // Fetch product data
+  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+    variables: { productId: PRODUCT_ID }
   });
 
-  const { data: segmentsData, loading: segmentsLoading, error: segmentsError } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
-    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID },
+  // Fetch segments related to the product and domain
+  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
+    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
 
-  if (productLoading || segmentsLoading) return <p>Loading...</p>;
-  if (productError || segmentsError) return <p>Error loading data.</p>;
+  useEffect(() => {
+    if (productDataQuery) {
+      setProductData(productDataQuery.product);
+      setFormFields(initialFormElements); // You can customize initial form fields based on the product
+    }
+  }, [productDataQuery]);
 
-  const product = productData?.Product?.[0] || {};
-  const segments = segmentsData?.Segment || [];
+  useEffect(() => {
+    if (segmentsData) {
+      setSegments(segmentsData.segments);
+    }
+  }, [segmentsData]);
 
-  if (!product || !segments.length) {
-    return <p>Product or segment data is missing or incomplete</p>;
+  // Handle input changes in form fields
+  const handleInputChange = (fieldId: string, value: string | number) => {
+    if (productData) {
+      setProductData({
+        ...productData,
+        [fieldId]: value
+      });
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  // Handle adding a custom form field
+  const handleAddField = (newField: FormField) => {
+    setFormFields([...formFields, newField]);
+    setHasUnsavedChanges(true);
+  };
+
+  // Handle removing a form field
+  const handleRemoveField = (index: number) => {
+    const updatedFields = [...formFields];
+    updatedFields.splice(index, 1);
+    setFormFields(updatedFields);
+    setHasUnsavedChanges(true);
+  };
+
+  // Handle drag-and-drop form reordering
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return;
+    const reorderedFields = Array.from(formFields);
+    const [reorderedItem] = reorderedFields.splice(result.source.index, 1);
+    reorderedFields.splice(result.destination.index, 0, reorderedItem);
+    setFormFields(reorderedFields);
+  };
+
+  // Render the form fields dynamically based on their type
+  const renderFieldInput = (field: FormField) => {
+    switch (field.type) {
+      case 'text':
+        return (
+          <Input
+            key={field.id}
+            placeholder={field.label}
+            value={(productData as any)?.[field.id] || ''}
+            onChange={(e: { target: { value: string | number; }; }) => handleInputChange(field.id, e.target.value)}
+          />
+        );
+      case 'textarea':
+        return (
+          <Textarea
+            key={field.id}
+            placeholder={field.label}
+            value={(productData as any)?.[field.id] || ''}
+            onChange={(e: { target: { value: string | number; }; }) => handleInputChange(field.id, e.target.value)}
+          />
+        );
+      case 'number':
+        return (
+          <Input
+            key={field.id}
+            type="number"
+            placeholder={field.label}
+            value={(productData as any)?.[field.id] || ''}
+            onChange={(e: { target: { value: string; }; }) => handleInputChange(field.id, parseFloat(e.target.value))}
+          />
+        );
+      case 'select':
+        return (
+          <Select
+            key={field.id}
+            value={(productData as any)?.[field.id] || ''}
+            onValueChange={(value: string | number) => handleInputChange(field.id, value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={field.label} />
+            </SelectTrigger>
+            <SelectContent>
+              {(field.options || []).map((option) => (
+                <SelectItem key={option} value={option}>{option}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Function to publish updates (mock mutation)
+  const handlePublish = () => {
+    // Implement your mutation logic here
+    console.log('Publishing updates:', productData, segments);
+    setHasUnsavedChanges(false);
+  };
+
+  if (loadingProduct || loadingSegments) {
+    return <div>Loading...</div>;
   }
 
-  const CustomFormBuilder: React.FC<{
-    formFields: FormField[];
-    setFormFields: React.Dispatch<React.SetStateAction<FormField[]>>;
-    availableFields: FormField[];
-    setAvailableFields: React.Dispatch<React.SetStateAction<FormField[]>>;
-    previewData: ProductData;
-    hasUnsavedChanges: boolean;
-    setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
-    handleInputChange: (id: string, value: string | number) => void;
-  }> = ({
-    formFields,
-    setFormFields,
-    availableFields,
-    setAvailableFields,
-    previewData,
-    hasUnsavedChanges,
-    setHasUnsavedChanges,
-    handleInputChange,
-  }) => {
-    const [newField, setNewField] = useState<FormField>({ id: '', type: 'text', label: '' });
-
-    const [publishProduct] = useMutation(DELETE_SEGMENT);
-
-    useEffect(() => {
-      if (segmentsData && segmentsData.Segment) {
-        const fetchedSegments = segmentsData.Segment.map((segment: any) => ({
-          id: segment.id,
-          type: 'text',
-          label: segment.name,
-        }));
-        setAvailableFields(fetchedSegments);
-      }
-    }, [segmentsData, setAvailableFields]);
-
-    const handleAddField = () => {
-      if (newField.id && newField.label) {
-        const newFieldId = `customField-${Date.now()}`;
-        setFormFields([...formFields, { ...newField, id: newFieldId }]);
-        setAvailableFields(availableFields.filter(f => f.id !== newField.id));
-        setNewField({ id: '', label: '', type: 'text', options: [] });
-        setHasUnsavedChanges(true);
-      }
-    };
-
-    const addFormField = (field: FormField) => {
-      setFormFields([...formFields, { ...field, id: `${field.id}-${Date.now()}` }]);
-      setAvailableFields(availableFields.filter(f => f.id !== field.id));
-      setHasUnsavedChanges(true);
-    };
-
-    const removeFormField = (index: number) => {
-      const removedField = formFields[index];
-      const newFields = [...formFields];
-      newFields.splice(index, 1);
-      setFormFields(newFields);
-      setAvailableFields([...availableFields, { id: removedField.id.split('-')[0], label: removedField.label, type: removedField.type }]);
-      setHasUnsavedChanges(true);
-    };
-
-    const onDragEnd = (result: any) => {
-      if (!result.destination) return;
-      const items = Array.from(formFields);
-      const [reorderedItem] = items.splice(result.source.index, 1);
-      items.splice(result.destination.index, 0, reorderedItem);
-      setFormFields(items);
-    };
-
-    const handlePublish = async () => {
-      console.log("Publishing product version...");
-      try {
-        await publishProduct({
-          variables: { id: PRODUCT_ID },
-        });
-        console.log("Product version updated successfully.");
-      } catch (error) {
-        console.error("Error updating product version:", error);
-      }
-    };
-
-    const renderFieldInput = (field: FormField) => {
-      const fieldId = field.id.split('-')[0];
-      switch (field.type) {
-        case 'text':
-          return (
-            <Input
-              key={field.id}
-              placeholder={field.label}
-              className="flex-grow text-xs h-7"
-              value={previewData[fieldId] || ''}
-              onChange={(e) => handleInputChange(fieldId, e.target.value)}
-            />
-          );
-        case 'textarea':
-          return (
-            <Textarea
-              key={field.id}
-              placeholder={field.label}
-              className="flex-grow text-xs h-14"
-              value={previewData[fieldId] || ''}
-              onChange={(e) => handleInputChange(fieldId, e.target.value)}
-            />
-          );
-        case 'number':
-          return (
-            <Input
-              key={field.id}
-              type="number"
-              placeholder={field.label}
-              className="flex-grow text-xs h-7"
-              value={previewData[fieldId] ? previewData[fieldId].toString() : ''}
-              onChange={(e) => {
-                const numericValue = e.target.value ? parseFloat(e.target.value) : undefined;
-                handleInputChange(fieldId, numericValue!);
-              }}
-            />
-          );
-        case 'select':
-          return (
-            <Select
-              key={field.id}
-              value={previewData[fieldId] || ''}
-              onValueChange={(value) => handleInputChange(fieldId, value as string)}
-            >
-              <SelectTrigger className="flex-grow text-xs h-7">
-                <SelectValue placeholder={field.label} />
-              </SelectTrigger>
-              <SelectContent>
-                {(field.options || []).map((option) => (
-                  <SelectItem key={option} value={option} className="text-xs">
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          );
-        default:
-          return null;
-      }
-    };
-
-    return (
-      <div>
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex space-x-1">
-              {availableFields.map((element) => (
-                <Button key={element.id} variant="outline" size="sm" onClick={() => addFormField(element)} className="text-xs py-1 px-2">
-                  <PlusIcon className="h-3 w-3 mr-1" /> {element.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="droppable">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="space-y-2"
-                >
-                  {formFields.map((field, index) => (
-                    <Draggable key={field.id} draggableId={field.id} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="bg-white p-4 border border-gray-300 rounded-lg"
-                        >
-                          <div className="flex items-center mb-2">
-                            <span className="flex-grow">{field.label}</span>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => removeFormField(index)}
-                              className="text-xs p-1"
-                            >
-                              <MinusIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          {renderFieldInput(field)}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <Button onClick={handleAddField} variant="outline" size="sm">
-            Add Field
-          </Button>
-          <Button onClick={handlePublish} variant="outline" size="sm" disabled={!hasUnsavedChanges}>
-            {hasUnsavedChanges ? 'Publish Changes' : 'No Changes'}
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const handleInputChange = (id: string, value: string | number) => {
-    // Update form logic here
-  };
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [formFields, setFormFields] = useState<FormField[]>([]);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [availableFields, setAvailableFields] = useState<FormField[]>([]);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
   return (
-    <div>
-      <h1>{product.name}</h1>
-      <CustomFormBuilder
-        formFields={formFields}
-        setFormFields={setFormFields}
-        availableFields={availableFields}
-        setAvailableFields={setAvailableFields}
-        previewData={product}
-        hasUnsavedChanges={hasUnsavedChanges}
-        setHasUnsavedChanges={setHasUnsavedChanges}
-        handleInputChange={handleInputChange}
-      />
+    <div className="product-page">
+      <Tabs>
+        <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="form">Form Builder</TabsTrigger>
+          <TabsTrigger value="segments">Segments</TabsTrigger>
+        </TabsList>
+
+        <div className="tab-content">
+          {/* Form Builder Tab */}
+          <Accordion type="single" collapsible>
+            <AccordionItem value="product-form">
+              <AccordionTrigger>Product Form</AccordionTrigger>
+              <AccordionContent>
+                <Card>
+                  <CardContent>
+                    <DragDropContext onDragEnd={onDragEnd}>
+                      <Droppable droppableId="form-fields">
+                        {(provided) => (
+                          <div {...provided.droppableProps} ref={provided.innerRef}>
+                            {formFields.map((field, index) => (
+                              <Draggable key={field.id} draggableId={field.id} index={index}>
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className="field-item"
+                                  >
+                                    <GripVertical />
+                                    {renderFieldInput(field)}
+                                    <Button variant="ghost" onClick={() => handleRemoveField(index)}>
+                                      <MinusIcon />
+                                    </Button>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          {/* Segments Tab */}
+          <Accordion type="single" collapsible>
+            <AccordionItem value="segments">
+              <AccordionTrigger>Manage Segments</AccordionTrigger>
+              <AccordionContent>
+                {segments.map((segment) => (
+                  <Card key={segment.id}>
+                    <CardContent>
+                      <h3>{segment.name}</h3>
+                      <p>{segment.content}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
+        {/* Publish Changes */}
+        <div className="actions">
+          {hasUnsavedChanges && (
+            <Button onClick={handlePublish}>
+              <Save /> Publish Changes
+            </Button>
+          )}
+        </div>
+      </Tabs>
     </div>
   );
-};
-
-export default ProductPage;
+}
