@@ -18,7 +18,6 @@ export const UPDATE_PRODUCT_VERSION = gql`mutation UpdateProductVersion(
   }
 }
 
-
 `;
 
 // Mutation to publish segments

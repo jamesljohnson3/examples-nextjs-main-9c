@@ -129,10 +129,13 @@ export default function ProductPage() {
   const handleSave = async () => {
     try {
       if (productData) {
+        // Generate Unix timestamp for versionNumber
+        const versionNumber = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+  
         await updateProductVersion({
           variables: {
             productId: PRODUCT_ID,
-            versionNumber: 10112, // Update this as needed
+            versionNumber: versionNumber,
             changes: "Updated product version",
             data: productData
           }
@@ -144,6 +147,7 @@ export default function ProductPage() {
       console.error('Error updating product version:', error);
     }
   };
+  
 
   const handlePublish = async () => {
     try {
