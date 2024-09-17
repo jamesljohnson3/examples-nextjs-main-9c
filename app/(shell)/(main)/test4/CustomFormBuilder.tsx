@@ -56,11 +56,11 @@ const initialAvailableFields: FormField[] = [
 
 const ProductPage: React.FC = () => {
   const [formFields, setFormFields] = useState<FormField[]>([]);
-  const [remainingFields, setRemainingFields] = useState<FormField[]>(initialAvailableFields);
+  const [reservedFields, setReservedFields] = useState<FormField[]>([]);
+  const [availableFields, setAvailableFields] = useState<FormField[]>(initialAvailableFields);
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [reservedRemainingFields, setReservedRemainingFields] = useState<FormField[]>([]);
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
   const [customFieldOptions, setCustomFieldOptions] = useState('');
@@ -108,12 +108,9 @@ const ProductPage: React.FC = () => {
         value: product[field.id] || ''
       }));
 
-      setFormFields(initialFields);
-
-      const excludedFields = new Set(initialFields.map(field => field.id));
-      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
-
-      setRemainingFields(updatedRemainingFields);
+      setFormFields(initialFields.filter(field => !RESERVED_FIELDS.has(field.id)));
+      setReservedFields(initialAvailableFields.filter(field => RESERVED_FIELDS.has(field.id)));
+      setAvailableFields(initialAvailableFields.filter(field => !RESERVED_FIELDS.has(field.id)));
       setProductData(product);
     }
   }, [productDataQuery]);
@@ -144,29 +141,20 @@ const ProductPage: React.FC = () => {
     }
 
     setFormFields(prev => [...prev, newField]);
-    setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
+    setAvailableFields(prev => prev.filter(field => field.id !== newField.id));
     setHasUnsavedChanges(true);
   };
 
   const handleRemoveField = (index: number) => {
-    setFormFields(prev => {
-      const updatedFields = [...prev];
-      const removedField = updatedFields.splice(index, 1)[0];
+    const field = formFields[index];
+    setFormFields(prev => prev.filter((_, i) => i !== index));
 
-      if (RESERVED_FIELDS.has(removedField.id)) {
-        setReservedRemainingFields(prevFields => [
-          ...prevFields.filter(field => field.id !== removedField.id),
-          removedField
-        ]);
-      } else {
-        setRemainingFields(prevFields => [
-          ...prevFields,
-          removedField
-        ].sort((a, b) => a.label.localeCompare(b.label)));
-      }
+    if (RESERVED_FIELDS.has(field.id)) {
+      setReservedFields(prev => [...prev, field]);
+    } else {
+      setAvailableFields(prev => [...prev, field].sort((a, b) => a.label.localeCompare(b.label)));
+    }
 
-      return updatedFields;
-    });
     setHasUnsavedChanges(true);
   };
 
@@ -252,14 +240,19 @@ const ProductPage: React.FC = () => {
 
       alert('Segments published successfully!');
     } catch (error) {
-      console.error('Error publishing segment:', error);
-      alert('Failed to publish segment.');
+      console.error('Error publishing segments:', error);
+      alert('Failed to publish segments.');
     }
   };
 
   const handleAddCustomField = () => {
-    if (!customFieldLabel.trim()) {
-      alert('Field label cannot be empty.');
+    if (!customFieldLabel) {
+      alert('Field label is required.');
+      return;
+    }
+
+    if (RESERVED_FIELDS.has(customFieldLabel)) {
+      alert('Field label is reserved.');
       return;
     }
 
@@ -361,7 +354,7 @@ const ProductPage: React.FC = () => {
           </div>
           <div>
             <h2>Available Fields</h2>
-            {remainingFields.map(field => (
+            {availableFields.map(field => (
               <Button
                 key={field.id}
                 onClick={() => handleAddField(field)}
