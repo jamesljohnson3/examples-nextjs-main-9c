@@ -1,7 +1,6 @@
 // mutations.js or mutations.ts
 import { gql } from '@apollo/client';
 
-
 export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
   mutation UpdateProductAndInsertSegment(
     $productId: String!,
@@ -11,7 +10,7 @@ export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
     $slug: String!,
     $segmentName: String!,
     $domainId: String!,
-    $post: Json!
+    $post: jsonb!  // Updated to jsonb
   ) {
     update_Product(
       where: { id: { _eq: $productId } },
