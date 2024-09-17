@@ -311,49 +311,24 @@ const renderFieldInput = (
 export default function InventoryManagement() {
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [availableFields, setAvailableFields] = useState<FormField[]>(initialFormElements);
-  const [nlpSensitivity, setNlpSensitivity] = useState(50);
-  const [aiCreativity, setAiCreativity] = useState(50);
+  
   const [previewData, setPreviewData] = useState<ProductData>(sampleProductData);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [imageGallery, setImageGallery] = useState<string[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
   const [metadata, setMetadata] = useState({ title: '', description: '', keywords: '' });
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [designConcepts, setDesignConcepts] = useState<DesignConcept[]>(sampleDesignConcepts);
-  const [fullscreenConcept, setFullscreenConcept] = useState<DesignConcept | null>(null);
+  
   const [activeTab, setActiveTab] = useState('form');
-  const [aiProgress, setAIProgress] = useState(0);
-  const [isAnimating, setIsAnimating] = React.useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState([
-    "Consider a more vibrant color palette to appeal to younger professionals",
-    "Emphasize the product's unique features in the description",
-    "Add customer testimonials to boost credibility",
-    "Consider a more vibrant color palette to appeal to younger professionals",
-    "Emphasize the product's unique features in the description",
-    "Add customer testimonials to boost credibility",
-  ]);
+  
+  
   const [versions, setVersions] = useState<Version[]>([
     { id: 1, timestamp: new Date().toISOString(), changes: 'Initial version' },
     { id: 2, timestamp: new Date(Date.now() - 86400000).toISOString(), changes: 'Updated product description' },
   ]);
   const [activeVersion, setActiveVersion] = useState(1);
 
-  const [showCommandList, setShowCommandList] = useState(false);
-  const commandRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (commandRef.current && !commandRef.current.contains(event.target as Node)) {
-        setShowCommandList(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  
 
   useEffect(() => {
     setFormFields([]);
@@ -666,38 +641,8 @@ export default function InventoryManagement() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="mt-2 bg-white backdrop-blur-lg border-0">
-              <CardHeader>
-                <CardTitle className="text-xs">Version History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[100px]">
-                  {versions.map((version) => (
-                    <div key={version.id} className="flex items-center justify-between py-1 border-b border-white last:border-b-0">
-                      <div className="flex items-center space-x-1">
-                        <Badge variant={version.id === activeVersion ? "default" : "secondary"} className="text-[10px]">v{version.id}</Badge>
-                        <span className="text-[10px]">{new Date(version.timestamp).toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="ghost" size="sm" onClick={() => setActiveVersion(version.id)} className="h-5 w-5 p-0">
-                                <GitBranch className="h-3 w-3" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-[10px]">Switch to this version</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        <span className="text-[10px] text-muted-foreground">{version.changes}</span>
-                      </div>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </CardContent>
-            </Card>
+            
+            
           </ResizablePanel>
         </ResizablePanelGroup>
   )
