@@ -26,6 +26,7 @@ const USER_ID = "cm14mvrxe0002ue6ygbc4yyzr";
 const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
 const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
 const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
+const ORGANIZATION_ID = 'cm14mvrwe0000ue6ygx7gfevr';
 
 type Post = {
   id: string;
@@ -45,6 +46,7 @@ function SinglePost({ id }: { id: string }) {
   const [postKeys, setPostKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // Queries
   const { data: productData } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -70,7 +72,7 @@ function SinglePost({ id }: { id: string }) {
   });
 
   const { data: mediaFilesData } = useQuery(GET_MEDIA_FILES, {
-    variables: { designElementId: 'example-design-element-id' }
+    variables: { designElementId: 'example-design-element-id' } // Replace with actual ID
   });
 
   const { data: userDetailsData } = useQuery(GET_USER_DETAILS, {
@@ -82,7 +84,7 @@ function SinglePost({ id }: { id: string }) {
   });
 
   const { data: designElementVersionsData } = useQuery(GET_DESIGN_ELEMENT_VERSIONS, {
-    variables: { designElementId: 'example-design-element-id' }
+    variables: { designElementId: 'example-design-element-id' } // Replace with actual ID
   });
 
   const { data: workspaceData } = useQuery(GET_WORKSPACE, {
@@ -90,13 +92,14 @@ function SinglePost({ id }: { id: string }) {
   });
 
   const { data: organizationData } = useQuery(GET_ORGANIZATION, {
-    variables: { organizationId: 'example-organization-id' }
+    variables: { organizationId: ORGANIZATION_ID }
   });
 
   const { data: dashboardData } = useQuery(GET_DASHBOARD_DATA, {
-    variables: { organizationId: 'example-organization-id', userId: USER_ID }
+    variables: { organizationId: ORGANIZATION_ID, userId: USER_ID }
   });
 
+  // Mutations
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
@@ -109,15 +112,16 @@ function SinglePost({ id }: { id: string }) {
       setPost({
         id: data.id,
         content: data.description,
-        createdAt: new Date().toISOString()
+        createdAt: data.createdAt
       });
       setEditedPost({
         name: data.name,
         description: data.description,
-        // Add other fields as needed
+        price: data.price.toString(),
+        quantity: data.quantity.toString(),
+        category: data.category
       });
-      const contentKeys = Object.keys(editedPost);
-      setPostKeys(contentKeys);
+      setPostKeys(Object.keys(editedPost));
     }
   }, [productData]);
 
@@ -134,9 +138,9 @@ function SinglePost({ id }: { id: string }) {
           productId: PRODUCT_ID,
           name: editedPost.name,
           description: editedPost.description,
-          price: 100, // Set appropriate values
-          quantity: 10,
-          category: 'Example Category'
+          price: parseFloat(editedPost.price),
+          quantity: parseInt(editedPost.quantity, 10),
+          category: editedPost.category
         }
       });
       setSuccess(true);
@@ -144,6 +148,71 @@ function SinglePost({ id }: { id: string }) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpdateProductVersion = async () => {
+    try {
+      await updateProductVersion({
+        variables: {
+          productId: PRODUCT_ID,
+          versionNumber: 1,
+          changes: "Initial version",
+          data: { name: "New Product Version Data" },
+          id: "new-version-id"
+        }
+      });
+    } catch (err: any) {
+      console.error('Error updating product version:', err.message);
+    }
+  };
+
+  const handlePublishSegments = async () => {
+    try {
+      await publishSegments({
+        variables: {
+          productVersionId: "product-version-id",
+          id: "segment-id"
+        }
+      });
+    } catch (err: any) {
+      console.error('Error publishing segments:', err.message);
+    }
+  };
+
+  const handleUpdateProductAndInsertSegment = async () => {
+    try {
+      await updateProductAndInsertSegment({
+        variables: {
+          productId: PRODUCT_ID,
+          name: "Updated Product Name",
+          description: "Updated Product Description",
+          segmentId: "new-segment-id",
+          slug: "new-segment-slug",
+          segmentName: "New Segment Name",
+          domainId: DOMAIN_ID,
+          post: { key: "value" }
+        }
+      });
+    } catch (err: any) {
+      console.error('Error updating product and inserting segment:', err.message);
+    }
+  };
+
+  const handleAddDesignElementVersion = async () => {
+    try {
+      await addDesignElementVersion({
+        variables: {
+          designElementId: "design-element-id",
+          versionNumber: 1,
+          elementData: { key: "value" },
+          screenshot: "screenshot-url",
+          createdById: USER_ID,
+          organizationId: ORGANIZATION_ID
+        }
+      });
+    } catch (err: any) {
+      console.error('Error adding design element version:', err.message);
     }
   };
 
@@ -199,6 +268,12 @@ function SinglePost({ id }: { id: string }) {
 
       {error && <p className="text-red-500">Error: {error}</p>}
       {success && <p className="text-green-500">Description updated successfully!</p>}
+
+      {/* Buttons to trigger mutations */}
+      <button onClick={handleUpdateProductVersion} className="btn">Update Product Version</button>
+      <button onClick={handlePublishSegments} className="btn">Publish Segments</button>
+      <button onClick={handleUpdateProductAndInsertSegment} className="btn">Update Product & Insert Segment</button>
+      <button onClick={handleAddDesignElementVersion} className="btn">Add Design Element Version</button>
     </>
   );
 }
