@@ -1,4 +1,48 @@
 import { gql } from '@apollo/client';
+// Query to get design element versions for a specific design element
+export const GET_DESIGN_ELEMENT_VERSIONS = gql`
+  query GetDesignElementVersions($designElementId: String!) {
+    DesignElementVersion(where: { designElementId: { _eq: $designElementId } }) {
+      id
+      versionNumber
+      elementData
+      screenshot
+      createdBy {
+        id
+        username
+      }
+      createdAt
+    }
+  }
+`;
+
+
+export const GET_DESIGN_ELEMENT_VERSION2S = gql`
+  query GetDesignElementVersions($designElementId: String!, $versionNumber: Int!) {
+    DesignElementVersion(
+      where: { 
+        designElementId: { _eq: $designElementId }, 
+        versionNumber: { _eq: $versionNumber } 
+      }
+    ) {
+      id
+      versionNumber
+      elementData
+      
+      createdAt
+      blockchainHash
+      ipfsHash
+    }
+  }
+`;
+export const GET_WORKSPACE = gql`
+  query GetWorkspace($workspaceId: String!) {
+    Workspace(where: { id: { _eq: $workspaceId } }) {
+      id
+     organizationId
+    }
+  }
+`;
 
 // Define the queries
 export const GET_PRODUCT = gql`
@@ -52,13 +96,14 @@ export const GET_AI_SUGGESTIONS = gql`
 
 
 
+// Query to get design elements for a given domainId
 export const GET_DESIGN_ELEMENTS = gql`
-  query GetDesignElements($productId: String!) {
-    DesignElement(where: { productId: { _eq: $productId } }) {
+  query GetDesignElements($domainId: String!) {
+    DesignElement(where: { domainId: { _eq: $domainId } }) {
       id
       name
       domainId
-      elementData
+      currentVersion
       createdAt
       updatedAt
     }
