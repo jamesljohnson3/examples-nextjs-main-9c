@@ -18,11 +18,7 @@ const ProductPage = ({ params }) => {
   const { data: workspaceData, loading: workspaceLoading, error: workspaceError } = useQuery(GET_WORKSPACE, { variables: { workspaceId: WORKSPACE_ID } });
   const [organizationId, setOrganizationId] = useState(null);
 
-  // Fetch organization details only when organizationId is available
-  const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
-    variables: { organizationId: organizationId },
-    skip: !organizationId 
-  });
+
 
   // Fetch product details
   const { data: productData, loading: productLoading, error: productError } = useQuery(GET_PRODUCT, { variables: { productId: PRODUCT_ID } });
@@ -45,7 +41,11 @@ const ProductPage = ({ params }) => {
       setOrganizationId(fetchedOrganizationId || null);
     }
   }, [workspaceData]);
-
+  // Fetch organization details only when organizationId is available
+  const { data: organizationData, loading: organizationLoading, error: organizationError } = useQuery(GET_ORGANIZATION, { 
+    variables: { organizationId: organizationId },
+  });
+  
   useEffect(() => {
     if (designElementsData) {
       setDesignElements(designElementsData.DesignElement || []);
