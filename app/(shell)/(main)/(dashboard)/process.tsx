@@ -721,7 +721,7 @@ export default function InventoryManagement() {
     }
 
   return (
-    <div className="min-h-screen rounded-md bg-gradient-to-br from-white via-gray-100 to-white  p-2 space-y-2">
+    <div className="min-h-screen  bg-gradient-to-br from-white via-gray-100 to-white  p-2 space-y-2">
   <div className="text-sm text-muted-foreground">
   <SidebarTrigger />
   Products / {previewData.category} / {previewData.id}

@@ -18,7 +18,7 @@ export default async function Layout({ children }: React.PropsWithChildren) {
     >
               <AppSidebar />
         <main className="flex flex-1 flex-col p-2 transition-all duration-300 ease-in-out">
-          <div className="h-full">
+          <div className="h-full rounded-md ">
             {children}
           </div>
         </main>
