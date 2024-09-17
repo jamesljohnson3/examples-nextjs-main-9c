@@ -32,10 +32,12 @@ interface ProductData {
 }
 
 interface Segment {
-  id: string;
-  name: string;
-  content: string;
+  id: string;         // Unique identifier for the segment
+  name: string;       // Name of the segment
+  slug: string;       // Slug for the segment (often used in URLs or as a unique identifier)
+  post: string;       // JSON string representing additional data related to the segment
 }
+
 
 const initialAvailableFields: FormField[] = [
   { id: 'name', type: 'text', label: 'Name' },
@@ -170,8 +172,7 @@ export default function ProductPage() {
         return;
       }
   
-      // Assuming you want to update all segments or handle it differently
-      // Here, we'll use the first segment's ID for demonstration
+      // Get the ID of the first segment
       const segmentId = segments[0]?.id;
   
       if (!segmentId) {
@@ -183,12 +184,13 @@ export default function ProductPage() {
         variables: { id: segmentId, productVersionId }
       });
   
-      alert('Segments published!');
+      alert('Segment published!');
     } catch (error) {
-      console.error('Error publishing segments:', error);
-      alert('Failed to publish segments.');
+      console.error('Error publishing segment:', error);
+      alert('Failed to publish segment.');
     }
   };
+  
   
 
   const handleAddCustomField = () => {
@@ -214,6 +216,7 @@ export default function ProductPage() {
         <TabsList className="grid grid-cols-2">
           <TabsTrigger value="form">Form Builder</TabsTrigger>
           <TabsTrigger value="segments">Segments</TabsTrigger>
+          
         </TabsList>
 
         <div className="tab-content">
