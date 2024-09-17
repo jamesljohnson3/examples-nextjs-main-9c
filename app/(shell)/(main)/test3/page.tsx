@@ -159,18 +159,37 @@ export default function ProductPage() {
     try {
       // Retrieve the productVersionId from local storage
       const productVersionId = localStorage.getItem('productVersionId');
-
+  
       if (!productVersionId) {
         alert('Product version ID not found in local storage.');
         return;
       }
-
-      await publishSegments({ variables: { id: segmentsData.id, productVersionId } });
+  
+      if (!segments.length) {
+        alert('No segments available to publish.');
+        return;
+      }
+  
+      // Assuming you want to update all segments or handle it differently
+      // Here, we'll use the first segment's ID for demonstration
+      const segmentId = segments[0]?.id;
+  
+      if (!segmentId) {
+        alert('No segment ID available.');
+        return;
+      }
+  
+      await publishSegments({
+        variables: { id: segmentId, productVersionId }
+      });
+  
       alert('Segments published!');
     } catch (error) {
       console.error('Error publishing segments:', error);
+      alert('Failed to publish segments.');
     }
   };
+  
 
   const handleAddCustomField = () => {
     const newField: FormField = {
