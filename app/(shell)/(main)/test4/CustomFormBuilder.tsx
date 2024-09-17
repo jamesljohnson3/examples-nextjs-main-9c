@@ -177,7 +177,10 @@ const ProductEditor = () => {
           onChange={(e) => setCustomFieldLabel(e.target.value)}
           placeholder="Field Label"
         />
-        <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
+        <Select
+          value={customFieldType}
+          onValueChange={(value: 'text' | 'textarea' | 'number' | 'select') => setCustomFieldType(value)}
+        >
           <SelectTrigger>
             <SelectValue>{customFieldType}</SelectValue>
           </SelectTrigger>
