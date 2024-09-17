@@ -10,7 +10,7 @@ export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
     $slug: String!,
     $segmentName: String!,
     $domainId: String!,
-    $post: jsonb!  // Updated to jsonb
+    $post: jsonb!  
   ) {
     update_Product(
       where: { id: { _eq: $productId } },
