@@ -144,8 +144,8 @@ function ProductEditDashboard({ segment }) {
   );
 }
 
-const ProductSegmentPage = () => {
-  const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+const ProductSegmentPage = ({params}) => {
+  const PRODUCT_ID = params.id;
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku'; // Replace with your domain ID or fetch dynamically
 
   // Fetch segments by productId and domainId
