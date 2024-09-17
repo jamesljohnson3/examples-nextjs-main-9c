@@ -1,56 +1,39 @@
 "use client";
-
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { 
-  GET_PRODUCT, 
-  GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN,
-  GET_PRODUCT_VERSIONS, 
-  GET_DESIGN_CONCEPTS, 
-  GET_AI_SUGGESTIONS, 
-  GET_DESIGN_ELEMENTS, 
-  GET_MEDIA_FILES, 
-  GET_USER_DETAILS,
-  GET_DOMAIN ,
-  GET_DESIGN_ELEMENT_VERSIONS,
-  GET_WORKSPACE,
-  GET_ORGANIZATION
+  GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN 
 } from '@/app/(shell)/(main)/queries';
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft, Save, Settings2 } from 'lucide-react';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronLeft, Save, Settings2 } from 'lucide-react'
-
-
-function ProductEditDashboard() {
+// Ensure ProductEditDashboard accepts and uses the segment prop
+function ProductEditDashboard({ segment }) {
   const [product, setProduct] = useState({
-    id: 'PROD-12345',
-    name: 'Wireless Earbuds',
-    description: 'High-quality wireless earbuds with noise cancellation',
-    price: 99.99,
-    quantity: 500,
-    category: 'Electronics',
-    metaTitle: '',
-    metaDescription: '',
-    keywords: '',
-  })
+    name: '',
+    description: '',
+    price: '',
+    quantity: '',
+    category: ''
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setProduct(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setProduct(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div>
-            <div className="text-sm text-gray-500">Products / Electronics / {product.id}</div>
-            <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+            <div className="text-sm text-gray-500">Products / Electronics / {segment.id}</div>
+            <h1 className="text-2xl font-bold text-gray-900">{segment.name}</h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-500">Version v2.1.3</div>
@@ -158,7 +141,7 @@ function ProductEditDashboard() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
 const ProductSegmentPage = () => {
@@ -187,10 +170,7 @@ const ProductSegmentPage = () => {
       <div>
         {segments.length > 0 ? (
           segments.map((segment) => (
-            <div key={segment.id}>
-              <ProductEditDashboard segment={segments} />
-          
-            </div>
+            <ProductEditDashboard key={segment.id} segment={segment} />
           ))
         ) : (
           <p>No segments available for this product and domain.</p>
