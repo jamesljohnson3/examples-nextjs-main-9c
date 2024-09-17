@@ -221,7 +221,7 @@ function SinglePost({ id }: { id: string }) {
   }
 
   return (
-    <>
+    <div>
       <div className="flex max-w-sm flex-col flex-1">
         <div className="px-5 py-3">
           {postKeys.map((key) => (
@@ -274,7 +274,75 @@ function SinglePost({ id }: { id: string }) {
       <button onClick={handlePublishSegments} className="btn">Publish Segments</button>
       <button onClick={handleUpdateProductAndInsertSegment} className="btn">Update Product & Insert Segment</button>
       <button onClick={handleAddDesignElementVersion} className="btn">Add Design Element Version</button>
-    </>
+
+      {/* Display fetched data */}
+      <div>
+        <h2>Product Details</h2>
+        {productData?.Product && (
+          <pre>{JSON.stringify(productData.Product, null, 2)}</pre>
+        )}
+
+        <h2>Segments</h2>
+        {segmentsData?.Segment && (
+          <pre>{JSON.stringify(segmentsData.Segment, null, 2)}</pre>
+        )}
+
+        <h2>Product Versions</h2>
+        {productVersionsData?.ProductVersion && (
+          <pre>{JSON.stringify(productVersionsData.ProductVersion, null, 2)}</pre>
+        )}
+
+        <h2>Design Concepts</h2>
+        {designConceptsData?.DesignConcept && (
+          <pre>{JSON.stringify(designConceptsData.DesignConcept, null, 2)}</pre>
+        )}
+
+        <h2>AI Suggestions</h2>
+        {aiSuggestionsData?.AISuggestion && (
+          <pre>{JSON.stringify(aiSuggestionsData.AISuggestion, null, 2)}</pre>
+        )}
+
+        <h2>Design Elements</h2>
+        {designElementsData?.DesignElement && (
+          <pre>{JSON.stringify(designElementsData.DesignElement, null, 2)}</pre>
+        )}
+
+        <h2>Media Files</h2>
+        {mediaFilesData?.MediaFile && (
+          <pre>{JSON.stringify(mediaFilesData.MediaFile, null, 2)}</pre>
+        )}
+
+        <h2>User Details</h2>
+        {userDetailsData?.User && (
+          <pre>{JSON.stringify(userDetailsData.User, null, 2)}</pre>
+        )}
+
+        <h2>Domain</h2>
+        {domainData?.Domain && (
+          <pre>{JSON.stringify(domainData.Domain, null, 2)}</pre>
+        )}
+
+        <h2>Design Element Versions</h2>
+        {designElementVersionsData?.DesignElementVersion && (
+          <pre>{JSON.stringify(designElementVersionsData.DesignElementVersion, null, 2)}</pre>
+        )}
+
+        <h2>Workspace</h2>
+        {workspaceData?.Workspace && (
+          <pre>{JSON.stringify(workspaceData.Workspace, null, 2)}</pre>
+        )}
+
+        <h2>Organization</h2>
+        {organizationData?.Organization && (
+          <pre>{JSON.stringify(organizationData.Organization, null, 2)}</pre>
+        )}
+
+        <h2>Dashboard Data</h2>
+        {dashboardData && (
+          <pre>{JSON.stringify(dashboardData, null, 2)}</pre>
+        )}
+      </div>
+    </div>
   );
 }
 
