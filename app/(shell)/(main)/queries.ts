@@ -43,7 +43,17 @@ export const GET_WORKSPACE = gql`
     }
   }
 `;
-
+// Query to get organization details
+export const GET_ORGANIZATION = gql`
+  query GetOrganization($organizationId: String!) {
+    Organization(where: { id: { _eq: $organizationId } }) {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+`;
 // Define the queries
 export const GET_PRODUCT = gql`
   query GetProduct($productId: String!) {
