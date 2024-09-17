@@ -1,6 +1,32 @@
 // mutations.js or mutations.ts
 import { gql } from '@apollo/client';
 
+// Mutation to update product version
+export const UPDATE_PRODUCT_VERSION = gql`
+  mutation UpdateProductVersion($productData: ProductInput!) {
+    updateProductVersion(productData: $productData) {
+      id
+      name
+      description
+      price
+      quantity
+      category
+      // Return any additional fields as needed
+    }
+  }
+`;
+
+// Mutation to publish segments
+export const PUBLISH_SEGMENTS = gql`
+  mutation PublishSegments($segments: [SegmentInput!]!) {
+    publishSegments(segments: $segments) {
+      id
+      name
+      content
+      // Return any additional fields as needed
+    }
+  }
+`;
 export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
   mutation UpdateProductAndInsertSegment(
     $productId: String!,
