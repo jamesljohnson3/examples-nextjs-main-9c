@@ -12,7 +12,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 
-// Define interfaces for form fields, product data, and segments
 interface FormField {
   id: string;
   type: string;
@@ -37,7 +36,6 @@ interface Segment {
   content: string;
 }
 
-// Mocked initial available form fields
 const availableFields: FormField[] = [
   { id: 'name', type: 'text', label: 'Name' },
   { id: 'description', type: 'textarea', label: 'Description' },
@@ -51,6 +49,10 @@ export default function ProductPage() {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const [customFieldLabel, setCustomFieldLabel] = useState('');
+  const [customFieldType, setCustomFieldType] = useState('text');
+  const [customFieldOptions, setCustomFieldOptions] = useState('');
 
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
@@ -142,6 +144,19 @@ export default function ProductPage() {
     }
   };
 
+  const handleAddCustomField = () => {
+    const newField: FormField = {
+      id: customFieldLabel.toLowerCase().replace(/\s+/g, '_'),
+      type: customFieldType,
+      label: customFieldLabel,
+      options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
+    };
+    handleAddField(newField);
+    setCustomFieldLabel('');
+    setCustomFieldType('text');
+    setCustomFieldOptions('');
+  };
+
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
@@ -173,10 +188,10 @@ export default function ProductPage() {
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
-                                    className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
-                                    >
-                      <GripVertical className="h-3 w-3 text-muted-foreground" />
-                      {field.type === 'text' && (
+                                    className="field-item"
+                                  >
+                                    <GripVertical />
+                                    {field.type === 'text' && (
                                       <Input
                                         placeholder={field.label}
                                         value={field.value || ''}
@@ -215,8 +230,8 @@ export default function ProductPage() {
                                         </SelectContent>
                                       </Select>
                                     )}
-                                    <Button  className="h-6 w-6 p-0" variant="ghost" onClick={() => handleRemoveField(index)}>
-                                      <MinusIcon className="h-3 w-3"  />
+                                    <Button variant="ghost" onClick={() => handleRemoveField(index)}>
+                                      <MinusIcon />
                                     </Button>
                                   </div>
                                 )}
@@ -227,20 +242,42 @@ export default function ProductPage() {
                         )}
                       </Droppable>
                     </DragDropContext>
-                    <div className="flex justify-between items-center mb-2">
-                    <div className="flex space-x-1">                      {availableFields.map((element) => (
-                        <Button
-                          key={element.id}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleAddField(element)}
-                          className="text-xs py-1 px-2"
-                        >
-                          <PlusIcon className="h-3 w-3 mr-1" /> {element.label}
-                        </Button>
-                      ))}
+
+                    {/* Custom Field Form */}
+                    <div className="custom-field-form">
+                      <h3>Add Custom Field</h3>
+                      <Input
+                        placeholder="Field Label"
+                        value={customFieldLabel}
+                        onChange={(e) => setCustomFieldLabel(e.target.value)}
+                      />
+                      <Select
+                        value={customFieldType}
+                        onValueChange={(value) => setCustomFieldType(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Field Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">Text</SelectItem>
+                          <SelectItem value="textarea">Textarea</SelectItem>
+                          <SelectItem value="number">Number</SelectItem>
+                          <SelectItem value="select">Select</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {customFieldType === 'select' && (
+                        <Textarea
+                          placeholder="Options (comma separated)"
+                          value={customFieldOptions}
+                          onChange={(e) => setCustomFieldOptions(e.target.value)}
+                        />
+                      )}
+                      <Button onClick={handleAddCustomField}>
+                        <PlusIcon className="mr-1" /> Add Custom Field
+                      </Button>
                     </div>
-                    </div>
+
+                    {/* Save and Publish Buttons */}
                     {hasUnsavedChanges && (
                       <Button onClick={handleSave}>Save</Button>
                     )}
@@ -252,20 +289,7 @@ export default function ProductPage() {
           </Accordion>
 
           {/* Segments Tab */}
-          <div>
-            {/* Render segments here if needed */}
-            <h2>Segments</h2>
-            {segments.length === 0 ? (
-              <p>No segments available.</p>
-            ) : (
-              segments.map((segment) => (
-                <div key={segment.id} className="segment-item">
-                  <h3>{segment.name}</h3>
-                  <p>{segment.content}</p>
-                </div>
-              ))
-            )}
-          </div>
+          
         </div>
       </Tabs>
     </div>
