@@ -188,7 +188,7 @@ const ProductSegmentPage = () => {
         {segments.length > 0 ? (
           segments.map((segment) => (
             <div key={segment.id}>
-              <ProductEditDashboard/>
+              <ProductEditDashboard segment={segments} />
           
             </div>
           ))

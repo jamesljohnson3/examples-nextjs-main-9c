@@ -39,6 +39,7 @@ const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
   useEffect(() => {
     if (workspaceData) {
       const fetchedOrganizationId = workspaceData.Workspace?.[0]?.organization?.id;
+      console.log('Organization', fetchedOrganizationId )
       if (fetchedOrganizationId) {
         setOrganizationId(fetchedOrganizationId);
       }
@@ -87,8 +88,8 @@ const DOMAIN_ID ='cm14mvs4l000jue6y5eo3ngku'
   if (designConceptsError) return <p>Error loading design concepts: {designConceptsError.message}</p>;
   if (workspaceError) return <p>Error loading workspace data: {workspaceError.message}</p>;
   if (designElementsError) return <p>Error loading design elements: {designElementsError.message}</p>;
-  if (organizationError) return <p>Error loading organization data: {organizationError.message}</p>;
 
+  
   const product = productData?.Product?.[0] || {};
   const workspace = workspaceData?.Workspace?.[0] || {};
   const organization = organizationData?.Organization?.[0] || {};
