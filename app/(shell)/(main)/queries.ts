@@ -1,21 +1,7 @@
 // mutations or queries 
 import { gql } from '@apollo/client';
 
-export const PUBLISH_SEGMENT = gql`
-mutation PublishSegment($id: ID!, $post: [FormFieldInput]) {
-  updateSegment(id: $id, post: $post) {
-    id
-    post {
-      id
-      type
-      label
-      value
-      options
-    }
-  }
-}
 
-`;
 export const UPDATE_SEGMENT = gql`
   mutation UpdateSegment($id: String!, $post: jsonb!) {
     update_Segment(

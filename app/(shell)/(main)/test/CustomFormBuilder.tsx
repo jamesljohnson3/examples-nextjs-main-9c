@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
-import { PUBLISH_SEGMENT, GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT } from '@/app/(shell)/(main)/queries';
+import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { DELETE_SEGMENT } from './mutations';
@@ -210,7 +210,6 @@ const ProductPage: React.FC = () => {
       alert('Failed to save product.');
     }
   };
-
   const handlePublish = async () => {
     try {
       const productVersionId = localStorage.getItem('productVersionId');
@@ -220,39 +219,43 @@ const ProductPage: React.FC = () => {
         return;
       }
   
-      const postData = formFields.map(field => ({
-        id: field.id,
-        type: field.type,
-        label: field.label,
-        value: field.value,
-        options: field.options || [],
-      }));   
-
+      const postData = formFields.reduce((acc, field) => {
+        acc[field.id] = {
+          type: field.type,
+          label: field.label,
+          value: field.value,
+          options: field.options || [],
+        };
+        return acc;
+      }, {} as Record<string, any>);
+  
       const segmentId = segments[0]?.id;
   
-      if (!SEGMENT_ID) {
+      if (!segmentId) {
         alert('No segment ID available.');
         return;
       }
   
+      // First publish the segment
       await publishSegments({
-        variables: { id: SEGMENT_ID, productVersionId }
+        variables: { id: segmentId, productVersionId },
       });
-   // Update segment with new form field data
-    await UpdateSegment({
-      variables: {
-        id: SEGMENT_ID,
-        _set: {
+  
+      // Then update the segment with new form field data
+      await UpdateSegment({
+        variables: {
+          id: segmentId,
           post: postData,
         },
-      },
-    });
-      alert('Segment published!');
+      });
+  
+      alert('Segment published and updated!');
     } catch (error) {
       console.error('Error publishing segment:', error);
       alert('Failed to publish segment.');
     }
   };
+  
   const handleAddCustomField = () => {
     if (!customFieldLabel.trim()) {
       alert('Field label cannot be empty.');
