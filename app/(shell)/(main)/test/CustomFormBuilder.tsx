@@ -311,10 +311,11 @@ const EnhancedProductMoodboard: React.FC = () => {
           <TabsTrigger value="metadata">Metadata</TabsTrigger>
           <TabsTrigger value="concept">Concept</TabsTrigger>
         </TabsList>
-        <TabsContent>
-          {renderTabContent()}
-        </TabsContent>
+    
+    
       </Tabs>
+      {renderTabContent()}
+
     </div>
   );
 };
