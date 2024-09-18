@@ -813,19 +813,25 @@ export default function EnhancedProductMoodboard() {
                       {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}
                     </div>
 
-                    <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 min-h-[200px] h-auto p-6">
-                    {productData && (
-                        <div>
-                            <img src="https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg" alt="Placeholder Image" className="w-full h-48 object-cover mb-4 rounded-lg"/>
-                            <h2 className="text-lg font-bold mb-2">{productData.name}</h2>
-                          <p className="text-sm text-gray-500">{productData.description}</p>
-                          <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
-                          <p className="text-sm">Quantity: {productData.quantity}</p>
-                          <p className="text-sm">Category: {productData.category}</p>
-                        </div>
-                      )}
-                      {!productData && <p>No product data available.</p>}
-                    </div>
+                    <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 min-h-[200px] md:min-h-[250px] lg:min-h-[300px] h-auto p-6">
+  {productData ? (
+    <div>
+      <img
+        src="https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg"
+        alt="Placeholder Image"
+        className="w-full h-48 md:h-56 lg:h-96 object-cover mb-4 rounded-lg"
+      />
+      <h2 className="text-lg font-bold mb-2">{productData.name}</h2>
+      <p className="text-sm text-gray-500">{productData.description}</p>
+      <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
+      <p className="text-sm">Quantity: {productData.quantity}</p>
+      <p className="text-sm">Category: {productData.category}</p>
+    </div>
+  ) : (
+    <p>No product data available.</p>
+  )}
+</div>
+
                     <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
                   </CardContent>
                 </Card>
