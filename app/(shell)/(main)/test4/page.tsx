@@ -1,20 +1,10 @@
-"use client"
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import {
-  PlusIcon,
-  MinusIcon,
-  Image,
-} from 'lucide-react';
+import { PlusIcon, MinusIcon, Image } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface ImageUploaderProps {
   onImageChange: (type: 'gallery' | 'primary', imageURL: string | null) => void;
@@ -23,6 +13,33 @@ interface ImageUploaderProps {
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
+
+  // Load saved gallery order and primary photo from localStorage when the component mounts
+  useEffect(() => {
+    const savedGallery = localStorage.getItem('imageGallery');
+    const savedPrimaryPhoto = localStorage.getItem('primaryPhoto');
+
+    if (savedGallery) {
+      setImageGallery(JSON.parse(savedGallery));
+    }
+
+    if (savedPrimaryPhoto) {
+      setPrimaryPhoto(savedPrimaryPhoto);
+    }
+  }, []);
+
+  // Save gallery and primary photo to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
+  }, [imageGallery]);
+
+  useEffect(() => {
+    if (primaryPhoto) {
+      localStorage.setItem('primaryPhoto', primaryPhoto);
+    } else {
+      localStorage.removeItem('primaryPhoto');
+    }
+  }, [primaryPhoto]);
 
   // Handle uploading of the primary image
   const handlePrimaryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,13 +67,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
     onImageChange('gallery', null); // Notify parent component if needed
   };
 
-  // Handle drag-and-drop reordering of images in the gallery
+  // Handle drag-and-drop reordering of images in the gallery and save the order
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
     const reorderedImages = Array.from(imageGallery);
     const [movedImage] = reorderedImages.splice(result.source.index, 1);
     reorderedImages.splice(result.destination.index, 0, movedImage);
+
     setImageGallery(reorderedImages);
   };
 
