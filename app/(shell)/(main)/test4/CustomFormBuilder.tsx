@@ -239,25 +239,24 @@ const ProductPage: React.FC = () => {
   const handlePublish = async () => {
     try {
       const productVersionId = localStorage.getItem('productVersionId');
-
+  
       if (!productVersionId) {
-        alert('No product version ID found.');
+        alert('Product version ID not found in local storage.');
         return;
       }
-
+  
+      const segmentId = segments[0]?.id;
+  
+      if (!SEGMENT_ID) {
+        alert('No segment ID available.');
+        return;
+      }
+  
       await publishSegments({
-        variables: {
-          productVersionId,
-          segments: segments.map(segment => ({
-            id: segment.id,
-            name: segment.name,
-            slug: segment.slug,
-            post: segment.post
-          })),
-        },
+        variables: { id: SEGMENT_ID, productVersionId }
       });
-
-      alert('Segments published successfully!');
+  
+      alert('Segment published!');
     } catch (error) {
       console.error('Error publishing segment:', error);
       alert('Failed to publish segment.');
