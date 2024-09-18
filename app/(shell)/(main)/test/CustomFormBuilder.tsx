@@ -456,30 +456,30 @@ export default function EnhancedProductMoodboard() {
                                         <div className="flex-grow">
                                           <label>{field.label}</label>
                                           {field.type === 'text' && (
-                                            <Input
+                                            <Input className="h-6 text-xs"
                                               value={field.value || ''}
                                               onChange={(e) => handleInputChange(field.id, e.target.value)}
                                             />
                                           )}
                                           {field.type === 'textarea' && (
-                                            <Textarea
+                                            <Textarea className="h-6 text-xs"
                                               value={field.value || ''}
                                               onChange={(e) => handleInputChange(field.id, e.target.value)}
                                             />
                                           )}
                                           {field.type === 'number' && (
-                                            <Input
+                                            <Input className="h-6 text-xs"
                                               type="number"
                                               value={field.value || ''}
                                               onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
                                             />
                                           )}
                                           {field.type === 'select' && (
-                                            <Select
+                                            <Select 
                                               onValueChange={(value) => handleInputChange(field.id, value)}
                                               defaultValue={field.value as string}
                                             >
-                                              <SelectTrigger>
+                                              <SelectTrigger className="h-6 text-xs">
                                                 <SelectValue />
                                               </SelectTrigger>
                                               <SelectContent>
