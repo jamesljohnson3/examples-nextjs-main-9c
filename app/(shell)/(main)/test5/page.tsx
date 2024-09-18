@@ -1,5 +1,4 @@
 'use client'
-'use client'
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -44,8 +43,9 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: FormField[];
+  post: { [key: string]: FormField };
 }
+
 
 const initialAvailableFields: FormField[] = [
   { id: 'name', type: 'text', label: 'Name' },
@@ -125,26 +125,27 @@ const ProductPage: React.FC = () => {
   }, [productDataQuery]);
   useEffect(() => {
     if (segmentsData) {
-      console.log('Segments Data:', segmentsData);
+      console.log(segmentsData);
       setSegments(segmentsData.Segment);
   
       // Flatten and extract form fields from segments
-      const segmentFields = segmentsData.Segment.flatMap((segment: { post: { [key: string]: FormField } }) => 
-        Object.values(segment.post)
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
+        Object.values(segment.post).map(field => ({
+          id: field.id || uuidv4(), // Ensure each field has a unique ID
+          type: field.type || 'text',
+          label: field.label || '',
+          value: field.value || '',
+          options: field.options || []
+        }))
       );
   
-      // Create a set of existing field IDs for quick lookup
-      const existingFieldIds = new Set(formFields.map(field => field.id));
+      // Log the transformed segment fields
+      console.log('formfields', segmentFields);
   
-      // Combine existing formFields with new segmentFields
-      setFormFields(prevFields => [
-        ...prevFields,
-        ...segmentFields.filter((field: { id: string; }) => !existingFieldIds.has(field.id))
-      ]);
-  
-      console.log('Form Fields After Merging:', segmentFields);
+      setFormFields(segmentFields);
     }
   }, [segmentsData]);
+  
   
 
 
