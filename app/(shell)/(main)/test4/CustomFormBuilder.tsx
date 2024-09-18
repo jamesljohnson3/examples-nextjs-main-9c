@@ -43,7 +43,7 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: FormField;
+  post: FormField[];
 }
 
 const initialAvailableFields: FormField[] = [
@@ -118,15 +118,21 @@ const ProductPage: React.FC = () => {
     }
   }, [productDataQuery]);
 
+ 
+  
+  
   useEffect(() => {
-    if (segmentsData?.segments) {
-      console.log(segmentsData.segments);
-      setSegments(segmentsData.segments);
-      const segmentFields = segmentsData.segments.flatMap((segment: { post: FormField }) => segment.post || []);
+    if (segmentsData) {
+      console.log(segmentsData);
+      setSegments(segmentsData.Segment);
+
+      // Flatten and extract form fields from segments
+      const segmentFields = segmentsData.Segment.flatMap((segment: { post: { [s: string]: unknown; } | ArrayLike<unknown>; }) => 
+        Object.values(segment.post)
+      );
       setFormFields(segmentFields);
     }
   }, [segmentsData]);
-  
 
   const handleInputChange = (fieldId: string, value: string | number) => {
     if (productData) {

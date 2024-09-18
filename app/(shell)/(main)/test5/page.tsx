@@ -117,9 +117,9 @@ const ProductPage: React.FC = () => {
   }, [productDataQuery, initialAvailableFields]);
 
   useEffect(() => {
-    if (segmentsData?.segments) {
-      console.log(segmentsData.segments);
-      setSegments(segmentsData.segments);
+    if (segmentsData) {
+      console.log(segmentsData);
+      setSegments(segmentsData);
     }
   }, [segmentsData]);
   
