@@ -1,5 +1,6 @@
 "use client"
-import React, { useState, useEffect, memo } from 'react';
+'use client'
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Input } from "@/components/ui/input";
@@ -43,8 +44,9 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: string;
+  post: { [key: string]: FormField };
 }
+
 
 const initialAvailableFields: FormField[] = [
   { id: 'name', type: 'text', label: 'Name' },
@@ -76,13 +78,18 @@ const ProductPage: React.FC = () => {
       alert('Error deleting segment.');
     }
   });
+  
   const handleDeleteSegment = async (segmentId: any) => {
+    if (!window.confirm('Are you sure you want to delete this segment?')) {
+      return;
+    }
     try {
       await deleteSegment({ variables: { segmentId } });
     } catch (error) {
       console.error('Error executing delete mutation:', error);
     }
   };
+  
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -95,59 +102,80 @@ const ProductPage: React.FC = () => {
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
-
+  
+  
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
+
+      // Initialize formFields with fetched data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
+
       setFormFields(initialFields);
 
+      // Exclude these fields from remainingFields
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+
       setRemainingFields(updatedRemainingFields);
       setProductData(product);
     }
   }, [productDataQuery]);
-
   useEffect(() => {
-    if (segmentsData?.segments) {
-      setSegments(segmentsData.segments);
+    if (segmentsData) {
+      console.log(segmentsData);
+      setSegments(segmentsData.Segment);
+  
+      // Flatten and extract form fields from segments
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
+        Object.values(segment.post).map(field => ({
+          id: field.id || uuidv4(), // Ensure each field has a unique ID
+          type: field.type || 'text',
+          label: field.label || '',
+          value: field.value || '',
+          options: field.options || []
+        }))
+      );
+  
+      // Log the transformed segment fields
+      console.log('formfields', segmentFields);
+  
+      setFormFields(segmentFields);
     }
   }, [segmentsData]);
+  
+  
 
-  const handleInputChange = (fieldId: string, value: string | number) => {
+
+
+  const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
+      const parsedValue = (typeof value === 'string' && isNaN(Number(value))) ? value : parseFloat(value as string);
       setProductData(prev => ({
         ...prev!,
-        [fieldId]: value
+        [fieldId]: parsedValue
       }));
     }
     setFormFields(prev =>
       prev.map(field => (field.id === fieldId ? { ...field, value } : field))
     );
     setHasUnsavedChanges(true);
-  };
+  }, [productData, formFields]);
 
   const handleAddField = (newField: FormField) => {
-    
-  
     setFormFields(prev => [...prev, newField]);
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
     setHasUnsavedChanges(true);
   };
-  
+
   const handleRemoveField = (index: number) => {
     setFormFields(prev => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
-      if (RESERVED_FIELDS.has(removedField.id)) {
-        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
-      } else {
-        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
-      }
+      setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
       return updatedFields;
     });
     setHasUnsavedChanges(true);
@@ -210,15 +238,16 @@ const ProductPage: React.FC = () => {
       alert('Failed to save product.');
     }
   };
+
   const handlePublish = async () => {
     try {
       const productVersionId = localStorage.getItem('productVersionId');
-  
+
       if (!productVersionId) {
         alert('Product version ID not found in local storage.');
         return;
       }
-  
+
       const postData = formFields.reduce((acc, field) => {
         acc[field.id] = {
           type: field.type,
@@ -228,56 +257,56 @@ const ProductPage: React.FC = () => {
         };
         return acc;
       }, {} as Record<string, any>);
-  
+
       const segmentId = SEGMENT_ID;
-  
+
       if (!segmentId) {
         alert('No segment ID available.');
         return;
       }
-  
-      // First publish the segment
+
       await publishSegments({
         variables: { id: segmentId, productVersionId },
       });
-  
-      // Then update the segment with new form field data
+
       await UpdateSegment({
         variables: {
           id: segmentId,
           post: postData,
         },
       });
-  
+
       alert('Segment published and updated!');
     } catch (error) {
       console.error('Error publishing segment:', error);
-      alert('Failed to publish segment.');
+      alert('Error publishing segment.');
     }
   };
-  
+
   const handleAddCustomField = () => {
     if (!customFieldLabel.trim()) {
       alert('Field label cannot be empty.');
       return;
     }
-  
     const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, '_');
     if (RESERVED_FIELDS.has(newFieldId)) {
       alert('Cannot use reserved field ID.');
       return;
     }
-  
+    if (formFields.find(field => field.id === newFieldId)) {
+      alert('Field with this label already exists.');
+      return;
+    }
+
     const newField: FormField = {
       id: newFieldId,
       type: customFieldType,
       label: customFieldLabel,
       options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
     };
-  
+
     handleAddField(newField);
-  
-    // Clear custom field input values
+
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setCustomFieldOptions('');
