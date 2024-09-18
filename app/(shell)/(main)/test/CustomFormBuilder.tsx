@@ -777,7 +777,12 @@ export default function EnhancedProductMoodboard() {
       </div>
       
 
-      <Tabs
+     
+
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel className="pr-2" defaultSize={80}>
+
+        <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
         className="w-full h-10"
@@ -796,11 +801,6 @@ export default function EnhancedProductMoodboard() {
       </Tabs>
 
      
-     
-
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel className="pr-2" defaultSize={80}>
-
           {renderTabContent()}
         </ResizablePanel>
         <ResizableHandle />
