@@ -293,6 +293,7 @@ const ProductPage: React.FC = () => {
   if (deleteLoading) return <p>Deleting...</p>;
   if (deleteError) return <p>Error deleting segment.</p>;
 
+  
   return (
     <div className="product-page">
       <Tabs>
@@ -329,15 +330,18 @@ const ProductPage: React.FC = () => {
                         <DragDropContext onDragEnd={onDragEnd}>
                           <Droppable droppableId="form-fields">
                             {(provided) => (
-                              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
+                              <div {...provided.droppableProps} ref={provided.innerRef}   
+ className="space-y-1">
                                 {formFields.map((field, index) => (
                                   <Draggable key={field.id} draggableId={field.id} index={index}>
                                     {(provided) => (
                                       <div
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
+                                        {...provided.dragHandleProps}   
+
+                                        className="flex items-center   
+ space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
                                       >
                                         <GripVertical className="h-3 w-3 text-muted-foreground" />
                                         <div className="flex-grow">

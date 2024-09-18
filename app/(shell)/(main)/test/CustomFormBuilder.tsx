@@ -2,13 +2,17 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Input } from "@/components/ui/input";
+import   
+ { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from   
+ "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger   
+ } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";   
+
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
@@ -60,6 +64,7 @@ const ProductPage: React.FC = () => {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [removedField, setRemovedField] = useState<FormField | null>(null);
 
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
@@ -153,17 +158,8 @@ const ProductPage: React.FC = () => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
 
-      // Check if the removed field is reserved
-      if (RESERVED_FIELDS.has(removedField.id)) {
-        // Add reserved field back to remainingFields
-        setRemainingFields(prev => [
-          ...prev.filter(field => field.id !== removedField.id),
-          removedField
-        ].sort((a, b) => a.label.localeCompare(b.label)));
-      } else {
-        // Add non-reserved field back to remainingFields
-        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
-      }
+      // Store removed field in temporary state
+      setRemovedField(removedField);
 
       return updatedFields;
     });
@@ -283,14 +279,12 @@ const ProductPage: React.FC = () => {
       return;
     }
 
-    // Update both formFields and remainingFields
-    setFormFields(prev => [...prev, newField]);
-    setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
-
+    handleAddField(newField);
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
+
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
@@ -334,15 +328,18 @@ const ProductPage: React.FC = () => {
                         <DragDropContext onDragEnd={onDragEnd}>
                           <Droppable droppableId="form-fields">
                             {(provided) => (
-                              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
+                              <div {...provided.droppableProps} ref={provided.innerRef}   
+ className="space-y-1">
                                 {formFields.map((field, index) => (
                                   <Draggable key={field.id} draggableId={field.id} index={index}>
                                     {(provided) => (
                                       <div
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
+                                        {...provided.dragHandleProps}   
+
+                                        className="flex items-center   
+ space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
                                       >
                                         <GripVertical className="h-3 w-3 text-muted-foreground" />
                                         <div className="flex-grow">
