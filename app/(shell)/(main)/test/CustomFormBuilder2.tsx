@@ -96,27 +96,21 @@ const ProductPage: React.FC = () => {
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
 
-
-  
   useEffect(() => {
-    if (segmentsData?.segments) {
-      // Find the segment by SEGMENT_ID
-      const existingSegment = segmentsData.segments.find((seg: { id: string; }) => seg.id === SEGMENT_ID);
-      if (existingSegment && existingSegment.post) {
-        // Map segment post data to form fields
-        const fieldsWithValues = existingSegment.post.map((post: { id: any; type: any; label: any; value: any; options: any; }) => ({
-          id: post.id,
-          type: post.type || 'text', // Default type if not provided
-          label: post.label,
-          value: post.value || '',
-          options: post.options || [],
-        }));
-        
-        setFormFields(fieldsWithValues);
-      }
+    if (productDataQuery?.Product) {
+      const product = productDataQuery.Product[0];
+      const initialFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: product[field.id] || ''
+      }));
+      setFormFields(initialFields);
+
+      const excludedFields = new Set(initialFields.map(field => field.id));
+      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+      setRemainingFields(updatedRemainingFields);
+      setProductData(product);
     }
-  }, [segmentsData]);
-  
+  }, [productDataQuery]);
 
   useEffect(() => {
     if (segmentsData?.segments) {
