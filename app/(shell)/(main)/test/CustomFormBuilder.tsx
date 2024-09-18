@@ -505,32 +505,39 @@ export default function EnhancedProductMoodboard() {
                           </Droppable>
                         </DragDropContext>
 
-                        <div className="custom-field-form">
+                        <h3 className="mt-4 text-xs font-semibold">Add Custom Field</h3>
+        <div className="space-y-1 max-w-sm"
+         id="custom-field-form">
+        
+                        
                           <Input
+                                      className="text-xs h-7"
                             value={customFieldLabel}
                             onChange={(e) => setCustomFieldLabel(e.target.value)}
                             placeholder="Field Label"
                           />
                           <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
-                            <SelectTrigger>
-                              <SelectValue>{customFieldType}</SelectValue>
+                            <SelectTrigger className="text-xs h-7">
+                              <SelectValue  placeholder="Field Type">{customFieldType}</SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="textarea">Textarea</SelectItem>
-                              <SelectItem value="number">Number</SelectItem>
-                              <SelectItem value="select">Select</SelectItem>
+                              <SelectItem className="text-xs" value="text">Text</SelectItem>
+                              <SelectItem className="text-xs"  value="textarea">Textarea</SelectItem>
+                              <SelectItem className="text-xs"  value="number">Number</SelectItem>
+                              <SelectItem className="text-xs"  value="select">Select</SelectItem>
                             </SelectContent>
                           </Select>
                           {customFieldType === 'select' && (
-                            <Textarea
+                               <Input
+              placeholder="Enter options (comma-separated)"
                               value={customFieldOptions}
                               onChange={(e) => setCustomFieldOptions(e.target.value)}
-                              placeholder="Comma-separated options"
-                            />
+                              className="text-xs h-7"
+
+                             />
                           )}
-                          <Button onClick={handleAddCustomField}>
-                            <PlusIcon className="mr-1" /> Add Custom Field
+                          <Button  className="text-xs h-7" size="sm" onClick={handleAddCustomField}>
+                            <PlusIcon className="mr-1" /> Add Field
                           </Button>
                         </div>
                       </CardContent>
@@ -805,19 +812,19 @@ export default function EnhancedProductMoodboard() {
         <ResizablePanel defaultSize={20}>
         <Card>
                   <CardContent>
-                    <h2 className="text-lg font-bold mb-2">Product Preview</h2>
                     <div className="flex items-center space-x-4">
-                      {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}
+                    <h2 className="text-lg font-bold mb-2">Product Preview</h2>
+
+                    {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}
+
                     </div>
 
-                    <div className=" bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 min-h-[100px] h-auto ">
+                    <div className=" bg-white text-neutral-950  dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 min-h-[100px] h-auto ">
   {productData ? (
     <div>
-        {hasUnsavedChanges && (
-            <span className="text-yellow-500">
-              Unsaved changes
-            </span>
-          )}
+      
+      
+
        <div className="relative w-full h-60 mb-4 rounded-lg overflow-hidden">
         <img
           src="https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg"
