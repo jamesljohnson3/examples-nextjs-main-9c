@@ -103,28 +103,69 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
+  
+      // Initialize formFields with fetched data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
+  
       setFormFields(initialFields);
-
+  
+      // Exclude these fields from remainingFields
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+  
       setRemainingFields(updatedRemainingFields);
       setProductData(product);
     }
-  }, [productDataQuery, initialAvailableFields]);
+  }, [productDataQuery]);
+  
 
   useEffect(() => {
     if (segmentsData) {
-      console.log(segmentsData);
-      setSegments(segmentsData?.post);
+      const fetchedSegments = segmentsData.Segment;
+      setSegments(fetchedSegments);
+  
+      // Extract fields from segments
+      const segmentFields = fetchedSegments.flatMap((segment: { post: { [s: string]: FormField; } | ArrayLike<FormField>; }) => 
+        Object.values(segment.post) as FormField[]
+      );
+  
+      // Create a map of segment fields indexed by field ID
+      const segmentFieldsMap = new Map(segmentFields.map((field: { id: any; }) => [field.id, field]));
+  
+      // Combine initial fields with segment fields, giving precedence to segment fields
+      const combinedFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: segmentFieldsMap.get(field.id)?.value || field.value
+      }));
+  
+      // Update the form fields state
+      setFormFields(combinedFields);
     }
   }, [segmentsData]);
   
+  
 
-
+  useEffect(() => {
+    const segment = segments.find(seg => seg.id === SEGMENT_ID);
+    if (segment) {
+      const segmentFields = Object.values(segment.post).map(field => ({
+        ...field,
+        id: field.id || uuidv4()  // Ensure each field has a unique ID
+      }));
+  
+      // Combine segment fields with initial fields
+      const combinedFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: segmentFields.find(sf => sf.id === field.id)?.value || field.value
+      }));
+  
+      setFormFields(combinedFields);
+    }
+  }, [segments, SEGMENT_ID]);
+  
   
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
