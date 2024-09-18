@@ -76,7 +76,7 @@ const ProductPage: React.FC = () => {
       alert('Error deleting segment.');
     }
   });
-  
+
   const handleDeleteSegment = async (segmentId: any) => {
     if (!window.confirm('Are you sure you want to delete this segment?')) {
       return;
@@ -87,7 +87,7 @@ const ProductPage: React.FC = () => {
       console.error('Error executing delete mutation:', error);
     }
   };
-  
+
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -100,6 +100,7 @@ const ProductPage: React.FC = () => {
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
+
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
@@ -114,7 +115,7 @@ const ProductPage: React.FC = () => {
       setRemainingFields(updatedRemainingFields);
       setProductData(product);
     }
-  }, [productDataQuery, initialAvailableFields]);
+  }, [productDataQuery]);
 
   useEffect(() => {
     if (segmentsData?.segments) {
@@ -123,14 +124,17 @@ const ProductPage: React.FC = () => {
   }, [segmentsData]);
 
   useEffect(() => {
-    // Map segment.post data to form fields
     const segment = segments.find(seg => seg.id === SEGMENT_ID);
     if (segment) {
       const segmentFields = segment.post.map(field => ({
         ...field,
-        id: field.id || uuidv4()  // Ensure each field has a unique ID
+        id: field.id || uuidv4() // Ensure each field has a unique ID
       }));
       setFormFields(segmentFields);
+
+      const segmentFieldIds = new Set(segmentFields.map(field => field.id));
+      const updatedRemainingFields = initialAvailableFields.filter(field => !segmentFieldIds.has(field.id));
+      setRemainingFields(updatedRemainingFields);
     }
   }, [segments]);
 
@@ -146,7 +150,7 @@ const ProductPage: React.FC = () => {
       prev.map(field => (field.id === fieldId ? { ...field, value } : field))
     );
     setHasUnsavedChanges(true);
-  }, [productData, formFields]);
+  }, [productData]);
 
   const handleAddField = (newField: FormField) => {
     setFormFields(prev => [...prev, newField]);
@@ -294,7 +298,7 @@ const ProductPage: React.FC = () => {
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
-  
+
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
