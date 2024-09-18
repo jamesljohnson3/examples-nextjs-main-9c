@@ -97,32 +97,39 @@ const ProductPage: React.FC = () => {
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
 
 
-  
   useEffect(() => {
-    if (segmentsData?.segments) {
-      // Find the segment by SEGMENT_ID
-      const existingSegment = segmentsData.segments.find((seg: { id: string; }) => seg.id === SEGMENT_ID);
-      if (existingSegment && existingSegment.post) {
-        // Map segment post data to form fields
-        const fieldsWithValues = existingSegment.post.map((post: { id: any; type: any; label: any; value: any; options: any; }) => ({
-          id: post.id,
-          type: post.type || 'text', // Default type if not provided
-          label: post.label,
-          value: post.value || '',
-          options: post.options || [],
-        }));
-        
-        setFormFields(fieldsWithValues);
-      }
+    if (productDataQuery?.Product) {
+      const product = productDataQuery.Product[0];
+      const updatedFields = formFields.map(field => ({
+        ...field,
+        value: product[field.id] || field.value || '',
+      }));
+  
+      setFormFields(updatedFields);
+      setProductData(product);
     }
-  }, [segmentsData]);
+  }, [productDataQuery]);
   
 
-  useEffect(() => {
-    if (segmentsData?.segments) {
-      setSegments(segmentsData.segments);
+useEffect(() => {
+  if (segmentsData?.segments) {
+    // Find the segment by SEGMENT_ID
+    const existingSegment = segmentsData.segments.find((seg: { id: string; }) => seg.id === SEGMENT_ID);
+    if (existingSegment && existingSegment.post) {
+      // Map segment post data to form fields
+      const fieldsWithValues = existingSegment.post.map((post: { id: any; type: any; label: any; value: any; options: any; }) => ({
+        id: post.id,
+        type: post.type || 'text', // Default type if not provided
+        label: post.label,
+        value: post.value || '',
+        options: post.options || [],
+      }));
+      
+      setFormFields(fieldsWithValues);
     }
-  }, [segmentsData]);
+  }
+}, [segmentsData]);
+
 
   const handleInputChange = (fieldId: string, value: string | number) => {
     if (productData) {
@@ -261,7 +268,6 @@ const ProductPage: React.FC = () => {
       alert('Failed to publish segment.');
     }
   };
-  
   const handleAddCustomField = () => {
     if (!customFieldLabel.trim()) {
       alert('Field label cannot be empty.');
@@ -281,13 +287,16 @@ const ProductPage: React.FC = () => {
       options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
     };
   
-    handleAddField(newField);
+    setFormFields(prev => [...prev, newField]);
+    setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
+    setHasUnsavedChanges(true);
   
     // Clear custom field input values
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
+  
   
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
