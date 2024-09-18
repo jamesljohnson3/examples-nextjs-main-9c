@@ -39,6 +39,7 @@ import {
   X,
 } from 'lucide-react';
 import {
+  ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
@@ -802,6 +803,8 @@ export default function EnhancedProductMoodboard() {
 
           {renderTabContent()}
         </ResizablePanel>
+        <ResizableHandle />
+
         <ResizablePanel defaultSize={20}>
         <Card>
                   <CardContent>
