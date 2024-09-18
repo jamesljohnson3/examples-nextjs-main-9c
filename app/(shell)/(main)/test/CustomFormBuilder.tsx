@@ -121,6 +121,8 @@ const ProductPage: React.FC = () => {
     if (segmentsData?.segments) {
       console.log(segmentsData.segments);
       setSegments(segmentsData.segments);
+      const segmentFields = segmentsData.segments.flatMap((segment: { post: any; }) => segment.post || []);
+      setFormFields(segmentFields);
     }
   }, [segmentsData]);
   

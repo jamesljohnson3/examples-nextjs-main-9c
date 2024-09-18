@@ -43,7 +43,7 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: string;
+  post: FormField;
 }
 
 const initialAvailableFields: FormField[] = [
@@ -120,9 +120,13 @@ const ProductPage: React.FC = () => {
 
   useEffect(() => {
     if (segmentsData?.segments) {
+      console.log(segmentsData.segments);
       setSegments(segmentsData.segments);
+      const segmentFields = segmentsData.segments.flatMap((segment: { post: FormField }) => segment.post || []);
+      setFormFields(segmentFields);
     }
   }, [segmentsData]);
+  
 
   const handleInputChange = (fieldId: string, value: string | number) => {
     if (productData) {
