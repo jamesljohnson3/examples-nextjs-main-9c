@@ -657,10 +657,7 @@ export default function EnhancedProductMoodboard() {
           </Button>
         </div>
       </div>
-
-      <h1 className="text-lg font-bold text-center mb-2">
-        Enhanced Product Moodboard
-      </h1>
+      
 
       <Tabs
         value={activeTab}
@@ -680,64 +677,8 @@ export default function EnhancedProductMoodboard() {
         </TabsList>
       </Tabs>
 
-      <Card className="mb-2">
-        <CardContent className="p-2">
-          <div className="flex space-x-2 mb-2">
-            <Input
-              placeholder="Search..."
-              className="flex-grow h-8 text-xs"
-            />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs"
-                >
-                  <User className="h-4 w-4 mr-1" />
-                  User
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-2">
-                <div className="flex items-center space-x-2">
-                  <Avatar>
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">
-                      John Doe
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      john@example.com
-                    </p>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <Command className="rounded-lg border shadow-md">
-            <CommandInput
-              placeholder="Type a command or search..."
-              className="h-8 text-xs"
-            />
-            <CommandList className="h-24 overflow-y-auto">
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup heading="Actions">
-                <CommandItem className="text-xs">
-                  Generate New Concept
-                </CommandItem>
-                <CommandItem className="text-xs">
-                  Modify Existing Concept
-                </CommandItem>
-                <CommandItem className="text-xs">
-                  Apply Style Transfer
-                </CommandItem>
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </CardContent>
-      </Card>
+     
+     
 
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={50}>
