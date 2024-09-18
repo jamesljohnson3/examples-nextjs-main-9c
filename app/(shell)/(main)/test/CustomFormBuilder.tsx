@@ -229,7 +229,7 @@ const ProductPage: React.FC = () => {
         return acc;
       }, {} as Record<string, any>);
   
-      const segmentId = segments[0]?.id;
+      const segmentId = SEGMENT_ID;
   
       if (!segmentId) {
         alert('No segment ID available.');
