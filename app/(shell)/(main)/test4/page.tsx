@@ -1,10 +1,20 @@
 "use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { PlusIcon, MinusIcon, Image } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+// Placeholder mock data for the product
+const productData = {
+  name: "Sample Product",
+  description: "This is a great product!",
+  price: 19.99,
+  quantity: 5,
+  category: "Accessories",
+};
 
 interface ImageUploaderProps {
   onImageChange: (type: 'gallery' | 'primary', imageURL: string | null) => void;
@@ -117,6 +127,29 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
                 </label>
               )}
             </div>
+
+            {/* Mockup for previewing the primary photo */}
+            <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 h-auto p-6 mt-4">
+              {primaryPhoto ? (
+                <div className="relative w-full mb-4">
+                  <div className="w-full" style={{ paddingBottom: '56.25%' }}>
+                    <img
+                      src={primaryPhoto}
+                      alt="Primary"
+                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                  <h2 className="text-lg font-bold mb-2">{productData.name}</h2>
+                  <p className="text-sm text-gray-500">{productData.description}</p>
+                  <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
+                  <p className="text-sm">Quantity: {productData.quantity}</p>
+                  <p className="text-sm">Category: {productData.category}</p>
+                </div>
+              ) : (
+                <p>No product data available.</p>
+              )}
+            </div>
+
           </AccordionContent>
         </AccordionItem>
 
@@ -184,3 +217,4 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
 };
 
 export default ImageUploader;
+
