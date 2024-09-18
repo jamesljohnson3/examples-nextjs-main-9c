@@ -826,7 +826,7 @@ export default function EnhancedProductMoodboard() {
                       )}
                       {!productData && <p>No product data available.</p>}
                     </div>
-                    <button onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
+                    <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
                   </CardContent>
                 </Card>
         </ResizablePanel>
