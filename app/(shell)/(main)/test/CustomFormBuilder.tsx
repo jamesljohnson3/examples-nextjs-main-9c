@@ -778,26 +778,11 @@ export default function EnhancedProductMoodboard() {
         </div>
       </div>
       
-
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-3 h-8">
-          <TabsTrigger value="form" className="text-xs">
-            Form Builder
-          </TabsTrigger>
-          <TabsTrigger value="refine" className="text-xs">
-            Refine with AI
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs">
-            Analytics
-          </TabsTrigger>
+      <Tabs>
+        <TabsList className="grid grid-cols-2">
+          <TabsTrigger value="form">Form Builder</TabsTrigger>
+          <TabsTrigger value="segments">Segments</TabsTrigger>
         </TabsList>
-      </Tabs>
-
-     
      
 
       <ResizablePanelGroup direction="horizontal">
@@ -830,6 +815,7 @@ export default function EnhancedProductMoodboard() {
         </ResizablePanel>
       </ResizablePanelGroup>
 
+      </Tabs>
       
     </div>
   );
