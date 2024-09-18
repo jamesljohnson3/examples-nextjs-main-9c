@@ -51,25 +51,15 @@ const sampleDesignConcepts = [
 
 export default function EnhancedProductMoodboard() {
   const [formFields, setFormFields] = useState([])
-  const [availableFields, setAvailableFields] = useState(initialFormElements)
-  const [nlpSensitivity, setNlpSensitivity] = useState(50)
-  const [aiCreativity, setAiCreativity] = useState(50)
+  const [availableFields, setAvailableFields] = useState(initialFormElements) 
   const [previewData, setPreviewData] = useState(sampleProductData)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [imageGallery, setImageGallery] = useState([])
   const [primaryPhoto, setPrimaryPhoto] = useState(null)
   const [ogImage, setOgImage] = useState(null)
-  const [metadata, setMetadata] = useState({ title: '', description: '', keywords: '' })
-  const [aiPrompt, setAiPrompt] = useState('')
-  const [designConcepts, setDesignConcepts] = useState(sampleDesignConcepts)
+  const [metadata, setMetadata] = useState({ title: '', description: '', keywords: '' }) 
   const [fullscreenConcept, setFullscreenConcept] = useState(null)
-  const [activeTab, setActiveTab] = useState('form')
-  const [aiProgress, setAIProgress] = useState(0)
-  const [aiSuggestions, setAiSuggestions] = useState([
-    "Consider a more vibrant color palette to appeal to younger professionals",
-    "Emphasize the product's unique features in the description",
-    "Add customer testimonials to boost credibility",
-  ])
+  const [activeTab, setActiveTab] = useState('form') 
 
   useEffect(() => {
     setFormFields(initialFormElements.map(field => ({ ...field, id: `${field.id}-${Date.now()}` })))
@@ -142,31 +132,7 @@ export default function EnhancedProductMoodboard() {
     setHasUnsavedChanges(true)
   }
 
-  const handleAiPromptSubmit = (e) => {
-    e.preventDefault()
-    console.log('Generating design concepts for:', aiPrompt)
-    setDesignConcepts(prevConcepts => [...prevConcepts].sort(() => Math.random() - 0.5))
-    setAiPrompt('')
-  }
-
-  const handleRefinement = () => {
-    setAIProgress(0)
-    const interval = setInterval(() => {
-      setAIProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          // Simulate AI refinement
-          setDesignConcepts(prevConcepts => [...prevConcepts].sort(() => Math.random() - 0.5))
-          setAiSuggestions(prevSuggestions => {
-            const newSuggestion = `New AI-generated suggestion: ${Date.now()}`
-            return [...prevSuggestions.slice(1), newSuggestion]
-          })
-          return 100
-        }
-        return prev + 10
-      })
-    }, 200)
-  }
+  
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -378,106 +344,8 @@ export default function EnhancedProductMoodboard() {
         )
       case 'refine':
         return (
-          <Accordion type="single" collapsible className="w-full space-y-2">
-            <AccordionItem value="ai-gallery">
-              <AccordionTrigger className="text-sm font-semibold">AI-Powered Design Concept Gallery</AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <form onSubmit={handleAiPromptSubmit} className="flex space-x-2">
-                      <Input 
-                        placeholder="Enter prompt for AI design concepts..." 
-                        value={aiPrompt}
-                        onChange={(e) => setAiPrompt(e.target.value)}
-                        className="flex-grow h-8 text-xs"
-                      />
-                      <Button type="submit" size="sm" className="h-8 text-xs">Generate</Button>
-                    </form>
-                    <div className="grid grid-cols-2 gap-2">
-                      {designConcepts.map((concept) => (
-                        <div key={concept.id} className="relative group">
-                          <img src={concept.image} alt={concept.title} className="w-full h-auto rounded" />
-                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button size="sm" onClick={() => setFullscreenConcept(concept)}>
-                              <Maximize2 className="h-4 w-4 mr-1" />
-                              Fullscreen
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="ai-config">
-              <AccordionTrigger className="text-sm font-semibold">AI Config</AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs">NLP Sensitivity</label>
-                        <Settings2Icon className="h-3 w-3 text-muted-foreground" />
-                      </div>
-                      <Slider
-                        value={[nlpSensitivity]}
-                        onValueChange={(value) => setNlpSensitivity(value[0])}
-                        max={100}
-                        step={1}
-                        className="h-3"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs">AI Creativity</label>
-                        <BrainCircuitIcon className="h-3 w-3 text-muted-foreground" />
-                      </div>
-                      <Slider
-                        value={[aiCreativity]}
-                        onValueChange={(value) => setAiCreativity(value[0])}
-                        max={100}
-                        step={1}
-                        className="h-3"
-                      />
-                    </div>
-                    <Button onClick={handleRefinement} className="w-full">
-                      {aiProgress > 0 && aiProgress < 100 ? (
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Zap className="mr-2 h-4 w-4" />
-                      )}
-                      Generate AI Refinement
-                    </Button>
-                    {aiProgress > 0 && (
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${aiProgress}%` }}></div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="ai-suggestions">
-              <AccordionTrigger className="text-sm font-semibold">AI Suggestions</AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2">
-                    <ul className="space-y-2">
-                      {aiSuggestions.map((suggestion, index) => (
-                        <li key={index} className="flex items-start space-x-2 animate-fade-in">
-                          <SparklesIcon className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-xs">{suggestion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          
+          <></>
         )
       case 'analytics':
         return (
