@@ -1,7 +1,41 @@
 // mutations or queries 
 import { gql } from '@apollo/client';
 
+export const PUBLISH_SEGMENT = gql`
+mutation PublishSegment($id: ID!, $post: [FormFieldInput]) {
+  updateSegment(id: $id, post: $post) {
+    id
+    post {
+      id
+      type
+      label
+      value
+      options
+    }
+  }
+}
 
+`;
+export const UPDATE_SEGMENT = gql`
+  mutation UpdateSegment($id: uuid!, $post: [post_insert_input!]!) {
+    update_Segment(
+      where: { id: { _eq: $id } },
+      _set: { post: $post }
+    ) {
+      returning {
+        id
+        name
+        post {
+          id
+          name
+          slug
+          metadata
+          sections
+        }
+      }
+    }
+  }
+`;
 export const SAVE_PRODUCT = gql`
   mutation SaveProduct($productId: String!, $name: String, $description: String,  $price: float8, $quantity: Int, $category: String) {
     update_Product(where: {id: {_eq: $productId}}, _set: {name: $name, description: $description, price: $price, quantity: $quantity, category: $category}) {
