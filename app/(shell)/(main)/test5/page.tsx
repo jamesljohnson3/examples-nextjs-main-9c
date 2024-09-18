@@ -146,23 +146,7 @@ const ProductPage: React.FC = () => {
   }, [segmentsData]);
   
 
-  useEffect(() => {
-    const segment = segments.find(seg => seg.id === SEGMENT_ID);
-    if (segment) {
-      const segmentFields = Object.values(segment.post).map(field => ({
-        ...field,
-        id: field.id || uuidv4()  // Ensure each field has a unique ID
-      }));
 
-      // Combine segment fields with initial fields
-      const combinedFields = initialAvailableFields.map(field => ({
-        ...field,
-        value: segmentFields.find(sf => sf.id === field.id)?.value || field.value
-      }));
-
-      setFormFields(combinedFields);
-    }
-  }, [segments, SEGMENT_ID]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {

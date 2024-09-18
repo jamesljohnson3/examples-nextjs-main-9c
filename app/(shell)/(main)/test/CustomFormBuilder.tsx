@@ -121,18 +121,21 @@ const ProductPage: React.FC = () => {
     }
   }, [productDataQuery]);
   
+  
 
 
   
   
   useEffect(() => {
-    if (segmentsData?.segments) {
-      // Extract fields from the segments
-      const segmentFields = segmentsData.segments.flatMap((segment: { post: { [s: string]: unknown; } | ArrayLike<unknown>; }) => 
-        Object.values(segment.post) || []
+    if (segmentsData) {
+      console.log('Segments Data:', segmentsData);
+      setSegments(segmentsData.Segment);
+  
+      // Flatten and extract form fields from segments
+      const segmentFields = segmentsData.Segment.flatMap((segment: { post: { [key: string]: FormField } }) => 
+        Object.values(segment.post)
       );
-      console.log(segmentsData.segments);
-
+  
       // Create a set of existing field IDs for quick lookup
       const existingFieldIds = new Set(formFields.map(field => field.id));
   
@@ -141,8 +144,11 @@ const ProductPage: React.FC = () => {
         ...prevFields,
         ...segmentFields.filter((field: { id: string; }) => !existingFieldIds.has(field.id))
       ]);
+  
+      console.log('Form Fields After Merging:', segmentFields);
     }
   }, [segmentsData]);
+  
   
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
