@@ -131,10 +131,7 @@ const ProductPage: React.FC = () => {
   };
 
   const handleAddField = (newField: FormField) => {
-    if (RESERVED_FIELDS.has(newField.id)) {
-      alert('Cannot add reserved field.');
-      return;
-    }
+    
   
     setFormFields(prev => [...prev, newField]);
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
