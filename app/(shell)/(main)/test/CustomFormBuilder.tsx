@@ -119,9 +119,11 @@ const ProductPage: React.FC = () => {
 
   useEffect(() => {
     if (segmentsData?.segments) {
+      console.log(segmentsData.segments);
       setSegments(segmentsData.segments);
     }
   }, [segmentsData]);
+  
 
   useEffect(() => {
     const segment = segments.find(seg => seg.id === SEGMENT_ID);

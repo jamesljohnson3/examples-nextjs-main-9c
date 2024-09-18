@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -119,9 +118,11 @@ const ProductPage: React.FC = () => {
 
   useEffect(() => {
     if (segmentsData?.segments) {
+      console.log(segmentsData.segments);
       setSegments(segmentsData.segments);
     }
   }, [segmentsData]);
+  
 
   useEffect(() => {
     // Map segment.post data to form fields
