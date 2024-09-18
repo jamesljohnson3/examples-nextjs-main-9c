@@ -43,7 +43,7 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: { [key: string]: FormField };
+  post: FormField[];
 }
 
 const initialAvailableFields: FormField[] = [

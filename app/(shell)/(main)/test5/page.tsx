@@ -43,7 +43,7 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: { [key: string]: FormField };
+  post: FormField[];
 }
 
 const initialAvailableFields: FormField[] = [
@@ -122,30 +122,29 @@ const ProductPage: React.FC = () => {
       setProductData(product);
     }
   }, [productDataQuery]);
-
   useEffect(() => {
     if (segmentsData) {
-      const fetchedSegments = segmentsData.Segment;
-      setSegments(fetchedSegments);
-
-      // Extract fields from segments
-      const segmentFields = fetchedSegments.flatMap((segment: { post: { [s: string]: FormField; } | ArrayLike<FormField>; }) => 
-        Object.values(segment.post) as FormField[]
+      console.log('Segments Data:', segmentsData);
+      setSegments(segmentsData.Segment);
+  
+      // Flatten and extract form fields from segments
+      const segmentFields = segmentsData.Segment.flatMap((segment: { post: { [key: string]: FormField } }) => 
+        Object.values(segment.post)
       );
-
-      // Create a map of segment fields indexed by field ID
-      const segmentFieldsMap = new Map(segmentFields.map((field: { id: any; }) => [field.id, field]));
-
-      // Combine initial fields with segment fields, giving precedence to segment fields
-      const combinedFields = initialAvailableFields.map(field => ({
-        ...field,
-        value: segmentFieldsMap.get(field.id)?.value || field.value
-      }));
-
-      // Update the form fields state
-      setFormFields(combinedFields);
+  
+      // Create a set of existing field IDs for quick lookup
+      const existingFieldIds = new Set(formFields.map(field => field.id));
+  
+      // Combine existing formFields with new segmentFields
+      setFormFields(prevFields => [
+        ...prevFields,
+        ...segmentFields.filter((field: { id: string; }) => !existingFieldIds.has(field.id))
+      ]);
+  
+      console.log('Form Fields After Merging:', segmentFields);
     }
   }, [segmentsData]);
+  
 
   useEffect(() => {
     const segment = segments.find(seg => seg.id === SEGMENT_ID);
