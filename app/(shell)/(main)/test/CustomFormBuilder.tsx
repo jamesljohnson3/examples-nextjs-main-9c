@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Input } from "@/components/ui/input";
@@ -100,6 +100,7 @@ const ProductPage: React.FC = () => {
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
+
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
@@ -202,67 +203,29 @@ const ProductPage: React.FC = () => {
 
       const versionNumber = Math.floor(Date.now() / 1000);
       const uuid = uuidv4();
-
       await updateProductVersion({
-        variables: {
-          productId: PRODUCT_ID,
-          versionNumber,
-          changes: "Updated product version",
-          data: productData,
-          id: uuid,
-        },
+        variables: { productId: PRODUCT_ID, version: versionNumber, uuid },
       });
 
-      localStorage.setItem('productVersionId', uuid);
-      setHasUnsavedChanges(false);
-      alert('Product version updated and saved!');
-    } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product.');
-    }
-  };
-
-  const handlePublish = async () => {
-    try {
-      const productVersionId = localStorage.getItem('productVersionId');
-
-      if (!productVersionId) {
-        alert('Product version ID not found in local storage.');
-        return;
-      }
-
-      const postData = formFields.reduce((acc, field) => {
-        acc[field.id] = {
-          type: field.type,
-          label: field.label,
-          value: field.value,
-          options: field.options || [],
-        };
-        return acc;
-      }, {} as Record<string, any>);
-
-      const segmentId = SEGMENT_ID;
-
-      if (!segmentId) {
-        alert('No segment ID available.');
-        return;
-      }
+      const fieldsToUpdate = formFields.map(({ id, value }) => ({
+        id,
+        value
+      }));
 
       await publishSegments({
-        variables: { id: segmentId, productVersionId },
-      });
-
-      await UpdateSegment({
         variables: {
-          id: segmentId,
-          post: postData,
-        },
+          productId: PRODUCT_ID,
+          version: versionNumber,
+          uuid,
+          fields: fieldsToUpdate,
+        }
       });
-
-      alert('Segment published and updated!');
+      
+      alert('Product saved successfully!');
+      setHasUnsavedChanges(false);
     } catch (error) {
-      console.error('Error publishing segment:', error);
-      alert('Error publishing segment.');
+      console.error('Error saving product:', error);
+      alert('Error saving product.');
     }
   };
 
@@ -294,7 +257,7 @@ const ProductPage: React.FC = () => {
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
-  
+
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
@@ -303,175 +266,152 @@ const ProductPage: React.FC = () => {
   if (deleteError) return <p>Error deleting segment.</p>;
 
   return (
-    <div className="product-page">
-      <Tabs>
-        <TabsList className="grid grid-cols-2">
-          <TabsTrigger value="form">Form Builder</TabsTrigger>
+    <div>
+      <Tabs defaultValue="product" className="w-full">
+        <TabsList>
+          <TabsTrigger value="product">Product</TabsTrigger>
           <TabsTrigger value="segments">Segments</TabsTrigger>
         </TabsList>
-
-        <div className="tab-content">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={70}>
-              <Accordion className='px-2' type="single" collapsible>
-                <AccordionItem value="product-form">
-                  <AccordionTrigger>Product Form</AccordionTrigger>
-                  <AccordionContent>
-                    <Card>
-                      <CardContent>
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex space-x-1">
-                            {remainingFields.map((field) => (
-                              <Button
-                                key={field.id}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAddField(field)}
-                                className="text-xs py-1 px-2"
-                              >
-                                <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <DragDropContext onDragEnd={onDragEnd}>
-                          <Droppable droppableId="form-fields">
+        <div className="my-4">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="product-form">
+              <AccordionTrigger>Product Form</AccordionTrigger>
+              <AccordionContent>
+                {productData && (
+                  <form>
+                    <div>
+                      <label htmlFor="name">Name</label>
+                      <Input id="name" value={productData.name} onChange={(e) => handleInputChange('name', e.target.value)} />
+                    </div>
+                    <div>
+                      <label htmlFor="description">Description</label>
+                      <Textarea id="description" value={productData.description} onChange={(e) => handleInputChange('description', e.target.value)} />
+                    </div>
+                    <div>
+                      <label htmlFor="price">Price</label>
+                      <Input type="number" id="price" value={productData.price} onChange={(e) => handleInputChange('price', e.target.value)} />
+                    </div>
+                    <div>
+                      <label htmlFor="quantity">Quantity</label>
+                      <Input type="number" id="quantity" value={productData.quantity} onChange={(e) => handleInputChange('quantity', e.target.value)} />
+                    </div>
+                    <div>
+                      <label htmlFor="category">Category</label>
+                      <Select value={productData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Electronics">Electronics</SelectItem>
+                          <SelectItem value="Clothing">Clothing</SelectItem>
+                          <SelectItem value="Food">Food</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button type="button" onClick={handleSave} disabled={!hasUnsavedChanges}>Save</Button>
+                  </form>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="form-fields">
+              <AccordionTrigger>Form Fields</AccordionTrigger>
+              <AccordionContent>
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable droppableId="droppable">
+                    {(provided) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps}>
+                        {formFields.map((field, index) => (
+                          <Draggable key={field.id} draggableId={field.id} index={index}>
                             {(provided) => (
-                              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
-                                {formFields.map((field, index) => (
-                                  <Draggable key={field.id} draggableId={field.id} index={index}>
-                                    {(provided) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
-                                      >
-                                        <GripVertical className="h-3 w-3 text-muted-foreground" />
-                                        <div className="flex-grow">
-                                          <label>{field.label}</label>
-                                          {field.type === 'text' && (
-                                            <Input
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                            />
-                                          )}
-                                          {field.type === 'textarea' && (
-                                            <Textarea
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                            />
-                                          )}
-                                          {field.type === 'number' && (
-                                            <Input
-                                              type="number"
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
-                                            />
-                                          )}
-                                          {field.type === 'select' && (
-                                            <Select
-                                              onValueChange={(value) => handleInputChange(field.id, value)}
-                                              defaultValue={field.value as string}
-                                            >
-                                              <SelectTrigger>
-                                                <SelectValue />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {field.options?.map((option) => (
-                                                  <SelectItem key={option} value={option}>
-                                                    {option}
-                                                  </SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          )}
-                                        </div>
-                                        <Button size="sm" variant="ghost" onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
-                                          <MinusIcon className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="border p-2 mb-2 bg-white shadow rounded"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span>{field.label}</span>
+                                  <GripVertical className="cursor-move" />
+                                  <Button variant="destructive" onClick={() => handleRemoveField(index)}>
+                                    <MinusIcon />
+                                  </Button>
+                                </div>
+                                {field.type === 'select' && field.options && (
+                                  <Select defaultValue={field.value as string} onValueChange={(value) => handleInputChange(field.id, value)}>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {field.options.map((opt, idx) => (
+                                        <SelectItem key={idx} value={opt}>{opt}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                                {field.type === 'textarea' && (
+                                  <Textarea
+                                    value={field.value as string}
+                                    onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                  />
+                                )}
+                                {field.type === 'text' && (
+                                  <Input
+                                    value={field.value as string}
+                                    onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                  />
+                                )}
+                                {field.type === 'number' && (
+                                  <Input
+                                    type="number"
+                                    value={field.value as string}
+                                    onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                  />
+                                )}
                               </div>
                             )}
-                          </Droppable>
-                        </DragDropContext>
-
-                        <div className="custom-field-form">
-                          <Input
-                            value={customFieldLabel}
-                            onChange={(e) => setCustomFieldLabel(e.target.value)}
-                            placeholder="Field Label"
-                          />
-                          <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
-                            <SelectTrigger>
-                              <SelectValue>{customFieldType}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="textarea">Textarea</SelectItem>
-                              <SelectItem value="number">Number</SelectItem>
-                              <SelectItem value="select">Select</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {customFieldType === 'select' && (
-                            <Textarea
-                              value={customFieldOptions}
-                              onChange={(e) => setCustomFieldOptions(e.target.value)}
-                              placeholder="Comma-separated options"
-                            />
-                          )}
-                          <Button onClick={handleAddCustomField}>
-                            <PlusIcon className="mr-1" /> Add Custom Field
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              {hasUnsavedChanges && (
-                <Button onClick={handleSave}>Save</Button>
-              )}
-              <Button onClick={handlePublish}>Publish</Button>
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel defaultSize={30}>
-              <div className="mt-4">
-                <Card>
-                  <CardContent>
-                    <h2 className="text-lg font-bold mb-2">Product Preview</h2>
-                    <div className="flex items-center space-x-4">
-                      {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}
-                    </div>
-
-                    <div className="p-4 border rounded-lg">
-                      {productData && (
-                        <div>
-                          <h3 className="text-xl font-semibold">{productData.name}</h3>
-                          <p className="text-sm text-gray-500">{productData.description}</p>
-                          <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
-                          <p className="text-sm">Quantity: {productData.quantity}</p>
-                          <p className="text-sm">Category: {productData.category}</p>
-                        </div>
-                      )}
-                      {!productData && <p>No product data available.</p>}
-                    </div>
-                    <button onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
-                  </CardContent>
-                </Card>
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+                <div>
+                  <Input
+                    placeholder="Custom field label"
+                    value={customFieldLabel}
+                    onChange={(e) => setCustomFieldLabel(e.target.value)}
+                  />
+                  <Select
+                    defaultValue={customFieldType}
+                    onValueChange={(value) => setCustomFieldType(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="textarea">Textarea</SelectItem>
+                      <SelectItem value="number">Number</SelectItem>
+                      <SelectItem value="select">Select</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {customFieldType === 'select' && (
+                    <Textarea
+                      placeholder="Options (comma separated)"
+                      value={customFieldOptions}
+                      onChange={(e) => setCustomFieldOptions(e.target.value)}
+                    />
+                  )}
+                  <Button onClick={handleAddCustomField}>Add Field</Button>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </Tabs>
     </div>
   );
 };
 
-export default memo(ProductPage);
+export default ProductPage;
