@@ -60,7 +60,6 @@ const ProductPage: React.FC = () => {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [removedField, setRemovedField] = useState<FormField | null>(null);
 
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
@@ -79,13 +78,7 @@ const ProductPage: React.FC = () => {
       alert('Error deleting segment.');
     }
   });
-  const handleDeleteSegment = async (segmentId: any) => {
-    try {
-      await deleteSegment({ variables: { segmentId } });
-    } catch (error) {
-      console.error('Error executing delete mutation:', error);
-    }
-  };
+
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -154,8 +147,10 @@ const ProductPage: React.FC = () => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
 
-      // Store removed field in temporary state
-      setRemovedField(removedField);
+      // Add the removed field back to remainingFields if it was not reserved
+      if (!RESERVED_FIELDS.has(removedField.id)) {
+        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
+      }
 
       return updatedFields;
     });
@@ -214,7 +209,6 @@ const ProductPage: React.FC = () => {
           productId: PRODUCT_ID,
           versionNumber,
           changes: "Updated product version",
-
           data: productData, // Ensure productData matches the ProductInput type
           id: uuid,
         },
@@ -233,7 +227,6 @@ const ProductPage: React.FC = () => {
   const handlePublish = async () => {
     try {
       const productVersionId = localStorage.getItem('productVersionId');
-
       if (!productVersionId) {
         alert('No product version ID found.');
         return;
@@ -246,15 +239,15 @@ const ProductPage: React.FC = () => {
             id: segment.id,
             name: segment.name,
             slug: segment.slug,
-            post: segment.post
+            post: segment.post,
           })),
         },
       });
 
       alert('Segments published successfully!');
     } catch (error) {
-      console.error('Error publishing segment:', error);
-      alert('Failed to publish segment.');
+      console.error('Error publishing segments:', error);
+      alert('Failed to publish segments.');
     }
   };
 
@@ -266,200 +259,147 @@ const ProductPage: React.FC = () => {
 
     const newField: FormField = {
       id: customFieldLabel.toLowerCase().replace(/\s+/g, '_'),
-      type: customFieldType,
       label: customFieldLabel,
+      type: customFieldType,
       options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
     };
 
-    if (RESERVED_FIELDS.has(newField.id)) {
-      alert('Cannot use reserved field ID.');
-      return;
-    }
-
-    handleAddField(newField);
+    setFormFields(prev => [...prev, newField]);
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setCustomFieldOptions('');
+    setHasUnsavedChanges(true);
   };
 
-  if (loadingProduct || loadingSegments) {
-    return <div>Loading...</div>;
-  }
+  const handleDeleteSegment = async (segmentId: string) => {
+    try {
+      await deleteSegment({
+        variables: {
+          segmentId,
+        },
+      });
 
-  if (deleteLoading) return <p>Deleting...</p>;
-  if (deleteError) return <p>Error deleting segment.</p>;
+      // Remove the deleted segment from the local state
+      setSegments(prevSegments => prevSegments.filter(segment => segment.id !== segmentId));
+    } catch (error) {
+      console.error('Error deleting segment:', error);
+    }
+  };
 
   return (
-    <div className="product-page">
-      <Tabs>
-        <TabsList className="grid grid-cols-2">
-          <TabsTrigger value="form">Form Builder</TabsTrigger>
-          <TabsTrigger value="segments">Segments</TabsTrigger>
-        </TabsList>
+    <div className="container mx-auto py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Edit Product</h1>
+        <Button variant="outline" onClick={handleSave} disabled={!hasUnsavedChanges}>
+          Save Changes
+        </Button>
+      </div>
 
-        <div className="tab-content">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={70}>
-              <Accordion className='px-2' type="single" collapsible>
-                <AccordionItem value="product-form">
-                  <AccordionTrigger>Product Form</AccordionTrigger>
-                  <AccordionContent>
-                    <Card>
-                      <CardContent>
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex space-x-1">
-                            {remainingFields.map((field) => (
-                              <Button
-                                key={field.id}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAddField(field)}
-                                className="text-xs py-1 px-2"
-                              >
-                                <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
-                              </Button>
-                            ))}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="formFields">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {formFields.map((field, index) => (
+                <Draggable key={field.id} draggableId={field.id} index={index}>
+                  {(provided) => (
+                    <div
+                      className="mb-4"
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <Card>
+                        <CardContent>
+                          <div className="flex justify-between items-center">
+                            <h2 className="text-lg font-semibold">{field.label}</h2>
+                            <button onClick={() => handleRemoveField(index)}>
+                              <MinusIcon className="text-red-500" />
+                            </button>
                           </div>
-                        </div>
-
-                        <DragDropContext onDragEnd={onDragEnd}>
-                          <Droppable droppableId="form-fields">
-                            {(provided) => (
-                              <div {...provided.droppableProps} ref={provided.innerRef}   
- className="space-y-1">
-                                {formFields.map((field, index) => (
-                                  <Draggable key={field.id} draggableId={field.id} index={index}>
-                                    {(provided) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}   
-
-                                        className="flex items-center   
- space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
-                                      >
-                                        <GripVertical className="h-3 w-3 text-muted-foreground" />
-                                        <div className="flex-grow">
-                                          <label>{field.label}</label>
-                                          {field.type === 'text' && (
-                                            <Input
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                            />
-                                          )}
-                                          {field.type === 'textarea' && (
-                                            <Textarea
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                            />
-                                          )}
-                                          {field.type === 'number' && (
-                                            <Input
-                                              type="number"
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
-                                            />
-                                          )}
-                                          {field.type === 'select' && (
-                                            <Select
-                                              onValueChange={(value) => handleInputChange(field.id, value)}
-                                              defaultValue={field.value as string}
-                                            >
-                                              <SelectTrigger>
-                                                <SelectValue />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {field.options?.map((option) => (
-                                                  <SelectItem key={option} value={option}>
-                                                    {option}
-                                                  </SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          )}
-                                        </div>
-                                        <Button size="sm" variant="ghost" onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
-                                          <MinusIcon className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </div>
-                            )}
-                          </Droppable>
-                        </DragDropContext>
-
-                        <div className="custom-field-form">
-                          <Input
-                            value={customFieldLabel}
-                            onChange={(e) => setCustomFieldLabel(e.target.value)}
-                            placeholder="Field Label"
-                          />
-                          <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
-                            <SelectTrigger>
-                              <SelectValue>{customFieldType}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="textarea">Textarea</SelectItem>
-                              <SelectItem value="number">Number</SelectItem>
-                              <SelectItem value="select">Select</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {customFieldType === 'select' && (
-                            <Textarea
-                              value={customFieldOptions}
-                              onChange={(e) => setCustomFieldOptions(e.target.value)}
-                              placeholder="Comma-separated options"
+                          {field.type === 'text' && (
+                            <Input
+                              value={field.value as string}
+                              onChange={(e) => handleInputChange(field.id, e.target.value)}
                             />
                           )}
-                          <Button onClick={handleAddCustomField}>
-                            <PlusIcon className="mr-1" /> Add Custom Field
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-
-              {hasUnsavedChanges && (
-                <Button onClick={handleSave}>Save</Button>
-              )}
-              <Button onClick={handlePublish}>Publish</Button>
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel defaultSize={30}>
-              <div className="mt-4">
-                <Card>
-                  <CardContent>
-                    <h2 className="text-lg font-bold mb-2">Product Preview</h2>
-                    <div className="flex items-center space-x-4">
-                      {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}
+                          {field.type === 'textarea' && (
+                            <Textarea
+                              value={field.value as string}
+                              onChange={(e) => handleInputChange(field.id, e.target.value)}
+                            />
+                          )}
+                          {field.type === 'number' && (
+                            <Input
+                              type="number"
+                              value={field.value as number}
+                              onChange={(e) => handleInputChange(field.id, Number(e.target.value))}
+                            />
+                          )}
+                          {field.type === 'select' && (
+                            <Select
+                              value={field.value as string}
+                              onValueChange={(value) => handleInputChange(field.id, value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={field.label} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {field.options?.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        </CardContent>
+                      </Card>
                     </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
-                    <div className="p-4 border rounded-lg">
-                      {productData && (
-                        <div>
-                          <h3 className="text-xl font-semibold">{productData.name}</h3>
-                          <p className="text-sm text-gray-500">{productData.description}</p>
-                          <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
-                          <p className="text-sm">Quantity: {productData.quantity}</p>
-                          <p className="text-sm">Category: {productData.category}</p>
-                          </div>
-                      )}
-                      {!productData && <p>No product data available.</p>}
-                    </div>
-                    <button onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
-                  </CardContent>
-                </Card>
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-      </Tabs>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">Add Custom Field</h2>
+        <Input
+          placeholder="Field Label"
+          value={customFieldLabel}
+          onChange={(e) => setCustomFieldLabel(e.target.value)}
+        />
+        <Select value={customFieldType} onValueChange={setCustomFieldType}>
+          <SelectTrigger>
+            <SelectValue placeholder="Field Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="text">Text</SelectItem>
+            <SelectItem value="textarea">Textarea</SelectItem>
+            <SelectItem value="number">Number</SelectItem>
+            <SelectItem value="select">Select</SelectItem>
+          </SelectContent>
+        </Select>
+        {customFieldType === 'select' && (
+          <Textarea
+            placeholder="Comma-separated options"
+            value={customFieldOptions}
+            onChange={(e) => setCustomFieldOptions(e.target.value)}
+          />
+        )}
+        <Button variant="outline" onClick={handleAddCustomField}>
+          Add Field
+        </Button>
+      </div>
+
+     
+     
+     
+      <Button variant="outline" onClick={handlePublish}>
+        Publish Segments
+      </Button>
     </div>
   );
 };
