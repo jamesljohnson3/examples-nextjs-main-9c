@@ -142,7 +142,7 @@ const App = () => {
         return <Input type="number" value={field.value || ''} onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))} />;
       case 'select':
         return (
-          <Select onChange={(e) => handleInputChange(field.id, e.target.value)} defaultValue={field.value as string}>
+          <Select onChange={(e: { target: { value: string | number; }; }) => handleInputChange(field.id, e.target.value)} defaultValue={field.value as string}>
             {field.options?.map((option) => (
               <option key={option} value={option}>{option}</option>
             ))}
@@ -197,7 +197,7 @@ const App = () => {
     <div>
       {segments.map((segment) => (
         <div key={segment.id}>
-          {segment.sections.map((section) => (
+          {segment.sections.map((section: { title: boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | React.Key | null | undefined; content: { html?: string; mdx?: string; }; }) => (
             <div key={section.title}>
               <h3>{section.title}</h3>
               {renderContent(section.content)}
