@@ -751,12 +751,37 @@ export default function EnhancedProductMoodboard() {
             Products /BREADCRUMBS
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          {hasUnsavedChanges && (
-            <span className="text-yellow-500">
-              Unsaved changes
-            </span>
-          )}
+       
+      </div>
+      
+
+     
+
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel className="pr-2" defaultSize={80}>
+
+        <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full h-12"
+      >
+        <TabsList className="grid w-full grid-cols-3 h-8">
+          <TabsTrigger value="form" className="text-xs">
+            Form Builder
+          </TabsTrigger>
+          <TabsTrigger value="refine" className="text-xs">
+            Refine with AI
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs">
+            Analytics
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+     
+          {renderTabContent()}
+          <div className="flex items-center space-x-2">
+        
           <Button
             size="sm"
             className="h-6"
@@ -774,34 +799,6 @@ export default function EnhancedProductMoodboard() {
             Publish
           </Button>
         </div>
-      </div>
-      
-
-     
-
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel className="pr-2" defaultSize={80}>
-
-        <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full h-10"
-      >
-        <TabsList className="grid w-full grid-cols-3 h-8">
-          <TabsTrigger value="form" className="text-xs">
-            Form Builder
-          </TabsTrigger>
-          <TabsTrigger value="refine" className="text-xs">
-            Refine with AI
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs">
-            Analytics
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-     
-          {renderTabContent()}
         </ResizablePanel>
         <ResizableHandle />
 
@@ -813,9 +810,14 @@ export default function EnhancedProductMoodboard() {
                       {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}
                     </div>
 
-                    <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 min-h-[200px] h-auto p-6">
+                    <div className=" bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 min-h-[100px] h-auto ">
   {productData ? (
     <div>
+        {hasUnsavedChanges && (
+            <span className="text-yellow-500">
+              Unsaved changes
+            </span>
+          )}
        <div className="relative w-full h-60 mb-4 rounded-lg overflow-hidden">
         <img
           src="https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg"

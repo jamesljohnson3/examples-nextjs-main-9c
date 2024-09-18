@@ -104,6 +104,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
               className="hidden"
               onChange={(e) => handleImageUpload(e, 'gallery')}
               accept="image/*"
+              multiple
             />
             <PlusIcon className="h-6 w-6 text-muted-foreground" />
           </label>
