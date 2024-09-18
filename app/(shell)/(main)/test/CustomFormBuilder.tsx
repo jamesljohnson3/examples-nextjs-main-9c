@@ -2,17 +2,13 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import   
- { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from   
- "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger   
- } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";   
-
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
@@ -218,6 +214,7 @@ const ProductPage: React.FC = () => {
           productId: PRODUCT_ID,
           versionNumber,
           changes: "Updated product version",
+
           data: productData, // Ensure productData matches the ProductInput type
           id: uuid,
         },
@@ -451,7 +448,7 @@ const ProductPage: React.FC = () => {
                           <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
                           <p className="text-sm">Quantity: {productData.quantity}</p>
                           <p className="text-sm">Category: {productData.category}</p>
-                        </div>
+                          </div>
                       )}
                       {!productData && <p>No product data available.</p>}
                     </div>
