@@ -137,17 +137,16 @@ const ProductPage: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
+ 
   const handleAddField = (newField: FormField) => {
-    if (RESERVED_FIELDS.has(newField.id)) {
-      alert('Cannot add reserved field.');
-      return;
-    }
-
+    // Add new field to formFields
     setFormFields(prev => [...prev, newField]);
+    
+    // Remove the field from remainingFields
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
+    
     setHasUnsavedChanges(true);
   };
-
   const handleRemoveField = (index: number) => {
     setFormFields(prev => {
       const updatedFields = [...prev];
