@@ -1,14 +1,19 @@
 "use client"
+
 import React, { useState, useEffect, memo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Input } from "@/components/ui/input";
+import   
+ { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from   
+ "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger   
+ } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";   
+
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
@@ -60,6 +65,7 @@ const ProductPage: React.FC = () => {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [removedField, setRemovedField] = useState<FormField | null>(null);
 
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
@@ -153,17 +159,8 @@ const ProductPage: React.FC = () => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
 
-      // Check if the removed field is reserved
-      if (RESERVED_FIELDS.has(removedField.id)) {
-        // Add reserved field back to remainingFields
-        setRemainingFields(prev => [
-          ...prev.filter(field => field.id !== removedField.id),
-          removedField
-        ].sort((a, b) => a.label.localeCompare(b.label)));
-      } else {
-        // Add non-reserved field back to remainingFields
-        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
-      }
+      // Store removed field in temporary state
+      setRemovedField(removedField);
 
       return updatedFields;
     });
