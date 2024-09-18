@@ -420,6 +420,120 @@ export default function EnhancedProductMoodboard() {
           <Accordion type="single" collapsible className="w-full space-y-2">
           
           
+        <Card>
+                      <CardContent>
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex space-x-1">
+                            {remainingFields.map((field) => (
+                              <Button
+                                key={field.id}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleAddField(field)}
+                                className="text-xs py-1 px-2"
+                              >
+                                <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <DragDropContext onDragEnd={onDragEnd}>
+                          <Droppable droppableId="form-fields">
+                            {(provided) => (
+                              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
+                                {formFields.map((field, index) => (
+                                  <Draggable key={field.id} draggableId={field.id} index={index}>
+                                    {(provided) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
+                                      >
+                                        <GripVertical className="h-3 w-3 text-muted-foreground" />
+                                        <div className="flex-grow">
+                                          <label>{field.label}</label>
+                                          {field.type === 'text' && (
+                                            <Input className="h-6 text-xs"
+                                              value={field.value || ''}
+                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                            />
+                                          )}
+                                          {field.type === 'textarea' && (
+                                            <Textarea className="h-6 text-xs"
+                                              value={field.value || ''}
+                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                            />
+                                          )}
+                                          {field.type === 'number' && (
+                                            <Input className="h-6 text-xs"
+                                              type="number"
+                                              value={field.value || ''}
+                                              onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
+                                            />
+                                          )}
+                                          {field.type === 'select' && (
+                                            <Select 
+                                              onValueChange={(value) => handleInputChange(field.id, value)}
+                                              defaultValue={field.value as string}
+                                            >
+                                              <SelectTrigger className="h-6 text-xs">
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {field.options?.map((option) => (
+                                                  <SelectItem key={option} value={option}>
+                                                    {option}
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          )}
+                                        </div>
+                                        <Button size="sm" variant="ghost" onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
+                                          <MinusIcon className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
+                        </DragDropContext>
+
+                        <div className="custom-field-form">
+                          <Input
+                            value={customFieldLabel}
+                            onChange={(e) => setCustomFieldLabel(e.target.value)}
+                            placeholder="Field Label"
+                          />
+                          <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
+                            <SelectTrigger>
+                              <SelectValue>{customFieldType}</SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text">Text</SelectItem>
+                              <SelectItem value="textarea">Textarea</SelectItem>
+                              <SelectItem value="number">Number</SelectItem>
+                              <SelectItem value="select">Select</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {customFieldType === 'select' && (
+                            <Textarea
+                              value={customFieldOptions}
+                              onChange={(e) => setCustomFieldOptions(e.target.value)}
+                              placeholder="Comma-separated options"
+                            />
+                          )}
+                          <Button onClick={handleAddCustomField}>
+                            <PlusIcon className="mr-1" /> Add Custom Field
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
 
             <AccordionItem value="image-gallery">
               <AccordionTrigger className="text-sm font-semibold">
@@ -686,120 +800,6 @@ export default function EnhancedProductMoodboard() {
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel className="pr-2" defaultSize={80}>
 
-        <Card>
-                      <CardContent>
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex space-x-1">
-                            {remainingFields.map((field) => (
-                              <Button
-                                key={field.id}
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAddField(field)}
-                                className="text-xs py-1 px-2"
-                              >
-                                <PlusIcon className="h-3 w-3 mr-1" /> {field.label}
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <DragDropContext onDragEnd={onDragEnd}>
-                          <Droppable droppableId="form-fields">
-                            {(provided) => (
-                              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
-                                {formFields.map((field, index) => (
-                                  <Draggable key={field.id} draggableId={field.id} index={index}>
-                                    {(provided) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className="flex items-center space-x-1 bg-white p-1 rounded-md transition-all duration-200 hover:bg-white/20"
-                                      >
-                                        <GripVertical className="h-3 w-3 text-muted-foreground" />
-                                        <div className="flex-grow">
-                                          <label>{field.label}</label>
-                                          {field.type === 'text' && (
-                                            <Input className="h-6 text-xs"
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                            />
-                                          )}
-                                          {field.type === 'textarea' && (
-                                            <Textarea className="h-6 text-xs"
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, e.target.value)}
-                                            />
-                                          )}
-                                          {field.type === 'number' && (
-                                            <Input className="h-6 text-xs"
-                                              type="number"
-                                              value={field.value || ''}
-                                              onChange={(e) => handleInputChange(field.id, parseFloat(e.target.value))}
-                                            />
-                                          )}
-                                          {field.type === 'select' && (
-                                            <Select 
-                                              onValueChange={(value) => handleInputChange(field.id, value)}
-                                              defaultValue={field.value as string}
-                                            >
-                                              <SelectTrigger className="h-6 text-xs">
-                                                <SelectValue />
-                                              </SelectTrigger>
-                                              <SelectContent>
-                                                {field.options?.map((option) => (
-                                                  <SelectItem key={option} value={option}>
-                                                    {option}
-                                                  </SelectItem>
-                                                ))}
-                                              </SelectContent>
-                                            </Select>
-                                          )}
-                                        </div>
-                                        <Button size="sm" variant="ghost" onClick={() => handleRemoveField(index)} className="h-6 w-6 p-0">
-                                          <MinusIcon className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </div>
-                            )}
-                          </Droppable>
-                        </DragDropContext>
-
-                        <div className="custom-field-form">
-                          <Input
-                            value={customFieldLabel}
-                            onChange={(e) => setCustomFieldLabel(e.target.value)}
-                            placeholder="Field Label"
-                          />
-                          <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
-                            <SelectTrigger>
-                              <SelectValue>{customFieldType}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="textarea">Textarea</SelectItem>
-                              <SelectItem value="number">Number</SelectItem>
-                              <SelectItem value="select">Select</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {customFieldType === 'select' && (
-                            <Textarea
-                              value={customFieldOptions}
-                              onChange={(e) => setCustomFieldOptions(e.target.value)}
-                              placeholder="Comma-separated options"
-                            />
-                          )}
-                          <Button onClick={handleAddCustomField}>
-                            <PlusIcon className="mr-1" /> Add Custom Field
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
           {renderTabContent()}
         </ResizablePanel>
         <ResizablePanel defaultSize={20}>
