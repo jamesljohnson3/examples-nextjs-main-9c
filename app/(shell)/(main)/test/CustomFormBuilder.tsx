@@ -43,7 +43,7 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: string;
+  post: FormField[];
 }
 
 const initialAvailableFields: FormField[] = [
@@ -100,7 +100,6 @@ const ProductPage: React.FC = () => {
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
-
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
@@ -122,6 +121,18 @@ const ProductPage: React.FC = () => {
       setSegments(segmentsData.segments);
     }
   }, [segmentsData]);
+
+  useEffect(() => {
+    // Map segment.post data to form fields
+    const segment = segments.find(seg => seg.id === SEGMENT_ID);
+    if (segment) {
+      const segmentFields = segment.post.map(field => ({
+        ...field,
+        id: field.id || uuidv4()  // Ensure each field has a unique ID
+      }));
+      setFormFields(segmentFields);
+    }
+  }, [segments]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
