@@ -1,24 +1,19 @@
 "use client"
-
 import React, { useState, useEffect, memo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import   
- { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from   
- "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger   
- } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";   
-
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
+import { DELETE_SEGMENT } from './mutations';
 
 const RESERVED_FIELDS = new Set([
   'id', 'name', 'description', 'price', 'quantity', 'category', 'organizationId', 'createdById',
@@ -65,7 +60,6 @@ const ProductPage: React.FC = () => {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [removedField, setRemovedField] = useState<FormField | null>(null);
 
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState('text');
@@ -76,9 +70,7 @@ const ProductPage: React.FC = () => {
   const SEGMENT_ID = 'unique-segment-id';
 
   const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
-    onCompleted: () => {
-      alert('Segment deleted successfully!');
-    },
+    onCompleted: () => alert('Segment deleted successfully!'),
     onError: (error) => {
       console.error('Error deleting segment:', error);
       alert('Error deleting segment.');
@@ -106,19 +98,14 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
-
-      // Initialize formFields with fetched data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
-
       setFormFields(initialFields);
 
-      // Exclude these fields from remainingFields
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
-
       setRemainingFields(updatedRemainingFields);
       setProductData(product);
     }
@@ -148,7 +135,6 @@ const ProductPage: React.FC = () => {
       alert('Cannot add reserved field.');
       return;
     }
-
     setFormFields(prev => [...prev, newField]);
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
     setHasUnsavedChanges(true);
@@ -158,13 +144,13 @@ const ProductPage: React.FC = () => {
     setFormFields(prev => {
       const updatedFields = [...prev];
       const removedField = updatedFields.splice(index, 1)[0];
-
-      // Store removed field in temporary state
-      setRemovedField(removedField);
-
+      if (RESERVED_FIELDS.has(removedField.id)) {
+        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
+      } else {
+        setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
+      }
       return updatedFields;
     });
-
     setHasUnsavedChanges(true);
   };
 
@@ -184,10 +170,8 @@ const ProductPage: React.FC = () => {
     }
 
     const { id, name, description, price, quantity, category } = productData;
-
-    // Parse price and quantity correctly
-    const parsedPrice = parseFloat(price as unknown as string); // Cast to string then parse
-    const parsedQuantity = parseInt(quantity as unknown as string); // Cast to string then parse
+    const parsedPrice = parseFloat(price as unknown as string);
+    const parsedQuantity = parseInt(quantity as unknown as string);
 
     if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
       alert('Invalid price or quantity');
@@ -195,7 +179,6 @@ const ProductPage: React.FC = () => {
     }
 
     try {
-      // Execute the mutation with the parsed product data
       await saveProduct({
         variables: {
           productId: PRODUCT_ID,
@@ -207,24 +190,19 @@ const ProductPage: React.FC = () => {
         },
       });
 
-      // Generate Unix timestamp for versionNumber
-      const versionNumber = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
-
-      // Generate a UUID for the id
+      const versionNumber = Math.floor(Date.now() / 1000);
       const uuid = uuidv4();
 
-      // Update product version
       await updateProductVersion({
         variables: {
           productId: PRODUCT_ID,
           versionNumber,
           changes: "Updated product version",
-          data: productData, // Ensure productData matches the ProductInput type
+          data: productData,
           id: uuid,
         },
       });
 
-      // Save the productVersionId to local storage
       localStorage.setItem('productVersionId', uuid);
       setHasUnsavedChanges(false);
       alert('Product version updated and saved!');
@@ -237,12 +215,10 @@ const ProductPage: React.FC = () => {
   const handlePublish = async () => {
     try {
       const productVersionId = localStorage.getItem('productVersionId');
-
       if (!productVersionId) {
         alert('No product version ID found.');
         return;
       }
-
       await publishSegments({
         variables: {
           productVersionId,
@@ -254,7 +230,6 @@ const ProductPage: React.FC = () => {
           })),
         },
       });
-
       alert('Segments published successfully!');
     } catch (error) {
       console.error('Error publishing segment:', error);
@@ -291,7 +266,8 @@ const ProductPage: React.FC = () => {
   }
 
   if (deleteLoading) return <p>Deleting...</p>;
-  if (deleteError) return <p>Error deleting segment.</p>;          
+  if (deleteError) return <p>Error deleting segment.</p>;
+
   return (
     <div className="product-page">
       <Tabs>
@@ -441,7 +417,7 @@ const ProductPage: React.FC = () => {
                     </div>
 
                     <div className="p-4 border rounded-lg">
-                      {productData ? (
+                      {productData && (
                         <div>
                           <h3 className="text-xl font-semibold">{productData.name}</h3>
                           <p className="text-sm text-gray-500">{productData.description}</p>
@@ -449,22 +425,19 @@ const ProductPage: React.FC = () => {
                           <p className="text-sm">Quantity: {productData.quantity}</p>
                           <p className="text-sm">Category: {productData.category}</p>
                         </div>
-                      ) : (
-                        <p>No product data available.</p>
                       )}
-                      </div>
-                      <Button onClick={() => handleDeleteSegment(SEGMENT_ID)} variant="destructive" className="mt-4">
-                        Delete Segment
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </div>
-        </Tabs>
-      </div>
-    );
+                      {!productData && <p>No product data available.</p>}
+                    </div>
+                    <button onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
+                  </CardContent>
+                </Card>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+      </Tabs>
+    </div>
+  );
 };
 
 export default memo(ProductPage);
