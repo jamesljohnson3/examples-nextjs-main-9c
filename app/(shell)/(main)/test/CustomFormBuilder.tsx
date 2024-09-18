@@ -37,27 +37,8 @@ import {
   Upload,
   Image,
   FileImage,
-  User,
   X,
 } from 'lucide-react';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import {
   ResizablePanel,
   ResizablePanelGroup,
@@ -113,12 +94,7 @@ const sampleProductData: ProductData = {
   category: 'Electronics',
 };
 
-const analyticsData: AnalyticDataItem[] = [
-  { label: 'Views', value: 4328, icon: EyeIcon },
-  { label: 'Likes', value: 1203, icon: BarChart3Icon },
-  { label: 'Shares', value: 567, icon: Sliders },
-  { label: 'Comments', value: 89, icon: MessageSquare },
-];
+
 
 
 export default function EnhancedProductMoodboard() {
@@ -591,30 +567,8 @@ export default function EnhancedProductMoodboard() {
         );
       case 'analytics':
         return (
-          <Card>
-            <CardContent className="p-2">
-              <h2 className="font-semibold mb-1">
-                Analytics Scoreboard
-              </h2>
-              <div className="grid grid-cols-2 gap-2">
-                {analyticsData.map((item, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-2 flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <item.icon className="h-4 w-4" />
-                        <span className="font-semibold">
-                          {item.label}
-                        </span>
-                      </div>
-                      <span className="text-lg font-bold">
-                        {item.value.toLocaleString()}
-                      </span>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          
+          <>coming soon</>
         );
       default:
         return null;
