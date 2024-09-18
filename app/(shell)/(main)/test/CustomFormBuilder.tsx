@@ -135,11 +135,12 @@ const ProductPage: React.FC = () => {
       alert('Cannot add reserved field.');
       return;
     }
+  
     setFormFields(prev => [...prev, newField]);
     setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
     setHasUnsavedChanges(true);
   };
-
+  
   const handleRemoveField = (index: number) => {
     setFormFields(prev => {
       const updatedFields = [...prev];
@@ -236,31 +237,33 @@ const ProductPage: React.FC = () => {
       alert('Failed to publish segment.');
     }
   };
-
   const handleAddCustomField = () => {
     if (!customFieldLabel.trim()) {
       alert('Field label cannot be empty.');
       return;
     }
-
+  
+    const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, '_');
+    if (RESERVED_FIELDS.has(newFieldId)) {
+      alert('Cannot use reserved field ID.');
+      return;
+    }
+  
     const newField: FormField = {
-      id: customFieldLabel.toLowerCase().replace(/\s+/g, '_'),
+      id: newFieldId,
       type: customFieldType,
       label: customFieldLabel,
       options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
     };
-
-    if (RESERVED_FIELDS.has(newField.id)) {
-      alert('Cannot use reserved field ID.');
-      return;
-    }
-
+  
     handleAddField(newField);
+  
+    // Clear custom field input values
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
-
+  
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
