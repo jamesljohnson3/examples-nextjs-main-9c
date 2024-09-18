@@ -43,7 +43,7 @@ interface Segment {
   id: string;
   name: string;
   slug: string;
-  post: FormField[];
+  post: { [key: string]: FormField };
 }
 
 const initialAvailableFields: FormField[] = [
@@ -104,43 +104,46 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
+  
+      // Initialize formFields with product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
-      setFormFields(initialFields);
-
+  
+      // Exclude these fields from remainingFields
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+  
+      setFormFields(initialFields);
       setRemainingFields(updatedRemainingFields);
       setProductData(product);
     }
   }, [productDataQuery]);
+  
 
+
+  
+  
   useEffect(() => {
     if (segmentsData?.segments) {
+      // Extract fields from the segments
+      const segmentFields = segmentsData.segments.flatMap((segment: { post: { [s: string]: unknown; } | ArrayLike<unknown>; }) => 
+        Object.values(segment.post) || []
+      );
       console.log(segmentsData.segments);
-      setSegments(segmentsData.segments);
-      const segmentFields = segmentsData.segments.flatMap((segment: { post: any; }) => segment.post || []);
-      setFormFields(segmentFields);
+
+      // Create a set of existing field IDs for quick lookup
+      const existingFieldIds = new Set(formFields.map(field => field.id));
+  
+      // Combine existing formFields with new segmentFields
+      setFormFields(prevFields => [
+        ...prevFields,
+        ...segmentFields.filter((field: { id: string; }) => !existingFieldIds.has(field.id))
+      ]);
     }
   }, [segmentsData]);
   
-
-  useEffect(() => {
-    const segment = segments.find(seg => seg.id === SEGMENT_ID);
-    if (segment) {
-      const segmentFields = segment.post.map(field => ({
-        ...field,
-        id: field.id || uuidv4() // Ensure each field has a unique ID
-      }));
-      setFormFields(segmentFields);
-
-      const segmentFieldIds = new Set(segmentFields.map(field => field.id));
-      const updatedRemainingFields = initialAvailableFields.filter(field => !segmentFieldIds.has(field.id));
-      setRemainingFields(updatedRemainingFields);
-    }
-  }, [segments]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
