@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
-import { PUBLISH_SEGMENT, GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS } from '@/app/(shell)/(main)/queries';
+import { PUBLISH_SEGMENT, GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { DELETE_SEGMENT } from './mutations';
@@ -94,7 +94,7 @@ const ProductPage: React.FC = () => {
   const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
   const [saveProduct] = useMutation(SAVE_PRODUCT);
-  const [updateSegment] = useMutation(PUBLISH_SEGMENT);
+  const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
 
   useEffect(() => {
     if (productDataQuery?.Product) {
@@ -239,7 +239,7 @@ const ProductPage: React.FC = () => {
         variables: { id: SEGMENT_ID, productVersionId }
       });
    // Update segment with new form field data
-    await updateSegment({
+    await UpdateSegment({
       variables: {
         id: SEGMENT_ID,
         _set: {
