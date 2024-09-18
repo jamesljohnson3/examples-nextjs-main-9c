@@ -119,13 +119,7 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     if (segmentsData) {
       console.log(segmentsData);
-      setSegments(segmentsData.Segment);
-
-      // Flatten and extract form fields from segments
-      const segmentFields = segmentsData.Segment.flatMap((segment: { post: { [s: string]: unknown; } | ArrayLike<unknown>; }) => 
-        Object.values(segment.post)
-      );
-      setFormFields(segmentFields);
+      setSegments(segmentsData?.post);
     }
   }, [segmentsData]);
   

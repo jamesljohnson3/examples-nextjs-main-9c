@@ -131,6 +131,7 @@ const ProductPage: React.FC = () => {
         Object.values(segment.post)
       );
       setFormFields(segmentFields);
+      console.log('formfields', segmentFields);
     }
   }, [segmentsData]);
 
