@@ -11,14 +11,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT } from '@/app/(shell)/(main)/queries';
+
 import { v4 as uuidv4 } from 'uuid';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { DELETE_SEGMENT } from './mutations';
+
 
 
 import { MDXProvider } from '@mdx-js/react';
 
-// Define the possible types of form fields
+
 type FormFieldType = 'text' | 'textarea' | 'number' | 'select' | 'html' | 'mdx';
 
 interface FormField {
@@ -29,7 +29,15 @@ interface FormField {
   value?: string | number;
 }
 
-// Define initial state values
+interface ProductData {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  category: string;
+}
+
 const RESERVED_FIELDS = new Set(['reserved_field_1', 'reserved_field_2']); // Reserved field IDs
 
 const App = () => {
@@ -37,7 +45,7 @@ const App = () => {
   const [customFieldLabel, setCustomFieldLabel] = useState('');
   const [customFieldType, setCustomFieldType] = useState<FormFieldType>('text');
   const [customFieldOptions, setCustomFieldOptions] = useState('');
-  const [productData, setProductData] = useState<any>(null);
+  const [productData, setProductData] = useState<ProductData | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const handleAddField = (field: FormField) => {
