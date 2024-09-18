@@ -17,7 +17,7 @@ mutation PublishSegment($id: ID!, $post: [FormFieldInput]) {
 
 `;
 export const UPDATE_SEGMENT = gql`
-  mutation UpdateSegment($id: uuid!, $post: [FormFieldInput]) {
+  mutation UpdateSegment($id: uuid!, $post: jsonb) {
     update_Segment(
       where: { id: { _eq: $id } },
       _set: { post: $post }
