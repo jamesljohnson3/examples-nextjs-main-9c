@@ -1,42 +1,53 @@
 "use client";
-"use client";
 
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
 import { Button } from "@/components/ui/button";
 import { PlusIcon, MinusIcon, Image } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { GET_PRODUCT } from '@/app/(shell)/(main)/queries'; // Import your GraphQL query
 
-// Placeholder mock data for the product
-const productData = {
-  name: "Sample Product",
-  description: "This is a great product!",
-  price: 19.99,
-  quantity: 5,
-  category: "Accessories",
-};
-
-interface ImageUploaderProps {
-  onImageChange: (type: 'gallery' | 'primary', imageURL: string | null) => void;
+interface ProductData {
+  id: string;
+  name: string;
+  description: string;
+  quantity: number;
+  category: string;
+  price?: number; // Optional price
+  primaryPhoto?: string;
+  imageGallery?: string[];
+  metadata?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+  };
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
+const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn"; // Example product ID
+
+const ImageUploader: React.FC = () => {
+  const { data, loading, error } = useQuery<{ Product: ProductData[] }>(GET_PRODUCT, {
+    variables: { productId: PRODUCT_ID },
+  });
+  
+  const product = data?.Product[0];
+  
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
 
-  // Load saved gallery order and primary photo from localStorage when the component mounts
+  // Load from GraphQL data or fallback to localStorage
   useEffect(() => {
-    const savedGallery = localStorage.getItem('imageGallery');
-    const savedPrimaryPhoto = localStorage.getItem('primaryPhoto');
-
-    if (savedGallery) {
-      setImageGallery(JSON.parse(savedGallery));
+    if (product) {
+      // Set primary photo and gallery from product data
+      setPrimaryPhoto(product.primaryPhoto || localStorage.getItem('primaryPhoto'));
+      const initialGallery = product.imageGallery?.map((url) => ({
+        id: url,
+        url,
+      })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
+      setImageGallery(initialGallery);
     }
-
-    if (savedPrimaryPhoto) {
-      setPrimaryPhoto(savedPrimaryPhoto);
-    }
-  }, []);
+  }, [product]);
 
   // Save gallery and primary photo to localStorage whenever they change
   useEffect(() => {
@@ -57,7 +68,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setPrimaryPhoto(imageUrl);
-      onImageChange('primary', imageUrl);
     }
   };
 
@@ -74,7 +84,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
   // Handle removal of an image from the gallery
   const handleRemoveImage = (id: string) => {
     setImageGallery(prev => prev.filter(image => image.id !== id));
-    onImageChange('gallery', null); // Notify parent component if needed
   };
 
   // Handle drag-and-drop reordering of images in the gallery and save the order
@@ -87,6 +96,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
 
     setImageGallery(reorderedImages);
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error loading product data: {error.message}</div>;
 
   return (
     <div className="w-full space-y-2">
@@ -139,11 +151,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
                       className="absolute inset-0 w-full h-full object-cover rounded-lg"
                     />
                   </div>
-                  <h2 className="text-lg font-bold mb-2">{productData.name}</h2>
-                  <p className="text-sm text-gray-500">{productData.description}</p>
-                  <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
-                  <p className="text-sm">Quantity: {productData.quantity}</p>
-                  <p className="text-sm">Category: {productData.category}</p>
+                  <h2 className="text-lg font-bold mb-2">{product?.name}</h2>
+                  <p className="text-sm text-gray-500">{product?.description}</p>
+                  <p className="text-md font-bold">${product?.price?.toFixed(2)}</p>
+                  <p className="text-sm">Quantity: {product?.quantity}</p>
+                  <p className="text-sm">Category: {product?.category}</p>
                 </div>
               ) : (
                 <p>No product data available.</p>
@@ -217,4 +229,3 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
 };
 
 export default ImageUploader;
-
