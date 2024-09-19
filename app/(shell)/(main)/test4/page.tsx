@@ -31,23 +31,23 @@ const ImageUploader: React.FC = () => {
     variables: { productId: PRODUCT_ID },
   });
   
-  const product = data?.Product[0];
+  const productData = data?.Product[0];
   
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
 
   // Load from GraphQL data or fallback to localStorage
   useEffect(() => {
-    if (product) {
+    if (productData) {
       // Set primary photo and gallery from product data
-      setPrimaryPhoto(product.primaryPhoto || localStorage.getItem('primaryPhoto'));
-      const initialGallery = product.imageGallery?.map((url) => ({
+      setPrimaryPhoto(productData.primaryPhoto || localStorage.getItem('primaryPhoto'));
+      const initialGallery = productData.imageGallery?.map((url) => ({
         id: url,
         url,
       })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
       setImageGallery(initialGallery);
     }
-  }, [product]);
+  }, [productData]);
 
   // Save gallery and primary photo to localStorage whenever they change
   useEffect(() => {
@@ -111,10 +111,10 @@ const ImageUploader: React.FC = () => {
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex items-center space-x-2">
-              {primaryPhoto ? (
+              {productData && productData.primaryPhoto ? (
                 <div className="relative w-16 h-16">
                   <img
-                    src={primaryPhoto}
+                    src={productData.primaryPhoto}
                     alt="Primary"
                     className="w-full h-full object-cover rounded"
                   />
@@ -140,28 +140,7 @@ const ImageUploader: React.FC = () => {
               )}
             </div>
 
-            {/* Mockup for previewing the primary photo */}
-            <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 h-auto p-6 mt-4">
-              {primaryPhoto ? (
-                <div className="relative w-full mb-4">
-                  <div className="w-full" style={{ paddingBottom: '56.25%' }}>
-                    <img
-                      src={primaryPhoto}
-                      alt="Primary"
-                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <h2 className="text-lg font-bold mb-2">{product?.name}</h2>
-                  <p className="text-sm text-gray-500">{product?.description}</p>
-                  <p className="text-md font-bold">${product?.price?.toFixed(2)}</p>
-                  <p className="text-sm">Quantity: {product?.quantity}</p>
-                  <p className="text-sm">Category: {product?.category}</p>
-                </div>
-              ) : (
-                <p>No product data available.</p>
-              )}
-            </div>
-
+            
           </AccordionContent>
         </AccordionItem>
 
@@ -224,6 +203,26 @@ const ImageUploader: React.FC = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      {/* Mockup for previewing the primary photo */}
+      <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 h-auto p-6 mt-4">
+              {productData && (
+                <div className="relative w-full mb-4">
+                  <div className="w-full" style={{ paddingBottom: '56.25%' }}>
+                    <img
+                      src={productData.primaryPhoto || primaryPhoto}
+                      alt="Primary"
+                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                  <h2 className="text-lg font-bold mb-2">{productData.name}</h2>
+                  <p className="text-sm text-gray-500">{productData.description}</p>
+                  <p className="text-md font-bold">${productData.price?.toFixed(2)}</p>
+                  <p className="text-sm">Quantity: {productData.quantity}</p>
+                  <p className="text-sm">Category: {productData.category}</p>
+                </div>
+              )}
+            </div>
+
     </div>
   );
 };
