@@ -1,13 +1,13 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { Button } from "@/components/ui/button";
-import { PlusIcon, MinusIcon, Image } from 'lucide-react';
+import { PlusIcon, MinusIcon, Image, FileImage } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { GET_PRODUCT } from '@/app/(shell)/(main)/queries'; // Import your GraphQL query
+import { Card, CardContent } from "@/components/ui/card";  // Assuming Card components are part of your UI library
+import { GET_PRODUCT } from '@/app/(shell)/(main)/queries';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { Input, Textarea } from "@/components/ui/input"; // Assuming Input and Textarea components
 
 interface ProductData {
   id: string;
@@ -15,9 +15,10 @@ interface ProductData {
   description: string;
   quantity: number;
   category: string;
-  price?: number; // Optional price
+  price?: number;
   primaryPhoto?: string;
   imageGallery?: string[];
+  ogImage?: string;
   metadata?: {
     title?: string;
     description?: string;
@@ -36,12 +37,23 @@ const ImageUploader: React.FC = () => {
   
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
+  const [ogImage, setOgImage] = useState<string | null>(null);
+  const [metadata, setMetadata] = useState({
+    title: '',
+    description: '',
+    keywords: '',
+  });
 
-  // Load from GraphQL data or fallback to localStorage
+  // Load product data into state
   useEffect(() => {
     if (productData) {
-      // Set primary photo and gallery from product data
       setPrimaryPhoto(productData.primaryPhoto || localStorage.getItem('primaryPhoto'));
+      setOgImage(productData.ogImage || null);
+      setMetadata({
+        title: productData.metadata?.title || '',
+        description: productData.metadata?.description || '',
+        keywords: productData.metadata?.keywords || '',
+      });
       const initialGallery = productData.imageGallery?.map((url) => ({
         id: url,
         url,
@@ -63,31 +75,38 @@ const ImageUploader: React.FC = () => {
     }
   }, [primaryPhoto]);
 
-  // Handle uploading of the primary image
-  const handlePrimaryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMetadataChange = (key: string, value: string) => {
+    setMetadata((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setPrimaryPhoto(imageUrl);
+      if (type === 'primary') {
+        setPrimaryPhoto(imageUrl);
+      } else if (type === 'og') {
+        setOgImage(imageUrl);
+      }
     }
   };
 
-  // Handle uploading of gallery images
   const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const newImages = files.map((file) => ({
-      id: URL.createObjectURL(file), // Unique key using URL
+      id: URL.createObjectURL(file),
       url: URL.createObjectURL(file),
     }));
     setImageGallery(prev => [...prev, ...newImages]);
   };
 
-  // Handle removal of an image from the gallery
   const handleRemoveImage = (id: string) => {
     setImageGallery(prev => prev.filter(image => image.id !== id));
   };
 
-  // Handle drag-and-drop reordering of images in the gallery and save the order
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
@@ -103,136 +122,122 @@ const ImageUploader: React.FC = () => {
 
   return (
     <div className="w-full space-y-2">
-                <ResizablePanelGroup direction="horizontal">
-                <ResizablePanel defaultSize={70}>
-      <Accordion type="single" collapsible className="w-full space-y-4">
-        
-        {/* Primary Photo Section inside Accordion */}
-        <AccordionItem value="primary-photo">
-          <AccordionTrigger className="text-sm font-semibold">
-            Primary Photo
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="flex items-center space-x-2">
-              {productData && productData.primaryPhoto ? (
-                <div className="relative w-16 h-16">
-                  <img
-                    src={productData.primaryPhoto}
-                    alt="Primary"
-                    className="w-full h-full object-cover rounded"
-                  />
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="absolute top-0 right-0 h-4 w-4 p-0"
-                    onClick={() => setPrimaryPhoto(null)}
-                  >
-                    <MinusIcon className="h-2 w-2" />
-                  </Button>
-                </div>
-              ) : (
-                <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={handlePrimaryImageUpload}
-                    accept="image/*"
-                  />
-                  <Image className="h-6 w-6 text-muted-foreground" />
-                </label>
-              )}
-            </div>
-
-            
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Gallery Section inside Accordion */}
-        <AccordionItem value="image-gallery">
-          <AccordionTrigger className="text-sm font-semibold">
-            Image Gallery
-          </AccordionTrigger>
-          <AccordionContent>
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="gallery">
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="flex flex-wrap gap-2"
-                  >
-                    {imageGallery.map((image, index) => (
-                      <Draggable key={image.id} draggableId={image.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="relative w-16 h-16"
-                            style={{ ...provided.draggableProps.style }}
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel defaultSize={70}>
+          <Accordion type="single" collapsible className="w-full space-y-4">
+            {/* OG Image Section */}
+            <AccordionItem value="og-image">
+              <AccordionTrigger className="text-sm font-semibold">
+                OG Image
+              </AccordionTrigger>
+              <AccordionContent>
+                <Card>
+                  <CardContent className="p-2 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      {ogImage ? (
+                        <div className="w-16 h-16 relative">
+                          <img
+                            src={ogImage}
+                            alt="OG"
+                            className="w-full h-full object-cover rounded"
+                          />
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="absolute top-0 right-0 h-4 w-4 p-0"
+                            onClick={() => setOgImage(null)}
                           >
-                            <img
-                              src={image.url}
-                              alt={`Gallery ${index}`}
-                              className="w-full h-full object-cover rounded"
-                            />
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              className="absolute top-0 right-0 h-4 w-4 p-0"
-                              onClick={() => handleRemoveImage(image.id)}
-                            >
-                              <MinusIcon className="h-2 w-2" />
-                            </Button>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                    <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={handleGalleryImageUpload}
-                        accept="image/*"
-                        multiple
+                            <MinusIcon className="h-2 w-2" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={(e) => handleImageUpload(e, 'og')}
+                            accept="image/*"
+                          />
+                          <FileImage className="h-6 w-6 text-muted-foreground" />
+                        </label>
+                      )}
+                      <span className="text-xs text-muted-foreground">
+                        Set Open Graph image for social sharing
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Metadata Section */}
+            <AccordionItem value="metadata">
+              <AccordionTrigger className="text-sm font-semibold">
+                Metadata
+              </AccordionTrigger>
+              <AccordionContent>
+                <Card>
+                  <CardContent className="p-2 space-y-2">
+                    <div className="space-y-1">
+                      <Input
+                        placeholder="Meta Title"
+                        className="h-6 text-xs"
+                        value={metadata.title}
+                        onChange={(e) =>
+                          handleMetadataChange('title', e.target.value)
+                        }
                       />
-                      <PlusIcon className="h-6 w-6 text-muted-foreground" />
-                    </label>
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+                      <Textarea
+                        placeholder="Meta Description"
+                        className="h-12 text-xs"
+                        value={metadata.description}
+                        onChange={(e) =>
+                          handleMetadataChange(
+                            'description',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Input
+                        placeholder="Keywords (comma-separated)"
+                        className="h-6 text-xs"
+                        value={metadata.keywords}
+                        onChange={(e) =>
+                          handleMetadataChange('keywords', e.target.value)
+                        }
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
 
+          </Accordion>
+        </ResizablePanel>
 
-      </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel defaultSize={30}>
-      {/* Mockup for previewing the primary photo */}
-      <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 h-auto p-6 mt-4">
-              {productData && (
-                <div className="relative w-full mb-4">
-                  <div className="w-full" style={{ paddingBottom: '56.25%' }}>
-                    <img
-                      src={productData.primaryPhoto || primaryPhoto}
-                      alt="Primary"
-                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <h2 className="text-lg font-bold mb-2">{productData.name}</h2>
-                  <p className="text-sm text-gray-500">{productData.description}</p>
-                  <p className="text-md font-bold">${productData.price?.toFixed(2)}</p>
-                  <p className="text-sm">Quantity: {productData.quantity}</p>
-                  <p className="text-sm">Category: {productData.category}</p>
+        {/* Product Preview */}
+        <ResizableHandle />
+        <ResizablePanel defaultSize={30}>
+          <div className="rounded-xl border bg-white shadow h-auto p-6 mt-4">
+            {productData && (
+              <div className="relative w-full mb-4">
+                <div className="w-full" style={{ paddingBottom: '56.25%' }}>
+                  <img
+                    src={productData.primaryPhoto || primaryPhoto}
+                    alt="Primary"
+                    className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                  />
                 </div>
-              )}
-            </div>
-
-            </ResizablePanel>
-          </ResizablePanelGroup>
+                <h3 className="mt-4 text-xl font-semibold">{productData.name}</h3>
+                <p className="text-sm text-muted">{productData.description}</p>
+                <p className="text-sm">Category: {productData.category}</p>
+                <p className="text-sm">Price: ${productData.price?.toFixed(2)}</p>
+                <p className="text-sm">Quantity: {productData.quantity}</p>
+              </div>
+            )}
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 };
