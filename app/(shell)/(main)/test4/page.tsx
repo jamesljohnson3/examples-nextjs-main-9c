@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GET_PRODUCT } from '@/app/(shell)/(main)/queries';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Textarea } from '@/components/ui/textarea';
-import Input from 'postcss/lib/input';
+import { Input } from "@/components/ui/input";
+
 
 
 
