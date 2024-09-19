@@ -7,6 +7,7 @@ import { PlusIcon, MinusIcon, Image } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { GET_PRODUCT } from '@/app/(shell)/(main)/queries'; // Import your GraphQL query
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
 interface ProductData {
   id: string;
@@ -102,6 +103,8 @@ const ImageUploader: React.FC = () => {
 
   return (
     <div className="w-full space-y-2">
+                <ResizablePanelGroup direction="horizontal">
+                <ResizablePanel defaultSize={70}>
       <Accordion type="single" collapsible className="w-full space-y-4">
         
         {/* Primary Photo Section inside Accordion */}
@@ -203,6 +206,11 @@ const ImageUploader: React.FC = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+
+      </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel defaultSize={30}>
       {/* Mockup for previewing the primary photo */}
       <div className="rounded-xl border border-neutral-200 bg-white text-neutral-950 shadow dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 h-auto p-6 mt-4">
               {productData && (
@@ -223,6 +231,8 @@ const ImageUploader: React.FC = () => {
               )}
             </div>
 
+            </ResizablePanel>
+          </ResizablePanelGroup>
     </div>
   );
 };
