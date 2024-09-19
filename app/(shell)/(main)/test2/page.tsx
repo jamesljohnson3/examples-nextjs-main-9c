@@ -357,7 +357,7 @@ export default function EnhancedProductMoodboard() {
         </AccordionItem>
       </Accordion>
 
-      <ResizablePanelGroup>
+      <ResizablePanelGroup direction={"horizontal"}>
         <ResizablePanel>
           <Accordion type="single" collapsible>
             <AccordionItem value="productDetails">
