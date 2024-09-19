@@ -4,10 +4,13 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon, MinusIcon, Image, FileImage } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Card, CardContent } from "@/components/ui/card";  // Assuming Card components are part of your UI library
+import { Card, CardContent } from "@/components/ui/card";
 import { GET_PRODUCT } from '@/app/(shell)/(main)/queries';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Input, Textarea } from "@/components/ui/input"; // Assuming Input and Textarea components
+import { Textarea } from '@/components/ui/textarea';
+import Input from 'postcss/lib/input';
+
+
 
 interface ProductData {
   id: string;
@@ -125,6 +128,104 @@ const ImageUploader: React.FC = () => {
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={70}>
           <Accordion type="single" collapsible className="w-full space-y-4">
+            
+            {/* Primary Photo Section */}
+            <AccordionItem value="primary-photo">
+              <AccordionTrigger className="text-sm font-semibold">
+                Primary Photo
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex items-center space-x-2">
+                  {primaryPhoto ? (
+                    <div className="relative w-16 h-16">
+                      <img
+                        src={primaryPhoto}
+                        alt="Primary"
+                        className="w-full h-full object-cover rounded"
+                      />
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="absolute top-0 right-0 h-4 w-4 p-0"
+                        onClick={() => setPrimaryPhoto(null)}
+                      >
+                        <MinusIcon className="h-2 w-2" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => handleImageUpload(e, 'primary')}
+                        accept="image/*"
+                      />
+                      <Image className="h-6 w-6 text-muted-foreground" />
+                    </label>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Gallery Section */}
+            <AccordionItem value="image-gallery">
+              <AccordionTrigger className="text-sm font-semibold">
+                Image Gallery
+              </AccordionTrigger>
+              <AccordionContent>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="gallery">
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="flex flex-wrap gap-2"
+                      >
+                        {imageGallery.map((image, index) => (
+                          <Draggable key={image.id} draggableId={image.id} index={index}>
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="relative w-16 h-16"
+                                style={{ ...provided.draggableProps.style }}
+                              >
+                                <img
+                                  src={image.url}
+                                  alt={`Gallery ${index}`}
+                                  className="w-full h-full object-cover rounded"
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="absolute top-0 right-0 h-4 w-4 p-0"
+                                  onClick={() => handleRemoveImage(image.id)}
+                                >
+                                  <MinusIcon className="h-2 w-2" />
+                                </Button>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                        <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
+                          <input
+                            type="file"
+                            className="hidden"
+                            onChange={handleGalleryImageUpload}
+                            accept="image/*"
+                            multiple
+                          />
+                          <PlusIcon className="h-6 w-6 text-muted-foreground" />
+                        </label>
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </AccordionContent>
+            </AccordionItem>
+
             {/* OG Image Section */}
             <AccordionItem value="og-image">
               <AccordionTrigger className="text-sm font-semibold">
@@ -183,50 +284,42 @@ const ImageUploader: React.FC = () => {
                         placeholder="Meta Title"
                         className="h-6 text-xs"
                         value={metadata.title}
-                        onChange={(e) =>
-                          handleMetadataChange('title', e.target.value)
-                        }
+                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('title', e.target.value)}
                       />
                       <Textarea
                         placeholder="Meta Description"
                         className="h-12 text-xs"
                         value={metadata.description}
-                        onChange={(e) =>
-                          handleMetadataChange(
-                            'description',
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleMetadataChange('description', e.target.value)}
                       />
                       <Input
                         placeholder="Keywords (comma-separated)"
                         className="h-6 text-xs"
                         value={metadata.keywords}
-                        onChange={(e) =>
-                          handleMetadataChange('keywords', e.target.value)
-                        }
+                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('keywords', e.target.value)}
                       />
                     </div>
                   </CardContent>
                 </Card>
               </AccordionContent>
             </AccordionItem>
-
           </Accordion>
         </ResizablePanel>
 
-        {/* Product Preview */}
+        {/* Product Preview Section */}
         <ResizableHandle />
         <ResizablePanel defaultSize={30}>
-          <div className="rounded-xl border bg-white shadow h-auto p-6 mt-4">
+          <div className="p-4">
             {productData && (
-              <div className="relative w-full mb-4">
-                <div className="w-full" style={{ paddingBottom: '56.25%' }}>
-                  <img
-                    src={productData.primaryPhoto || primaryPhoto}
-                    alt="Primary"
-                    className="absolute inset-0 w-full h-full object-cover rounded-lg"
-                  />
+              <div>
+                <div className="relative w-full mb-4">
+                  <div className="w-full" style={{ paddingBottom: '56.25%' }}>
+                    <img
+                      src={primaryPhoto}
+                      alt="Primary"
+                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">{productData.name}</h3>
                 <p className="text-sm text-muted">{productData.description}</p>
