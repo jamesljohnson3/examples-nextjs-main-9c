@@ -472,6 +472,7 @@ export default function EnhancedProductMoodboard() {
     reorderedImages.splice(result.destination.index, 0, movedImage);
 
     setImageGallery(reorderedImages);
+    setHasUnsavedChanges(true);
   };
 
   if (deleteLoading) return <p>Deleting...</p>;
