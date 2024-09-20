@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Badge } from "@/components/ui/badge";
 import { GitBranch } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ProductData {
   id: string;
@@ -35,15 +36,15 @@ interface ProductData {
 }
 
 interface Version {
-  data: any;
-  id: number;
-  timestamp: string;
+  id: string; // Use string if your ID is a string
+  versionNumber: number;
   changes: string;
+  data: any;
+  createdAt: string; // Ensure this matches your data
 }
-
 function VersionControl({ productId, setProductData, previewData }: { productId: string, setProductData: any, previewData: any }) {
   const [versions, setVersions] = useState<Version[]>([]);
-  const [activeVersion, setActiveVersion] = useState<number | null>(null);
+  const [activeVersion, setActiveVersion] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
@@ -71,30 +72,33 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
     // Fetch versions again if needed or handle via refetch
   };
 
-  const handleSave = () => {
-    console.log('Saving changes...');
-    console.log("Form Data:", previewData);
-    console.log("Custom Fields:", versions); 
+  
+const handleSave = () => {
+  console.log('Saving changes...');
+  console.log("Form Data:", previewData);
+  console.log("Custom Fields:", versions);
 
-    const newVersion: Version = {
-      id: versions.length + 1,
-      timestamp: new Date().toISOString(),
-      changes: 'Updated product information',
-      data: previewData, // Use the actual previewData
-    };
-
-    saveProductVersion({
-      variables: {
-        productId,
-        versionNumber: newVersion.id,
-        changes: newVersion.changes,
-        data: previewData,
-      },
-    });
-
-    setVersions([...versions, newVersion]);
-    setActiveVersion(newVersion.id);
+  const newVersion: Version = {
+    id: uuidv4(), // Ensure the ID is unique
+    versionNumber: versions.length + 1, // Incremental version number
+    changes: 'Updated product information',
+    data: previewData,
+    createdAt: new Date().toISOString(), // Use createdAt to match your data structure
   };
+
+  saveProductVersion({
+    variables: {
+      productId,
+      versionNumber: newVersion.versionNumber, // Use the version number instead of ID
+      changes: newVersion.changes,
+      data: JSON.stringify(previewData), // Ensure data is stringified if needed
+    },
+  });
+
+  setVersions([...versions, newVersion]); // Update versions with the new version
+  setActiveVersion(newVersion.id); // Set the active version to the new version
+  setHasUnsavedChanges(false); // Reset unsaved changes flag
+};
 
   const handleSwitchVersion = (version: Version) => {
     setActiveVersion(version.id);
@@ -103,7 +107,6 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
 
   if (loading) return <div>Loading versions...</div>;
   if (error) return <div>Error loading versions: {error.message}</div>;
-
   return (
     <Card className="mt-2 bg-white backdrop-blur-lg border-0">
       <CardHeader>
@@ -114,8 +117,8 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
           {versions.map((version) => (
             <div key={version.id} className="flex items-center justify-between py-1 border-b border-white last:border-b-0">
               <div className="flex items-center space-x-1">
-                <Badge variant={version.id === activeVersion ? "default" : "secondary"} className="text-[10px]">v{version.id}</Badge>
-                <span className="text-[10px]">{new Date(version.timestamp).toLocaleString()}</span>
+                <Badge variant={version.id === activeVersion ? "default" : "secondary"} className="text-[10px]">v{version.versionNumber}</Badge>
+                <span className="text-[10px]">{new Date(version.createdAt).toLocaleString()}</span> {/* Ensure this is the correct field */}
               </div>
               <div className="flex items-center space-x-1">
                 <Tooltip>
