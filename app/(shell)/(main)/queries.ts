@@ -215,6 +215,7 @@ export const GET_PRODUCT = gql`
       metadata
       createdAt
       updatedAt
+      ogImage
     }
   }
 `;
