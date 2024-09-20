@@ -29,6 +29,8 @@ interface ProductData {
     description?: string;
     keywords?: string;
   };
+
+  [key: string]: any;
 }
 
 const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn"; // Example product ID
@@ -80,25 +82,6 @@ const ImageUploader: React.FC = () => {
     }
   }, [primaryPhoto]);
 
-  const handleMetadataChange = (key: string, value: string) => {
-    setMetadata((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      if (type === 'primary') {
-        setPrimaryPhoto(imageUrl);
-      } else if (type === 'og') {
-        setOgImage(imageUrl);
-      }
-    }
-  };
-
   const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const newImages = files.map((file) => ({
@@ -120,6 +103,25 @@ const ImageUploader: React.FC = () => {
     reorderedImages.splice(result.destination.index, 0, movedImage);
 
     setImageGallery(reorderedImages);
+  };
+
+  const handleMetadataChange = (key: string, value: string) => {
+    setMetadata((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      if (type === 'primary') {
+        setPrimaryPhoto(imageUrl);
+      } else if (type === 'og') {
+        setOgImage(imageUrl);
+      }
+    }
   };
 
   if (loading) return <div>Loading...</div>;

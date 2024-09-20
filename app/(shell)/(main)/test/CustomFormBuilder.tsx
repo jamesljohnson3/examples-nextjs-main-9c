@@ -74,12 +74,20 @@ interface ProductData {
   id: string;
   name: string;
   description: string;
-  price: number;
   quantity: number;
   category: string;
+  price?: number;
+  primaryPhoto?: string;
+  imageGallery?: string[];
+  ogImage?: string;
+  metadata?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+  };
+
   [key: string]: any;
 }
-
 interface Segment {
   id: string;
   name: string;
@@ -164,7 +172,24 @@ export default function EnhancedProductMoodboard() {
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
-  
+    // Load product data into state
+    useEffect(() => {
+      if (productData) {
+        setPrimaryPhoto(productData.primaryPhoto || localStorage.getItem('primaryPhoto'));
+        setOgImage(productData.ogImage || null);
+        setMetadata({
+          title: productData.metadata?.title || '',
+          description: productData.metadata?.description || '',
+          keywords: productData.metadata?.keywords || '',
+        });
+        const initialGallery = productData.imageGallery?.map((url) => ({
+          id: url,
+          url,
+        })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
+        setImageGallery(initialGallery);
+      }
+    }, [productData]);
+
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
@@ -185,6 +210,7 @@ export default function EnhancedProductMoodboard() {
       setProductData(product);
     }
   }, [productDataQuery]);
+
   useEffect(() => {
     if (segmentsData) {
       console.log(segmentsData);
@@ -372,7 +398,18 @@ export default function EnhancedProductMoodboard() {
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
+    // Save gallery and primary photo to localStorage whenever they change
+    useEffect(() => {
+      localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
+    }, [imageGallery]);
   
+    useEffect(() => {
+      if (primaryPhoto) {
+        localStorage.setItem('primaryPhoto', primaryPhoto);
+      } else {
+        localStorage.removeItem('primaryPhoto');
+      }
+    }, [primaryPhoto]);
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
@@ -410,6 +447,33 @@ export default function EnhancedProductMoodboard() {
     setMetadata({ ...metadata, [key]: value });
     setHasUnsavedChanges(true);
   };
+
+
+
+
+  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const newImages = files.map((file) => ({
+      id: URL.createObjectURL(file),
+      url: URL.createObjectURL(file),
+    }));
+    setImageGallery(prev => [...prev, ...newImages]);
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setImageGallery(prev => prev.filter(image => image.id !== id));
+  };
+
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const reorderedImages = Array.from(imageGallery);
+    const [movedImage] = reorderedImages.splice(result.source.index, 1);
+    reorderedImages.splice(result.destination.index, 0, movedImage);
+
+    setImageGallery(reorderedImages);
+  };
+
   if (deleteLoading) return <p>Deleting...</p>;
   if (deleteError) return <p>Error deleting segment.</p>;
   
@@ -543,102 +607,105 @@ export default function EnhancedProductMoodboard() {
                       </CardContent>
                     </Card>
 
-            <AccordionItem value="image-gallery">
-              <AccordionTrigger className="text-sm font-semibold">
-                Image Gallery
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex flex-wrap gap-2">
-                      {imageGallery.map((img, index) => (
-                        <div key={index} className="w-16 h-16 relative">
-                          <img
-                            src={img}
-                            alt={`Gallery ${index}`}
-                            className="w-full h-full object-cover rounded"
-                          />
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="absolute top-0 right-0 h-4 w-4 p-0"
-                            onClick={() => {
-                              const newGallery = [...imageGallery];
-                              newGallery.splice(index, 1);
-                              setImageGallery(newGallery);
-                              setHasUnsavedChanges(true);
-                            }}
-                          >
-                            <MinusIcon className="h-2 w-2" />
-                          </Button>
-                        </div>
-                      ))}
-                      <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                        <input
-                          type="file"
-                          className="hidden"
-                          onChange={(e) =>
-                            handleImageUpload(e, 'gallery')
-                          }
-                          accept="image/*"
-                        />
-                        <PlusIcon className="h-6 w-6 text-muted-foreground" />
-                      </label>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
+             
+            {/* Primary Photo Section */}
             <AccordionItem value="primary-photo">
               <AccordionTrigger className="text-sm font-semibold">
                 Primary Photo
               </AccordionTrigger>
               <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      {primaryPhoto ? (
-                        <div className="w-16 h-16 relative">
-                          <img
-                            src={primaryPhoto}
-                            alt="Primary"
-                            className="w-full h-full object-cover rounded"
-                          />
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="absolute top-0 right-0 h-4 w-4 p-0"
-                            onClick={() => {
-                              setPrimaryPhoto(null);
-                              setHasUnsavedChanges(true);
-                            }}
-                          >
-                            <MinusIcon className="h-2 w-2" />
-                          </Button>
-                        </div>
-                      ) : (
+                <div className="flex items-center space-x-2">
+                  {primaryPhoto ? (
+                    <div className="relative w-16 h-16">
+                      <img
+                        src={primaryPhoto}
+                        alt="Primary"
+                        className="w-full h-full object-cover rounded"
+                      />
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="absolute top-0 right-0 h-4 w-4 p-0"
+                        onClick={() => setPrimaryPhoto(null)}
+                      >
+                        <MinusIcon className="h-2 w-2" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => handleImageUpload(e, 'primary')}
+                        accept="image/*"
+                      />
+                      <Image className="h-6 w-6 text-muted-foreground" />
+                    </label>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Gallery Section */}
+            <AccordionItem value="image-gallery">
+              <AccordionTrigger className="text-sm font-semibold">
+                Image Gallery
+              </AccordionTrigger>
+              <AccordionContent>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="gallery">
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="flex flex-wrap gap-2"
+                      >
+                        {imageGallery.map((image, index) => (
+                          <Draggable key={image.id} draggableId={image.id} index={index}>
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className="relative w-16 h-16"
+                                style={{ ...provided.draggableProps.style }}
+                              >
+                                <img
+                                  src={image.url}
+                                  alt={`Gallery ${index}`}
+                                  className="w-full h-full object-cover rounded"
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="absolute top-0 right-0 h-4 w-4 p-0"
+                                  onClick={() => handleRemoveImage(image.id)}
+                                >
+                                  <MinusIcon className="h-2 w-2" />
+                                </Button>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
                         <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
                           <input
                             type="file"
                             className="hidden"
-                            onChange={(e) =>
-                              handleImageUpload(e, 'primary')
-                            }
+                            onChange={handleGalleryImageUpload}
                             accept="image/*"
+                            multiple
                           />
-                          <Image className="h-6 w-6 text-muted-foreground" />
+                          <PlusIcon className="h-6 w-6 text-muted-foreground" />
                         </label>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        Set as primary product image
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
               </AccordionContent>
             </AccordionItem>
 
+            {/* OG Image Section */}
             <AccordionItem value="og-image">
               <AccordionTrigger className="text-sm font-semibold">
                 OG Image
@@ -658,10 +725,7 @@ export default function EnhancedProductMoodboard() {
                             size="sm"
                             variant="destructive"
                             className="absolute top-0 right-0 h-4 w-4 p-0"
-                            onClick={() => {
-                              setOgImage(null);
-                              setHasUnsavedChanges(true);
-                            }}
+                            onClick={() => setOgImage(null)}
                           >
                             <MinusIcon className="h-2 w-2" />
                           </Button>
@@ -671,9 +735,7 @@ export default function EnhancedProductMoodboard() {
                           <input
                             type="file"
                             className="hidden"
-                            onChange={(e) =>
-                              handleImageUpload(e, 'og')
-                            }
+                            onChange={(e) => handleImageUpload(e, 'og')}
                             accept="image/*"
                           />
                           <FileImage className="h-6 w-6 text-muted-foreground" />
@@ -688,6 +750,7 @@ export default function EnhancedProductMoodboard() {
               </AccordionContent>
             </AccordionItem>
 
+            {/* Metadata Section */}
             <AccordionItem value="metadata">
               <AccordionTrigger className="text-sm font-semibold">
                 Metadata
@@ -700,28 +763,19 @@ export default function EnhancedProductMoodboard() {
                         placeholder="Meta Title"
                         className="h-6 text-xs"
                         value={metadata.title}
-                        onChange={(e) =>
-                          handleMetadataChange('title', e.target.value)
-                        }
+                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('title', e.target.value)}
                       />
                       <Textarea
                         placeholder="Meta Description"
                         className="h-12 text-xs"
                         value={metadata.description}
-                        onChange={(e) =>
-                          handleMetadataChange(
-                            'description',
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleMetadataChange('description', e.target.value)}
                       />
                       <Input
                         placeholder="Keywords (comma-separated)"
                         className="h-6 text-xs"
                         value={metadata.keywords}
-                        onChange={(e) =>
-                          handleMetadataChange('keywords', e.target.value)
-                        }
+                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('keywords', e.target.value)}
                       />
                     </div>
                   </CardContent>
