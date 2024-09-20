@@ -26,11 +26,7 @@ const GET_PRODUCT = gql`
       primaryPhoto
       imageGallery
       ogImage
-      metadata {
-        title
-        description
-        keywords
-      }
+      metadata 
     }
   }
 `;
