@@ -122,7 +122,7 @@ export default function EnhancedProductMoodboard() {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [imageGallery, setImageGallery] = useState<string[]>([]);
+  const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
   const [metadata, setMetadata] = useState({
