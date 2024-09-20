@@ -873,29 +873,26 @@ export default function EnhancedProductMoodboard() {
 
                     </div>
 
-                    <div className=" bg-white text-neutral-950  dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 min-h-[100px] h-auto ">
-  {productData ? (
-    <div>
-      
-      
-
-       <div className="relative w-full h-60 mb-4 rounded-lg overflow-hidden">
-        <img
-          src="https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg"
-          alt="Placeholder Image"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-      </div>
-      <h2 className="text-lg font-bold mb-2">{productData.name}</h2>
-      <p className="text-sm text-gray-500">{productData.description}</p>
-      <p className="text-md font-bold">${productData.price.toFixed(2)}</p>
-      <p className="text-sm">Quantity: {productData.quantity}</p>
-      <p className="text-sm">Category: {productData.category}</p>
-    </div>
-  ) : (
-    <p>No product data available.</p>
-  )}
-</div>
+                    <div className="p-4">
+            {productData && (
+              <div>
+                <div className="relative w-full mb-4">
+                  <div className="w-full" style={{ paddingBottom: '56.25%' }}>
+                    <img
+                      src={primaryPhoto}
+                      alt="Primary"
+                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold">{productData.name}</h3>
+                <p className="text-sm text-muted">{productData.description}</p>
+                <p className="text-sm">Category: {productData.category}</p>
+                <p className="text-sm">Price: ${productData.price?.toFixed(2)}</p>
+                <p className="text-sm">Quantity: {productData.quantity}</p>
+              </div>
+            )}
+          </div>
 
 
 
