@@ -293,6 +293,7 @@ export default function EnhancedProductMoodboard() {
     }
 
     try {
+      // Save product information including metadata, primary photo, OG image, and gallery
       await saveProduct({
         variables: {
           productId: PRODUCT_ID,
@@ -301,6 +302,14 @@ export default function EnhancedProductMoodboard() {
           price: parsedPrice,
           quantity: parsedQuantity,
           category,
+          metadata: {
+            title: metadata.title,
+            description: metadata.description,
+            keywords: metadata.keywords,
+          },
+          primaryPhoto,
+          ogImage,
+          imageGallery: imageGallery.map((img) => img.url), // Save the updated image gallery order
         },
       });
 

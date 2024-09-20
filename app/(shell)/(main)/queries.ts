@@ -17,19 +17,24 @@ export const UPDATE_SEGMENT = gql`
   }
 `;
 export const SAVE_PRODUCT = gql`
-  mutation SaveProduct($productId: String!, $name: String, $description: String,  $price: float8, $quantity: Int, $category: String) {
-    update_Product(where: {id: {_eq: $productId}}, _set: {name: $name, description: $description, price: $price, quantity: $quantity, category: $category}) {
-      returning {
-        id
-        name
-        description
-        price
-        quantity
-        category
-      }
+mutation SaveProduct($productId: String!, $name: String, $description: String, $price: float8, $quantity: Int, $category: String, $primaryPhoto: String, $ogImage: String, $imageGallery: [String!], $metadata: jsonb) {
+  update_Product(where: {id: {_eq: $productId}}, _set: {name: $name, description: $description, price: $price, quantity: $quantity, category: $category, primaryPhoto: $primaryPhoto, ogImage: $ogImage, imageGallery: $imageGallery, metadata: $metadata}) {
+    returning {
+      id
+      name
+      description
+      price
+      quantity
+      category
+      primaryPhoto
+      imageGallery
+      ogImage
+      metadata
     }
   }
+}
 `;
+
 
 // Mutation to update product version
 export const UPDATE_PRODUCT_VERSION = gql`
