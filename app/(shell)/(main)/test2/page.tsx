@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 import { useQuery, useMutation } from '@apollo/client'; 
 import { Button } from "@/components/ui/button";
@@ -426,7 +427,7 @@ const ImageUploader: React.FC = () => {
                 <div className="relative w-full mb-4">
                   <div className="w-full" style={{ paddingBottom: '56.25%' }}>
                     <img
-                      src={primaryPhoto}
+                      src={primaryPhoto ??'/placeholder.svg'}
                       alt="Primary"
                       className="absolute inset-0 w-full h-full object-cover rounded-lg"
                     />
