@@ -299,9 +299,19 @@ export default function EnhancedProductMoodboard() {
   
   // Merged logic for fetching and handling both product and segment fields
   useEffect(() => {
+
+    const reservedFields = RESERVED_FIELDS // Define reserved fields
+
     if (productDataQuery?.Product) {
       const loadedProductData = productDataQuery.Product[0];
-  
+     // Function to check if reserved fields are present in the product data
+     const hasReservedFields = reservedFields.every(field => field in loadedProductData);
+
+     // If reserved fields are not present, exit early or show an error message
+     if (!hasReservedFields) {
+       console.error('Required reserved fields are missing in product data.');
+       return; // Prevent further execution if required fields are missing
+     }
       // Set the main product data fields
       setProductData(loadedProductData);
       setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
