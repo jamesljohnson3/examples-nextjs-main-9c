@@ -64,9 +64,13 @@ const ImageUploader: React.FC = () => {
   };
 
   useEffect(() => {
-    uppyInstance.on('upload-success', (file: UppyFile, response: SuccessResponse) => {
-      const uploadedUrl = response.body.url; // Adjust based on your response structure
-      saveImage(file, uploadedUrl);
+    uppyInstance.on('upload-success', (file: UppyFile | undefined, response: SuccessResponse) => {
+      if (file) {
+        const uploadedUrl = response.body.url; // Adjust based on your response structure
+        saveImage(file, uploadedUrl);
+      } else {
+        console.error('File not found in upload-success event');
+      }
     });
 
     return () => {
