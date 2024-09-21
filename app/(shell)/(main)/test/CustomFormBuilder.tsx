@@ -172,43 +172,50 @@ export default function EnhancedProductMoodboard() {
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
+  
+  // Merged logic for fetching and handling both product and segment fields
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
-  
-      // Initialize formFields with fetched product data
+
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
-  
-      // Exclude these fields from remainingFields
+
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
-  
+
       setFormFields(initialFields);
       setRemainingFields(updatedRemainingFields);
       setProductData(product);
     }
-  }, [productDataQuery]);
-  
-  useEffect(() => {
+
     if (segmentsData) {
+      setSegments(segmentsData.Segment);
+
+      // Flatten and extract form fields from segments
       const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
         Object.values(segment.post).map(field => ({
-          id: field.id || uuidv4(), // Ensure each field has a unique ID
+          id: field.id || uuidv4(),
           type: field.type || 'text',
           label: field.label || '',
           value: field.value || '',
           options: field.options || []
         }))
       );
-  
-      // Merge segment fields with existing form fields
-      setFormFields(prevFields => [...prevFields, ...segmentFields]);
-      setSegments(segmentsData.Segment);
+
+      // Ensure no duplicate fields based on both id and label
+      const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
+        if (!acc.find(field => field.id === current.id || field.label === current.label)) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
+      setFormFields(mergedFields);
     }
-  }, [segmentsData]);
+  }, [productDataQuery, segmentsData]);
   
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
@@ -353,33 +360,25 @@ export default function EnhancedProductMoodboard() {
   };
 
   const handleAddCustomField = () => {
-    if (!customFieldLabel.trim()) {
-      alert('Field label cannot be empty.');
-      return;
-    }
-    const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, '_');
-    if (RESERVED_FIELDS.has(newFieldId)) {
-      alert('Cannot use reserved field ID.');
-      return;
-    }
-    if (formFields.find(field => field.id === newFieldId)) {
-      alert('Field with this label already exists.');
+    if (RESERVED_FIELDS.has(customFieldLabel)) {
+      alert(`The label "${customFieldLabel}" is a reserved field name and cannot be used.`);
       return;
     }
 
-    const newField: FormField = {
-      id: newFieldId,
-      type: customFieldType,
+    const newCustomField: FormField = {
+      id: uuidv4(),
       label: customFieldLabel,
-      options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
+      type: customFieldType,
+      options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : [],
+      value: ''
     };
 
-    handleAddField(newField);
-
+    setFormFields(prev => [...prev, newCustomField]);
     setCustomFieldLabel('');
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
+
     // Save gallery and primary photo to localStorage whenever they change
     useEffect(() => {
       localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
