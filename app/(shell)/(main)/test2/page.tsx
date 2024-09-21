@@ -552,7 +552,7 @@ const ImageUploader: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
-if (loading || loadingSegments) {
+if (loading) {
     return <div>Loading...</div>;
   }
 
