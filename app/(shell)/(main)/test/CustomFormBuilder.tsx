@@ -194,10 +194,10 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
   const handleSwitchVersion = (version: Version) => {
     setActiveVersion(version.id);
     setProductData(version.data);
-
-    // Store the selected version ID in localStorage
+    setPrimaryPhoto(version.data.primaryPhoto || null); // Ensure primaryPhoto is updated
     localStorage.setItem('productVersionId', version.id);
   };
+  
 
   if (loading) return <div>Loading versions...</div>;
   if (error) return <div>Error loading versions: {error.message}</div>;
@@ -698,7 +698,7 @@ export default function EnhancedProductMoodboard() {
                             )}
                           </Droppable>
                         </DragDropContext>
-                        <div className="flex justify-end space-x-4">
+                        <div className="flex justify-end space-x-4 mt-4 mr-4">
     <Button size="sm" disabled={!hasUnsavedChanges} onClick={handleSave}>
       <Save className="h-4 w-4 mr-2" />
       Save
@@ -994,12 +994,10 @@ export default function EnhancedProductMoodboard() {
         </ResizablePanel>
         <ResizableHandle withHandle />
 
-        <ResizablePanel className="flex flex-col gap-8" defaultSize={30}>
+        <ResizablePanel className=" pl-2 flex flex-col gap-8" defaultSize={30}>
         <Card>
                   <CardContent>
                     <div className="flex items-center space-x-4">
-                    <h2 className="text-lg font-bold mb-2">Product Preview</h2>
-
                     {hasUnsavedChanges && <span className="text-yellow-500 text-sm">Unsaved changes</span>}
 
                     </div>

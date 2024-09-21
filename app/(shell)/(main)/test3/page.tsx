@@ -47,6 +47,7 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
 
   const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
@@ -117,14 +118,13 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
     // Update the active version in localStorage
     localStorage.setItem('productVersionId', newVersion.id);
   };
-
   const handleSwitchVersion = (version: Version) => {
     setActiveVersion(version.id);
     setProductData(version.data);
-
-    // Store the selected version ID in localStorage
+    setPrimaryPhoto(version.data.primaryPhoto || null); // Ensure primaryPhoto is updated
     localStorage.setItem('productVersionId', version.id);
   };
+  
 
   if (loading) return <div>Loading versions...</div>;
   if (error) return <div>Error loading versions: {error.message}</div>;
