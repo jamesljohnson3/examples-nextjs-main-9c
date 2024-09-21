@@ -116,12 +116,12 @@ interface Version {
   createdAt: string;
 }
 
-function VersionControl({ productId, setProductData, previewData }: { productId: string, setProductData: any, previewData: any }) {
+function VersionControl({ productId, setProductData, previewData, primaryPhoto, setPrimaryPhoto }: { productId: string, setProductData: any, previewData: any, primaryPhoto: string | null, setPrimaryPhoto: any }) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
 
+  
   const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
   });
@@ -894,7 +894,7 @@ export default function EnhancedProductMoodboard() {
              {/* Add Custom Field */}
              <AccordionItem value="custom-fields">
               <AccordionTrigger className="text-sm font-semibold">
-              Custom Fields
+            Advanced Options
               </AccordionTrigger>
               <AccordionContent>
                
@@ -1036,7 +1036,13 @@ export default function EnhancedProductMoodboard() {
                     <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
                   </CardContent>
                 </Card>
-                <VersionControl productId={PRODUCT_ID} setProductData={setProductData} previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} />
+                <VersionControl 
+  productId={PRODUCT_ID} 
+  setProductData={setProductData} 
+  previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} 
+  primaryPhoto={primaryPhoto} // Pass the primaryPhoto state
+  setPrimaryPhoto={setPrimaryPhoto} // Pass the function to update it
+/>
 
           <Button
             size="sm"

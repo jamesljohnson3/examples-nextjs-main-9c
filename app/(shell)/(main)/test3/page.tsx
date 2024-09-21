@@ -43,12 +43,12 @@ interface Version {
   createdAt: string;
 }
 
-function VersionControl({ productId, setProductData, previewData }: { productId: string, setProductData: any, previewData: any }) {
+function VersionControl({ productId, setProductData, previewData, primaryPhoto, setPrimaryPhoto }: { productId: string, setProductData: any, previewData: any, primaryPhoto: string | null, setPrimaryPhoto: any }) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
 
+  
   const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
   });
@@ -124,12 +124,11 @@ useEffect(() => {
     setActiveVersion(version.id);
     setProductData(version.data);
     
-    // Update primaryPhoto based on the version data
-    const newPrimaryPhoto = version.data.primaryPhoto || null;
-    setPrimaryPhoto(newPrimaryPhoto);
-    
+    // Update the primary photo state in the parent
+    setPrimaryPhoto(version.data.primaryPhoto || null); // Ensure primaryPhoto is updated
     localStorage.setItem('productVersionId', version.id);
 };
+
 
 
 
@@ -473,7 +472,13 @@ const ImageUploader: React.FC = () => {
             )}
           </div>
 
-          <VersionControl productId={PRODUCT_ID} setProductData={setProductData} previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} />
+          <VersionControl 
+  productId={PRODUCT_ID} 
+  setProductData={setProductData} 
+  previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} 
+  primaryPhoto={primaryPhoto} // Pass the primaryPhoto state
+  setPrimaryPhoto={setPrimaryPhoto} // Pass the function to update it
+/>
 
         </ResizablePanel>
       </ResizablePanelGroup>
