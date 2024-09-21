@@ -34,6 +34,7 @@ interface Image {
 const ImageUploader: React.FC = () => {
   const [imageGallery, setImageGallery] = useState<Image[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [hasUnsavedImageGalleryChanges, setHasUnsavedImageGalleryChanges] = useState(false);
 
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID },
@@ -61,6 +62,7 @@ const ImageUploader: React.FC = () => {
     for (const file of selectedFiles) {
       uppyInstance.addFile({ name: file.name, type: file.type, data: file });
     }
+    setHasUnsavedImageGalleryChanges(true);
   };
 
   useEffect(() => {
@@ -80,10 +82,12 @@ const ImageUploader: React.FC = () => {
 
   const saveImage = async (file: UppyFile, uploadedUrl: string) => {
     setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
+    setHasUnsavedImageGalleryChanges(true);
   };
 
   const handleRemoveImage = (id: string) => {
     setImageGallery((prev) => prev.filter((image) => image.id !== id));
+    setHasUnsavedImageGalleryChanges(true);
   };
 
   const handleDragEnd = (result: any) => {
@@ -92,15 +96,15 @@ const ImageUploader: React.FC = () => {
     const [movedImage] = reorderedImages.splice(result.source.index, 1);
     reorderedImages.splice(result.destination.index, 0, movedImage);
     setImageGallery(reorderedImages);
+    setHasUnsavedImageGalleryChanges(true);
   };
 
   const handleSaveOrder = () => {
     localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
+    setHasUnsavedImageGalleryChanges(false);
     alert('Image order saved!');
   };
-  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileInput(event)
-  };
+
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
@@ -109,8 +113,8 @@ const ImageUploader: React.FC = () => {
     <div className="w-full space-y-2">
       <div className="flex justify-between items-center">
         {isUploading && <div>Uploading...</div>}
-        <input type="file" multiple onChange={handleFileInput} accept="image/*" />
-        <Button onClick={handleSaveOrder}>Save Order</Button>
+
+        <Button onClick={handleSaveOrder} disabled={!hasUnsavedImageGalleryChanges}>Save Changes</Button>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -141,7 +145,7 @@ const ImageUploader: React.FC = () => {
               ))}
               {provided.placeholder}
               <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                <input type="file" className="hidden" onChange={handleGalleryImageUpload} accept="image/*" multiple />
+                <input type="file" className="hidden" onChange={handleFileInput} accept="image/*" multiple />
                 <PlusIcon className="h-6 w-6 text-muted-foreground" />
               </label>
             </div>
