@@ -305,12 +305,9 @@ export default function EnhancedProductMoodboard() {
     if (productDataQuery?.Product) {
       const loadedProductData = productDataQuery.Product[0];
 
-      // Check if all reserved fields are present
-      const hasReservedFields = Array.from(reservedFields).every(field => field in loadedProductData);
-      if (!hasReservedFields) {
-        console.error('Missing required reserved fields in product data.');
-        return;  // Exit early if required fields are missing
-      }
+     
+      
+      
 
       // Set the product data and fields
       setProductData(loadedProductData);
@@ -620,7 +617,7 @@ export default function EnhancedProductMoodboard() {
           
         <Card>
                       <CardContent>
-                        <div className="flex justify-between items-center mt-4 mb-2">
+                        <div className="flex justify-between items-center mb-2">
                           <div className="flex space-x-1">
                             {remainingFields.map((field) => (
                               <Button
@@ -701,12 +698,14 @@ export default function EnhancedProductMoodboard() {
                             )}
                           </Droppable>
                         </DragDropContext>
-                        <div className="flex items-center space-x-4">
-    <Button size="sm" disabled={!hasUnsavedChanges} onClick={handleSave}>
-      <Save className="h-4 w-4 mr-2" />
-      Save
-    </Button>
-  </div>
+                        <Button
+            size="sm"
+            className="h-6 text-center mx-auto items-center justify-center"
+            onClick={handleSave}
+          >
+            <Save className="h-3 w-3 mr-1" />
+            Save
+          </Button>
                       </CardContent>
                     </Card>
 
