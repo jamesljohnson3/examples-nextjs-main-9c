@@ -627,7 +627,7 @@ export default function EnhancedProductMoodboard() {
           
         <Card>
                       <CardContent>
-                        <div className="flex justify-between items-center mb-2">
+                        <div className="flex justify-between items-center mt-4 mb-2">
                           <div className="flex space-x-1">
                             {remainingFields.map((field) => (
                               <Button
@@ -711,14 +711,12 @@ export default function EnhancedProductMoodboard() {
                             )}
                           </Droppable>
                         </DragDropContext>
-                        {hasUnsavedChanges && <div className="flex items-center space-x-4">
-          <Button size="sm" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Save
-          </Button>
-         
-        </div>}
-
+                        <div className="flex items-center space-x-4">
+    <Button size="sm" disabled={!hasUnsavedChanges} onClick={handleSave}>
+      <Save className="h-4 w-4 mr-2" />
+      Save
+    </Button>
+  </div>
                       </CardContent>
                     </Card>
 
