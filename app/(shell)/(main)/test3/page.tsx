@@ -2,11 +2,10 @@
 'use client'
 import { useQuery, useMutation } from '@apollo/client'; 
 import { Button } from "@/components/ui/button";
-import { PlusIcon, MinusIcon, Image, FileImage } from 'lucide-react';
+import { PlusIcon, MinusIcon, Image, FileImage,Save } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GET_PRODUCT, GET_PRODUCT_VERSIONS, UPDATE_PRODUCT_VERSION } from '@/app/(shell)/(main)/queries';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from "@/components/ui/input";
@@ -16,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { GitBranch } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT, GET_PRODUCT_VERSIONS } from '@/app/(shell)/(main)/queries';
 
 interface ProductData {
   id: string;
@@ -32,7 +32,6 @@ interface ProductData {
     description?: string;
     keywords?: string;
   };
-  [key: string]: any;
 }
 
 interface Version {
@@ -50,17 +49,19 @@ function VersionControl({
   primaryPhoto, 
   setPrimaryPhoto, 
   setMetadata,
+  setHasUnsavedChanges,
   ogImage, 
   setOgImage, 
   imageGallery, 
   setImageGallery 
 }: { 
   productId: string; 
-  setProductData: any; 
+  setProductData: any;
   previewData: any; 
   primaryPhoto: string | null; 
   setPrimaryPhoto: any; 
   setMetadata: any;
+  setHasUnsavedChanges: any;
   ogImage: string | null; 
   setOgImage: any; 
   imageGallery: { id: string; url: string }[]; 
@@ -68,100 +69,49 @@ function VersionControl({
 }) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  
   const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
   });
 
-  const [saveProductVersion] = useMutation(UPDATE_PRODUCT_VERSION, {
-    onCompleted: (data: any) => {
-      console.log('Version saved:', data);
-      fetchVersions();
-      setHasUnsavedChanges(false);
-    },
-    onError: (error: any) => {
-      console.error('Error saving version:', error);
-    },
-  });
-
-// Modify the useEffect for loading versions
-useEffect(() => {
-  if (data) {
+  useEffect(() => {
+    if (data) {
       const loadedProductVersions = data.ProductVersion;
       setVersions(loadedProductVersions);
 
       const storedVersionId = localStorage.getItem('productVersionId');
       if (storedVersionId) {
-          const storedVersion = loadedProductVersions.find((version: { id: string; }) => version.id === storedVersionId);
-          if (storedVersion) {
-              setActiveVersion(storedVersion.id);
-              setProductData(storedVersion.data);
-              setPrimaryPhoto(storedVersion.data.primaryPhoto || null); // Set the primary photo here
-          }
+        const storedVersion = loadedProductVersions.find(
+          (version: { id: string }) => version.id === storedVersionId
+        );
+        if (storedVersion) {
+          setActiveVersion(storedVersion.id);
+          setProductData(storedVersion.data);
+          setPrimaryPhoto(storedVersion.data.primaryPhoto || null);
+        }
       } else {
-          const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
-          setActiveVersion(latestVersion.id);
-          setProductData(latestVersion.data);
-          setPrimaryPhoto(latestVersion.data.primaryPhoto || null); // Set the primary photo here
+        const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
+        setActiveVersion(latestVersion.id);
+        setProductData(latestVersion.data);
+        setPrimaryPhoto(latestVersion.data.primaryPhoto || null);
       }
-  }
-}, [data]);
+    }
+  }, [data]);
 
-  const fetchVersions = () => {
-    // Fetch versions again if needed or handle via refetch
-  };
-
-  const handleSave = () => {
-    console.log('Saving changes...');
-    console.log("Form Data:", previewData);
-    console.log("Custom Fields:", versions);
-
-    const newVersion: Version = {
-      id: uuidv4(),
-      versionNumber: versions.length + 1,
-      changes: 'Updated product information',
-      data: previewData,
-      createdAt: new Date().toISOString(),
-    };
-
-    saveProductVersion({
-      variables: {
-        productId,
-        versionNumber: newVersion.versionNumber,
-        changes: newVersion.changes,
-        data: JSON.stringify(previewData),
-      },
-    });
-
-    setVersions([...versions, newVersion]);
-    setActiveVersion(newVersion.id);
-    setHasUnsavedChanges(false);
-
-    // Update the active version in localStorage
-    localStorage.setItem('productVersionId', newVersion.id);
-  };
   const handleSwitchVersion = (version: Version) => {
     setActiveVersion(version.id);
     setProductData(version.data);
-    
-    // Update primary photo, ogImage, imageGallery, and metadata states in the parent
     setPrimaryPhoto(version.data.primaryPhoto || null);
     setOgImage(version.data.ogImage || null);
     setImageGallery(version.data.imageGallery || []);
-    
     setMetadata({
-        title: version.data.metadata?.title || '',
-        description: version.data.metadata?.description || '',
-        keywords: version.data.metadata?.keywords || '',
+      title: version.data.metadata?.title || '',
+      description: version.data.metadata?.description || '',
+      keywords: version.data.metadata?.keywords || '',
     });
-
+    setHasUnsavedChanges(true);
     localStorage.setItem('productVersionId', version.id);
-};
-
-
-
+  };
 
   if (loading) return <div>Loading versions...</div>;
   if (error) return <div>Error loading versions: {error.message}</div>;
@@ -195,9 +145,6 @@ useEffect(() => {
             </div>
           ))}
         </ScrollArea>
-        <Button variant="outline" onClick={handleSave} disabled={!hasUnsavedChanges}>
-          Save New Version
-        </Button>
       </CardContent>
     </Card>
   );
@@ -209,6 +156,7 @@ const ImageUploader: React.FC = () => {
   const { data, loading, error } = useQuery<{ Product: ProductData[] }>(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID },
   });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
@@ -219,6 +167,9 @@ const ImageUploader: React.FC = () => {
     description: '',
     keywords: '',
   });
+
+  const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
+  const [saveProduct] = useMutation(SAVE_PRODUCT);
 
   useEffect(() => {
     if (data) {
@@ -231,10 +182,11 @@ const ImageUploader: React.FC = () => {
         description: loadedProductData.metadata?.description || '',
         keywords: loadedProductData.metadata?.keywords || '',
       });
-      const initialGallery = loadedProductData.imageGallery?.map((url) => ({
-        id: url,
-        url,
-      })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
+      const initialGallery =
+        loadedProductData.imageGallery?.map((url) => ({
+          id: url,
+          url,
+        })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
       setImageGallery(initialGallery);
     }
   }, [data]);
@@ -257,23 +209,40 @@ const ImageUploader: React.FC = () => {
       id: URL.createObjectURL(file),
       url: URL.createObjectURL(file),
     }));
-    setImageGallery(prev => [...prev, ...newImages]);
+    setImageGallery((prev) => [...prev, ...newImages]);
   };
 
   const handleRemoveImage = (id: string) => {
-    setImageGallery(prev => prev.filter(image => image.id !== id));
+    setImageGallery((prev) => prev.filter((image) => image.id !== id));
+    setHasUnsavedChanges(true);
   };
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const reorderedImages = Array.from(imageGallery);
-    const [movedImage] = reorderedImages.splice(result.source.index, 1);
-    reorderedImages.splice(result.destination.index, 0, movedImage);
-
-    setImageGallery(reorderedImages);
+    const updatedImages = [...imageGallery];
+    const [moved] = updatedImages.splice(result.source.index, 1);
+    updatedImages.splice(result.destination.index, 0, moved);
+    setImageGallery(updatedImages);
+    setHasUnsavedChanges(true);
   };
 
+  const handleSave = async () => {
+    try {
+      await saveProduct({
+        variables: {
+          productId: PRODUCT_ID,
+          primaryPhoto,
+          ogImage,
+          imageGallery: imageGallery.map((image) => image.url),
+          metadata,
+        },
+      });
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+    }
+  };
   const handleMetadataChange = (key: string, value: string) => {
     setMetadata((prev) => ({
       ...prev,
@@ -293,15 +262,21 @@ const ImageUploader: React.FC = () => {
     }
   };
 
-
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error loading product data: {error.message}</div>;
+  if (error) return <div>Error loading product: {error.message}</div>;
+
 
   return (
     <div className="w-full space-y-2">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={70}>
           <Accordion type="single" collapsible className="w-full space-y-4">
+          <div className="flex justify-end space-x-4 mt-4 mr-4">
+    <Button size="sm" disabled={!hasUnsavedChanges} onClick={handleSave}>
+      <Save className="h-4 w-4 mr-2" />
+      Save
+    </Button>
+  </div>
             {/* Primary Photo Section */}
             <AccordionItem value="primary-photo">
               <AccordionTrigger className="text-sm font-semibold">
@@ -477,6 +452,8 @@ const ImageUploader: React.FC = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+
+
         </ResizablePanel>
 
         {/* Product Preview Section */}
@@ -503,18 +480,19 @@ const ImageUploader: React.FC = () => {
             )}
           </div>
 
-          <VersionControl 
-  productId={PRODUCT_ID} 
-  setProductData={setProductData} 
-  previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} 
-  primaryPhoto={primaryPhoto} 
-  setPrimaryPhoto={setPrimaryPhoto} 
-  ogImage={ogImage} // Pass the ogImage state
-  setOgImage={setOgImage} // Pass the function to update it
-  imageGallery={imageGallery} // Pass the imageGallery state
-  setImageGallery={setImageGallery} // Pass the function to update it
-  setMetadata={setMetadata}
-/>
+          <VersionControl
+          productId={PRODUCT_ID}
+          setProductData={setProductData}
+          previewData={productData}
+          primaryPhoto={primaryPhoto}
+          setPrimaryPhoto={setPrimaryPhoto}
+          setMetadata={setMetadata}
+          setHasUnsavedChanges={setHasUnsavedChanges}
+          ogImage={ogImage}
+          setOgImage={setOgImage}
+          imageGallery={imageGallery}
+          setImageGallery={setImageGallery}
+        />
 
 
         </ResizablePanel>
