@@ -15,8 +15,8 @@ const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
 const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
 const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
 const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
- // Initialize Uppy instance
- const uppyInstance = new Uppy({
+
+const uppyInstance = new Uppy({
   autoProceed: true,
   restrictions: { maxNumberOfFiles: 20, allowedFileTypes: ['image/*'] },
 }).use(Transloadit, {
@@ -25,10 +25,11 @@ const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
     template_id: TEMPLATE_ID,
   },
 });
+
 const ImageUploader = () => {
   const [imageGallery, setImageGallery] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  
+
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -36,7 +37,11 @@ const ImageUploader = () => {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
 
-  // Log product and segment data
+  useEffect(() => {
+    const storedImages = JSON.parse(localStorage.getItem('imageGallery')) || [];
+    setImageGallery(storedImages);
+  }, []);
+
   useEffect(() => {
     if (productDataQuery) {
       console.log("Product Data:", JSON.stringify(productDataQuery, null, 2));
@@ -46,9 +51,6 @@ const ImageUploader = () => {
     }
   }, [productDataQuery, segmentsData]);
 
- 
-
-  // Handle adding files to Uppy
   const handleFileInput = (event) => {
     const selectedFiles = Array.from(event.target.files);
     for (const file of selectedFiles) {
@@ -56,13 +58,11 @@ const ImageUploader = () => {
     }
   };
 
-  // Save uploaded images to state
   const saveImage = async (file) => {
     const uploadedUrl = file.uploadURL; // Get URL from Transloadit
     setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
   };
 
-  // Handle Uppy completion
   useEffect(() => {
     uppyInstance.on('complete', async (result) => {
       const uploadedImages = result.successful;
@@ -72,7 +72,7 @@ const ImageUploader = () => {
     });
 
     return () => {
-      uppyInstance.close(); // Cleanup Uppy instance on unmount
+      uppyInstance.close();
     };
   }, []);
 
@@ -88,6 +88,11 @@ const ImageUploader = () => {
     setImageGallery(reorderedImages);
   };
 
+  const handleSaveOrder = () => {
+    localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
+    alert('Image order saved!');
+  };
+
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
@@ -97,6 +102,7 @@ const ImageUploader = () => {
       <div className="flex justify-between items-center">
         {isUploading && <div>Uploading...</div>}
         <input type="file" multiple onChange={handleFileInput} accept="image/*" />
+        <Button onClick={handleSaveOrder}>Save Order</Button>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
