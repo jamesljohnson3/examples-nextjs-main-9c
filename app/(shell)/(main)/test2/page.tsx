@@ -232,12 +232,19 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
 }
 
 const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
+const SEGMENT_ID = 'unique-segment-id';
 
 const ImageUploader: React.FC = () => {
-
-  const { data, loading, error } = useQuery<{ Product: ProductData[] }>(GET_PRODUCT, {
-    variables: { productId: PRODUCT_ID },
+  
+  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+    variables: { productId: PRODUCT_ID }
   });
+
+  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
+    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
+  });
+
 
 
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -259,9 +266,6 @@ const ImageUploader: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'form' | 'refine' | 'analytics'>(
     'form'
   );
-
-  const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
-  const SEGMENT_ID = 'unique-segment-id';
 
   const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
     onCompleted: () => alert('Segment deleted successfully!'),
@@ -286,18 +290,15 @@ const ImageUploader: React.FC = () => {
   
   
 
-  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
-    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
-  });
-
   const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
-
   useEffect(() => {
-    if (data) {
-      const loadedProductData = data.Product[0];
+    if (productDataQuery?.Product) {
+      const loadedProductData = productDataQuery.Product[0];
+  
+      // Set the main product data fields
       setProductData(loadedProductData);
       setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
       setOgImage(loadedProductData.ogImage || null);
@@ -306,13 +307,56 @@ const ImageUploader: React.FC = () => {
         description: loadedProductData.metadata?.description || '',
         keywords: loadedProductData.metadata?.keywords || '',
       });
-      const initialGallery = loadedProductData.imageGallery?.map((url) => ({
+  
+      // Initialize the image gallery
+      const initialGallery = loadedProductData.imageGallery?.map((url: any) => ({
         id: url,
         url,
       })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
       setImageGallery(initialGallery);
+  
+      // Initialize form fields from available fields and product data
+      const initialFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: loadedProductData[field.id] || '',  // Populate the field value if it exists in product data
+      }));
+  
+      // Exclude fields already in the form from the remaining available fields
+      const excludedFields = new Set(initialFields.map(field => field.id));
+      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+  
+      setFormFields(initialFields);  // Set the initialized fields in the form
+      setRemainingFields(updatedRemainingFields);  // Set any remaining fields that weren't part of the form
     }
-  }, [data]);
+  
+    if (segmentsData) {
+      setSegments(segmentsData.Segment);
+  
+      // Extract and flatten fields from segment data (e.g., segment.post)
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
+        Object.values(segment.post).map(field => ({
+          id: field.id || uuidv4(),  // Generate a unique ID if missing
+          type: field.type || 'text',  // Default to 'text' if type is missing
+          label: field.label || '',  // Default to an empty label if missing
+          value: field.value || '',  // Default to an empty value if missing
+          options: field.options || [],  // Default to an empty array for options
+        }))
+      );
+  
+      // Merge fields from both formFields and segmentFields, ensuring no duplicates by ID or label
+      const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
+        if (!acc.find(field => field.id === current.id || field.label === current.label)) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+  
+      setFormFields(mergedFields);  // Update the form fields with merged data
+    }
+  }, [productDataQuery, segmentsData]);  // Dependencies include productDataQuery and segmentsData
+  
+
+
 
   useEffect(() => {
     localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
@@ -552,13 +596,14 @@ const ImageUploader: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
-if (loading) {
+  if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
 
 
-  if (error) return <div>Error loading product data: {error.message}</div>;
-
+  if (deleteLoading) return <p>Deleting...</p>;
+  if (deleteError) return <p>Error deleting segment.</p>;
+  
   return (
     <div className="w-full space-y-2">
       <ResizablePanelGroup direction="horizontal">
