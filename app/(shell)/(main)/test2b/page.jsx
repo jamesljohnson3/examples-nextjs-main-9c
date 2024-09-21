@@ -26,10 +26,10 @@ function classNames(...classes) {
 }
 
 const Upload = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState({ id: 1, title: 'Standard', turnaround: '4–10 business days', price: '$5.00' });
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [nameOnCard, setNameOnCard] = useState('');
-  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState(deliveryMethods[0]);
+  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState();
   const [ images, setImages ] = useState([]);
 
   // Extract the project field from the URL
@@ -103,7 +103,7 @@ const Upload = () => {
       const files = uppy.getFiles();
       setUploadedFiles(files);
   
-      const response = await fetch('https://hook.us1.make.com/dnyg5bgpnd8fug39da6h3xizaexj43kr', {
+      const response = await fetch('api/my-api-endpoint', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,52 +176,8 @@ const Upload = () => {
 <button             className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 type="submit">Distribute</button>  <a      href="https://spaces.unlimitpotential.com/edit"      className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 >Cancel</a>    </div>   
-            <RadioGroup value={selectedDeliveryMethod} onChange={setSelectedDeliveryMethod}>
-              <RadioGroup.Label className="text-lg font-medium text-gray-900">Delivery method</RadioGroup.Label>
-
-              <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-                {deliveryMethods.map((deliveryMethod) => (
-                  <RadioGroup.Option
-                    key={deliveryMethod.id}
-                    value={deliveryMethod}
-                    className={({ checked, active }) =>
-                      classNames(
-                        checked ? 'border-transparent' : 'border-gray-300',
-                        active ? 'ring-2 ring-indigo-500' : '',
-                        'relative bg-white border rounded-lg shadow-sm p-4 flex cursor-pointer focus:outline-none'
-                      )
-                    }
-                  >
-                    {({ checked, active }) => (
-                      <>
-                        <div className="flex-1 flex">
-                          <div className="flex flex-col">
-                            <RadioGroup.Label as="span" className="block text-sm font-medium text-gray-900">
-                              {deliveryMethod.title}
-                            </RadioGroup.Label>
-                            <RadioGroup.Description as="span" className="mt-1 flex items-center text-sm text-gray-500">
-                              {deliveryMethod.turnaround}
-                            </RadioGroup.Description>
-                            <RadioGroup.Description as="span" className="mt-6 text-sm font-medium text-gray-900">
-                              {deliveryMethod.price}
-                            </RadioGroup.Description>
-                          </div>
-                        </div>
-                        {checked ? <>Icon</> : null}
-                        <div
-                          className={classNames(
-                            active ? 'border' : 'border-2',
-                            checked ? 'border-indigo-500' : 'border-transparent',
-                            'absolute -inset-px rounded-lg pointer-events-none'
-                          )}
-                          aria-hidden="true"
-                        />
-                      </>
-                    )}
-                  </RadioGroup.Option>
-                ))}
-              </div>
-            </RadioGroup>
+           
+           
           </div>
 
           
