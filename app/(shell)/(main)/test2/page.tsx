@@ -36,12 +36,13 @@ interface ProductData {
 }
 
 interface Version {
-  id: string; // Use string if your ID is a string
+  id: string;
   versionNumber: number;
   changes: string;
   data: any;
-  createdAt: string; // Ensure this matches your data
+  createdAt: string;
 }
+
 function VersionControl({ productId, setProductData, previewData }: { productId: string, setProductData: any, previewData: any }) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
@@ -64,7 +65,22 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
 
   useEffect(() => {
     if (data) {
-      setVersions(data.ProductVersion);
+      const storedVersionId = localStorage.getItem('productVersionId');
+      const loadedProductVersions = data.ProductVersion;
+      setVersions(loadedProductVersions);
+
+      // Set the active version based on localStorage or the latest version
+      if (storedVersionId) {
+        const storedVersion = loadedProductVersions.find((version) => version.id === storedVersionId);
+        if (storedVersion) {
+          setActiveVersion(storedVersion.id);
+          setProductData(storedVersion.data);
+        }
+      } else {
+        const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
+        setActiveVersion(latestVersion.id);
+        setProductData(latestVersion.data);
+      }
     }
   }, [data]);
 
@@ -72,41 +88,47 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
     // Fetch versions again if needed or handle via refetch
   };
 
-  
-const handleSave = () => {
-  console.log('Saving changes...');
-  console.log("Form Data:", previewData);
-  console.log("Custom Fields:", versions);
+  const handleSave = () => {
+    console.log('Saving changes...');
+    console.log("Form Data:", previewData);
+    console.log("Custom Fields:", versions);
 
-  const newVersion: Version = {
-    id: uuidv4(), // Ensure the ID is unique
-    versionNumber: versions.length + 1, // Incremental version number
-    changes: 'Updated product information',
-    data: previewData,
-    createdAt: new Date().toISOString(), // Use createdAt to match your data structure
+    const newVersion: Version = {
+      id: uuidv4(),
+      versionNumber: versions.length + 1,
+      changes: 'Updated product information',
+      data: previewData,
+      createdAt: new Date().toISOString(),
+    };
+
+    saveProductVersion({
+      variables: {
+        productId,
+        versionNumber: newVersion.versionNumber,
+        changes: newVersion.changes,
+        data: JSON.stringify(previewData),
+      },
+    });
+
+    setVersions([...versions, newVersion]);
+    setActiveVersion(newVersion.id);
+    setHasUnsavedChanges(false);
+
+    // Update the active version in localStorage
+    localStorage.setItem('productVersionId', newVersion.id);
   };
-
-  saveProductVersion({
-    variables: {
-      productId,
-      versionNumber: newVersion.versionNumber, // Use the version number instead of ID
-      changes: newVersion.changes,
-      data: JSON.stringify(previewData), // Ensure data is stringified if needed
-    },
-  });
-
-  setVersions([...versions, newVersion]); // Update versions with the new version
-  setActiveVersion(newVersion.id); // Set the active version to the new version
-  setHasUnsavedChanges(false); // Reset unsaved changes flag
-};
 
   const handleSwitchVersion = (version: Version) => {
     setActiveVersion(version.id);
     setProductData(version.data);
+
+    // Store the selected version ID in localStorage
+    localStorage.setItem('productVersionId', version.id);
   };
 
   if (loading) return <div>Loading versions...</div>;
   if (error) return <div>Error loading versions: {error.message}</div>;
+
   return (
     <Card className="mt-2 bg-white backdrop-blur-lg border-0">
       <CardHeader>
@@ -118,7 +140,7 @@ const handleSave = () => {
             <div key={version.id} className="flex items-center justify-between py-1 border-b border-white last:border-b-0">
               <div className="flex items-center space-x-1">
                 <Badge variant={version.id === activeVersion ? "default" : "secondary"} className="text-[10px]">v{version.versionNumber}</Badge>
-                <span className="text-[10px]">{new Date(version.createdAt).toLocaleString()}</span> {/* Ensure this is the correct field */}
+                <span className="text-[10px]">{new Date(version.createdAt).toLocaleString()}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Tooltip>
@@ -144,14 +166,14 @@ const handleSave = () => {
   );
 }
 
-const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn"; // Example product ID
+const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
 
 const ImageUploader: React.FC = () => {
   const { data, loading, error } = useQuery<{ Product: ProductData[] }>(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID },
   });
 
-  const [productData, setProductData] = useState<ProductData | null>(null); // Add state for product data
+  const [productData, setProductData] = useState<ProductData | null>(null);
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
@@ -161,11 +183,10 @@ const ImageUploader: React.FC = () => {
     keywords: '',
   });
 
-  // Load product data into state
   useEffect(() => {
     if (data) {
       const loadedProductData = data.Product[0];
-      setProductData(loadedProductData); // Set the product data state
+      setProductData(loadedProductData);
       setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
       setOgImage(loadedProductData.ogImage || null);
       setMetadata({
@@ -181,7 +202,6 @@ const ImageUploader: React.FC = () => {
     }
   }, [data]);
 
-  // Save gallery and primary photo to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
   }, [imageGallery]);
@@ -235,6 +255,7 @@ const ImageUploader: React.FC = () => {
       }
     }
   };
+
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading product data: {error.message}</div>;
