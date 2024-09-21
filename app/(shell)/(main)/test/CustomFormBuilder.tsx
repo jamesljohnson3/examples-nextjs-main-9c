@@ -260,6 +260,14 @@ export default function EnhancedProductMoodboard() {
   const [activeTab, setActiveTab] = useState<'form' | 'refine' | 'analytics'>(
     'form'
   );
+
+
+
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+
+
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   const SEGMENT_ID = 'unique-segment-id';
@@ -297,22 +305,24 @@ export default function EnhancedProductMoodboard() {
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
   
-  
   useEffect(() => {
-    // Reserved fields validation and dynamic check
-    const reservedFields = RESERVED_FIELDS;
+    if (loadingProduct || loadingSegments) {
+      setLoading(true);
+      return;
+    }
+
+    setLoading(false);
+    setError(null); // Reset error state
 
     if (productDataQuery?.Product) {
       const loadedProductData = productDataQuery.Product[0];
+      const hasReservedFields = Array.from(RESERVED_FIELDS).every(field => field in loadedProductData);
 
-      // Check if all reserved fields are present
-      const hasReservedFields = Array.from(reservedFields).every(field => field in loadedProductData);
       if (!hasReservedFields) {
-        console.error('Missing required reserved fields in product data.');
-        return;  // Exit early if required fields are missing
+        setError('Missing required reserved fields in product data.');
+        return;
       }
 
-      // Set the product data and fields
       setProductData(loadedProductData);
       setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
       setOgImage(loadedProductData.ogImage || null);
@@ -328,36 +338,33 @@ export default function EnhancedProductMoodboard() {
         url,
       })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
       setImageGallery(initialGallery);
-
-      // Initialize form fields from available fields and product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: loadedProductData[field.id] || '',
       }));
-
-      // Filter out fields already populated in the form
+      
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
 
-      setFormFields(initialFields);  // Set initialized fields
-      setRemainingFields(updatedRemainingFields);  // Set remaining available fields
+      setFormFields(initialFields);
+      setRemainingFields(updatedRemainingFields);
+    } else {
+      setError('Product data is not available.');
     }
 
     if (segmentsData) {
       setSegments(segmentsData.Segment);
 
-      // Extract and flatten segment fields
       const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
         Object.values(segment.post).map(field => ({
-          id: field.id || uuidv4(),  // Unique ID if missing
-          type: field.type || 'text',  // Default to 'text'
-          label: field.label || '',  // Default empty label
-          value: field.value || '',  // Default empty value
-          options: field.options || [],  // Default empty options array
+          id: field.id || uuidv4(),
+          type: field.type || 'text',
+          label: field.label || '',
+          value: field.value || '',
+          options: field.options || [],
         }))
       );
 
-      // Merge formFields and segmentFields, avoiding duplicates by id or label
       const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
         if (!acc.find(field => field.id === current.id || field.label === current.label)) {
           acc.push(current);
@@ -365,9 +372,9 @@ export default function EnhancedProductMoodboard() {
         return acc;
       }, []);
 
-      setFormFields(mergedFields);  // Set merged fields in the form
+      setFormFields(mergedFields);
     }
-  }, [productDataQuery, segmentsData]);
+  }, [productDataQuery, segmentsData, loadingProduct, loadingSegments]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
@@ -640,6 +647,9 @@ export default function EnhancedProductMoodboard() {
                           <Droppable droppableId="form-fields">
                             {(provided) => (
                               <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
+                                 {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {/* Render your form and segment data here */}
                                 {formFields.map((field, index) => (
                                   <Draggable key={field.id} draggableId={field.id} index={index}>
                                     {(provided) => (
