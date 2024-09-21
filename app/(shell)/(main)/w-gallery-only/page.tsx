@@ -496,7 +496,7 @@ const ImageUploader: React.FC = () => {
                           <input
                             type="file"
                             className="hidden"
-                            onChange={handleGalleryImageUpload}
+                            onChange={handleFileInput}
                             accept="image/*"
                             multiple
                           />
