@@ -71,7 +71,7 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
 
       // Set the active version based on localStorage or the latest version
       if (storedVersionId) {
-        const storedVersion = loadedProductVersions.find((version) => version.id === storedVersionId);
+        const storedVersion = loadedProductVersions.find((version: { id: string; }) => version.id === storedVersionId);
         if (storedVersion) {
           setActiveVersion(storedVersion.id);
           setProductData(storedVersion.data);
