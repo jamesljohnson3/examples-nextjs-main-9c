@@ -1,19 +1,73 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
 import { Button } from "@/components/ui/button";
-import { PlusIcon, MinusIcon, Image, FileImage } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Card, CardContent } from "@/components/ui/card";
-import { GET_PRODUCT } from '@/app/(shell)/(main)/queries';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {
+  PlusIcon,
+  MinusIcon,
+  GripVertical,
+  ImageIcon,
+  EyeIcon,
+  BarChart3Icon,
+  Sliders,
+  MessageSquare,
+  ChevronLeft,
+  Save,
+  Upload,
+  Image,
+  FileImage,
+  X,
+} from 'lucide-react';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { GitBranch } from 'lucide-react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import { useQuery, useMutation } from '@apollo/client'; 
+import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT, GET_PRODUCT_VERSIONS } from '@/app/(shell)/(main)/queries';
+import { v4 as uuidv4 } from 'uuid';
+ import { DELETE_SEGMENT } from './mutations';
 
 
+ const RESERVED_FIELDS = new Set([
+  'id', 'name', 'description', 'price', 'quantity', 'category', 'organizationId', 'createdById',
+  'primaryPhoto', 'imageGallery', 'ogImage', 'metadata', 'createdAt', 'updatedAt', 'designConcepts',
+  'aiSuggestions', 'Segment'
+]);
 
+interface FormField {
+  id: string;
+  type: string;
+  label: string;
+  options?: string[];
+  value?: string | number;
+}
 
 interface ProductData {
   id: string;
@@ -33,16 +87,149 @@ interface ProductData {
 
   [key: string]: any;
 }
+interface Segment {
+  id: string;
+  name: string;
+  slug: string;
+  post: { [key: string]: FormField };
+}
 
-const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn"; // Example product ID
+
+const initialAvailableFields: FormField[] = [
+  { id: 'name', type: 'text', label: 'Name' },
+  { id: 'description', type: 'textarea', label: 'Description' },
+  { id: 'price', type: 'number', label: 'Price' },
+  { id: 'quantity', type: 'number', label: 'Quantity' },
+  { id: 'category', type: 'select', label: 'Category', options: ['Electronics', 'Clothing', 'Food'] },
+];
+
+interface Version {
+  id: string;
+  versionNumber: number;
+  changes: string;
+  data: any;
+  createdAt: string;
+}
+
+function VersionControl({ 
+  productId, 
+  setProductData, 
+  previewData, 
+  primaryPhoto, 
+  setPrimaryPhoto, 
+  setMetadata,
+  setHasUnsavedChanges,
+  ogImage, 
+  setOgImage, 
+  imageGallery, 
+  setImageGallery 
+}: { 
+  productId: string; 
+  setProductData: any;
+  previewData: any; 
+  primaryPhoto: string | null; 
+  setPrimaryPhoto: any; 
+  setMetadata: any;
+  setHasUnsavedChanges: any;
+  ogImage: string | null; 
+  setOgImage: any; 
+  imageGallery: { id: string; url: string }[]; 
+  setImageGallery: any; 
+}) {
+  const [versions, setVersions] = useState<Version[]>([]);
+  const [activeVersion, setActiveVersion] = useState<string | null>(null);
+
+  const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
+    variables: { productId },
+  });
+
+  useEffect(() => {
+    if (data) {
+      const loadedProductVersions = data.ProductVersion;
+      setVersions(loadedProductVersions);
+
+      const storedVersionId = localStorage.getItem('productVersionId');
+      if (storedVersionId) {
+        const storedVersion = loadedProductVersions.find(
+          (version: { id: string }) => version.id === storedVersionId
+        );
+        if (storedVersion) {
+          setActiveVersion(storedVersion.id);
+          setProductData(storedVersion.data);
+          setPrimaryPhoto(storedVersion.data.primaryPhoto || null);
+        }
+      } else {
+        const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
+        setActiveVersion(latestVersion.id);
+        setProductData(latestVersion.data);
+        setPrimaryPhoto(latestVersion.data.primaryPhoto || null);
+      }
+    }
+  }, [data]);
+
+  const handleSwitchVersion = (version: Version) => {
+    setActiveVersion(version.id);
+    setProductData(version.data);
+    setPrimaryPhoto(version.data.primaryPhoto || null);
+    setOgImage(version.data.ogImage || null);
+    setImageGallery(version.data.imageGallery || []);
+    setMetadata({
+      title: version.data.metadata?.title || '',
+      description: version.data.metadata?.description || '',
+      keywords: version.data.metadata?.keywords || '',
+    });
+    setHasUnsavedChanges(true);
+    localStorage.setItem('productVersionId', version.id);
+  };
+  const reversedVersions = versions.slice().reverse(); // Create a copy and reverse
+
+  if (loading) return <div>Loading versions...</div>;
+  if (error) return <div>Error loading versions: {error.message}</div>;
+
+  return (
+    <Card className="mt-2 bg-white backdrop-blur-lg border-0">
+      <CardHeader>
+        <CardTitle className="text-xs">Version History</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[100px]">
+        {reversedVersions.map((version, index) => (
+            <div key={version.id} className="flex items-center justify-between py-1 border-b border-white last:border-b-0">
+              <div className="flex items-center space-x-1">
+                <Badge variant={version.id === activeVersion ? "default" : "secondary"} className="text-[10px]">v{version.versionNumber}</Badge>
+                <span className="text-[10px]">{new Date(version.createdAt).toLocaleString()}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" onClick={() => handleSwitchVersion(version)} className="h-5 w-5 p-0">
+                      <GitBranch className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-[10px]">Switch to this version</p>
+                  </TooltipContent>
+                </Tooltip>
+                <span className="text-[10px] text-muted-foreground">{version.changes}</span>
+              </div>
+            </div>
+          ))}
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}
+
+const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
+const SEGMENT_ID = 'unique-segment-id';
 
 const ImageUploader: React.FC = () => {
-  const { data, loading, error } = useQuery<{ Product: ProductData[] }>(GET_PRODUCT, {
-    variables: { productId: PRODUCT_ID },
-  });
-  
-  const productData = data?.Product[0];
-  
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  const [remainingFields, setRemainingFields] = useState<FormField[]>(initialAvailableFields);
+  const [segments, setSegments] = useState<Segment[]>([]); 
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [productData, setProductData] = useState<ProductData | null>(null);
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
@@ -51,24 +238,84 @@ const ImageUploader: React.FC = () => {
     description: '',
     keywords: '',
   });
+  
+  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+    variables: { productId: PRODUCT_ID }
+  });
 
+  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
+    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
+  });
   // Load product data into state
+  
+  
   useEffect(() => {
-    if (productData) {
-      setPrimaryPhoto(productData.primaryPhoto || localStorage.getItem('primaryPhoto'));
-      setOgImage(productData.ogImage || null);
+    // Reserved fields validation and dynamic check
+    // const reservedFields = RESERVED_FIELDS;
+
+    if (productDataQuery?.Product) {
+      const loadedProductData = productDataQuery.Product[0];
+
+     
+      
+
+
+      // Set the product data and fields
+      setProductData(loadedProductData);
+      setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
+      setOgImage(loadedProductData.ogImage || null);
       setMetadata({
-        title: productData.metadata?.title || '',
-        description: productData.metadata?.description || '',
-        keywords: productData.metadata?.keywords || '',
+        title: loadedProductData.metadata?.title || '',
+        description: loadedProductData.metadata?.description || '',
+        keywords: loadedProductData.metadata?.keywords || '',
       });
-      const initialGallery = productData.imageGallery?.map((url) => ({
+
+      // Initialize image gallery
+      const initialGallery = loadedProductData.imageGallery?.map((url: any) => ({
         id: url,
         url,
       })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
       setImageGallery(initialGallery);
+
+      // Initialize form fields from available fields and product data
+      const initialFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: loadedProductData[field.id] || '',
+      }));
+
+      // Filter out fields already populated in the form
+      const excludedFields = new Set(initialFields.map(field => field.id));
+      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+
+      setFormFields(initialFields);  // Set initialized fields
+      setRemainingFields(updatedRemainingFields);  // Set remaining available fields
     }
-  }, [productData]);
+
+    if (segmentsData) {
+      setSegments(segmentsData.Segment);
+
+      // Extract and flatten segment fields
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
+        Object.values(segment.post).map(field => ({
+          id: field.id || uuidv4(),  // Unique ID if missing
+          type: field.type || 'text',  // Default to 'text'
+          label: field.label || '',  // Default empty label
+          value: field.value || '',  // Default empty value
+          options: field.options || [],  // Default empty options array
+        }))
+      );
+
+      // Merge formFields and segmentFields, avoiding duplicates by id or label
+      const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
+        if (!acc.find(field => field.id === current.id || field.label === current.label)) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
+      setFormFields(mergedFields);  // Set merged fields in the form
+    }
+  }, [productDataQuery, segmentsData]);
 
   // Save gallery and primary photo to localStorage whenever they change
   useEffect(() => {
@@ -104,29 +351,13 @@ const ImageUploader: React.FC = () => {
     reorderedImages.splice(result.destination.index, 0, movedImage);
 
     setImageGallery(reorderedImages);
+    setHasUnsavedChanges(true);
   };
 
-  const handleMetadataChange = (key: string, value: string) => {
-    setMetadata((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      if (type === 'primary') {
-        setPrimaryPhoto(imageUrl);
-      } else if (type === 'og') {
-        setOgImage(imageUrl);
-      }
-    }
-  };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error loading product data: {error.message}</div>;
+  
+  if (loadingProduct || loadingSegments) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="w-full space-y-2">
@@ -134,43 +365,8 @@ const ImageUploader: React.FC = () => {
         <ResizablePanel defaultSize={70}>
           <Accordion type="single" collapsible className="w-full space-y-4">
             
-            {/* Primary Photo Section */}
-            <AccordionItem value="primary-photo">
-              <AccordionTrigger className="text-sm font-semibold">
-                Primary Photo
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex items-center space-x-2">
-                  {primaryPhoto ? (
-                    <div className="relative w-16 h-16">
-                      <img
-                        src={primaryPhoto}
-                        alt="Primary"
-                        className="w-full h-full object-cover rounded"
-                      />
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="absolute top-0 right-0 h-4 w-4 p-0"
-                        onClick={() => setPrimaryPhoto(null)}
-                      >
-                        <MinusIcon className="h-2 w-2" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => handleImageUpload(e, 'primary')}
-                        accept="image/*"
-                      />
-                      <Image className="h-6 w-6 text-muted-foreground" />
-                    </label>
-                  )}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+           
+           
 
             {/* Gallery Section */}
             <AccordionItem value="image-gallery">
@@ -231,96 +427,22 @@ const ImageUploader: React.FC = () => {
               </AccordionContent>
             </AccordionItem>
 
-            {/* OG Image Section */}
-            <AccordionItem value="og-image">
-              <AccordionTrigger className="text-sm font-semibold">
-                OG Image
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      {ogImage ? (
-                        <div className="w-16 h-16 relative">
-                          <img
-                            src={ogImage}
-                            alt="OG"
-                            className="w-full h-full object-cover rounded"
-                          />
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="absolute top-0 right-0 h-4 w-4 p-0"
-                            onClick={() => setOgImage(null)}
-                          >
-                            <MinusIcon className="h-2 w-2" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                          <input
-                            type="file"
-                            className="hidden"
-                            onChange={(e) => handleImageUpload(e, 'og')}
-                            accept="image/*"
-                          />
-                          <FileImage className="h-6 w-6 text-muted-foreground" />
-                        </label>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        Set Open Graph image for social sharing
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Metadata Section */}
-            <AccordionItem value="metadata">
-              <AccordionTrigger className="text-sm font-semibold">
-                Metadata
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="space-y-1">
-                      <Input
-                        placeholder="Meta Title"
-                        className="h-6 text-xs"
-                        value={metadata.title}
-                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('title', e.target.value)}
-                      />
-                      <Textarea
-                        placeholder="Meta Description"
-                        className="h-12 text-xs"
-                        value={metadata.description}
-                        onChange={(e) => handleMetadataChange('description', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Keywords (comma-separated)"
-                        className="h-6 text-xs"
-                        value={metadata.keywords}
-                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('keywords', e.target.value)}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
+          
+          
           </Accordion>
         </ResizablePanel>
 
         {/* Product Preview Section */}
-        <ResizableHandle />
-        <ResizablePanel defaultSize={30}>
-          <div className="p-4">
+        <ResizableHandle withHandle />
+
+<ResizablePanel className=" pl-2 flex flex-col gap-8" defaultSize={30}>
+ <div className="p-4">
             {productData && (
               <div>
                 <div className="relative w-full mb-4">
                   <div className="w-full" style={{ paddingBottom: '56.25%' }}>
                     <img
-                      src={primaryPhoto}
+                      src={primaryPhoto ?? ""}
                       alt="Primary"
                       className="absolute inset-0 w-full h-full object-cover rounded-lg"
                     />
@@ -334,6 +456,19 @@ const ImageUploader: React.FC = () => {
               </div>
             )}
           </div>
+          <VersionControl
+          productId={PRODUCT_ID}
+          setProductData={setProductData}
+          previewData={productData}
+          primaryPhoto={primaryPhoto}
+          setPrimaryPhoto={setPrimaryPhoto}
+          setMetadata={setMetadata}
+          setHasUnsavedChanges={setHasUnsavedChanges}
+          ogImage={ogImage}
+          setOgImage={setOgImage}
+          imageGallery={imageGallery}
+          setImageGallery={setImageGallery}
+        />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
@@ -341,3 +476,4 @@ const ImageUploader: React.FC = () => {
 };
 
 export default ImageUploader;
+

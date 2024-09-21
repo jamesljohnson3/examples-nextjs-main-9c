@@ -525,6 +525,8 @@ export default function EnhancedProductMoodboard() {
         localStorage.removeItem('primaryPhoto');
       }
     }, [primaryPhoto]);
+
+    
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
