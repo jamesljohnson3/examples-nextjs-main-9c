@@ -180,46 +180,65 @@ export default function EnhancedProductMoodboard() {
   // Merged logic for fetching and handling both product and segment fields
   useEffect(() => {
     if (productDataQuery?.Product) {
-      const product = productDataQuery.Product[0];
-
+      const loadedProductData = productDataQuery.Product[0];
+  
+      // Set the main product data fields
+      setProductData(loadedProductData);
+      setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
+      setOgImage(loadedProductData.ogImage || null);
+      setMetadata({
+        title: loadedProductData.metadata?.title || '',
+        description: loadedProductData.metadata?.description || '',
+        keywords: loadedProductData.metadata?.keywords || '',
+      });
+  
+      // Initialize the image gallery
+      const initialGallery = loadedProductData.imageGallery?.map((url: any) => ({
+        id: url,
+        url,
+      })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
+      setImageGallery(initialGallery);
+  
+      // Initialize form fields from available fields and product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
-        value: product[field.id] || ''
+        value: loadedProductData[field.id] || '',  // Populate the field value if it exists in product data
       }));
-
+  
+      // Exclude fields already in the form from the remaining available fields
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
-
-      setFormFields(initialFields);
-      setRemainingFields(updatedRemainingFields);
-      setProductData(product);
+  
+      setFormFields(initialFields);  // Set the initialized fields in the form
+      setRemainingFields(updatedRemainingFields);  // Set any remaining fields that weren't part of the form
     }
-
+  
     if (segmentsData) {
       setSegments(segmentsData.Segment);
-
-      // Flatten and extract form fields from segments
+  
+      // Extract and flatten fields from segment data (e.g., segment.post)
       const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
         Object.values(segment.post).map(field => ({
-          id: field.id || uuidv4(),
-          type: field.type || 'text',
-          label: field.label || '',
-          value: field.value || '',
-          options: field.options || []
+          id: field.id || uuidv4(),  // Generate a unique ID if missing
+          type: field.type || 'text',  // Default to 'text' if type is missing
+          label: field.label || '',  // Default to an empty label if missing
+          value: field.value || '',  // Default to an empty value if missing
+          options: field.options || [],  // Default to an empty array for options
         }))
       );
-
-      // Ensure no duplicate fields based on both id and label
+  
+      // Merge fields from both formFields and segmentFields, ensuring no duplicates by ID or label
       const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
         if (!acc.find(field => field.id === current.id || field.label === current.label)) {
           acc.push(current);
         }
         return acc;
       }, []);
-
-      setFormFields(mergedFields);
+  
+      setFormFields(mergedFields);  // Update the form fields with merged data
     }
-  }, [productDataQuery, segmentsData]);
+  }, [productDataQuery, segmentsData]);  // Dependencies include productDataQuery and segmentsData
+  
   
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
