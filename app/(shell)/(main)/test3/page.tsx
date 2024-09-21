@@ -112,6 +112,7 @@ function VersionControl({
     setHasUnsavedChanges(true);
     localStorage.setItem('productVersionId', version.id);
   };
+  const reversedVersions = versions.slice().reverse(); // Create a copy and reverse
 
   if (loading) return <div>Loading versions...</div>;
   if (error) return <div>Error loading versions: {error.message}</div>;
@@ -123,7 +124,7 @@ function VersionControl({
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[100px]">
-          {versions.map((version) => (
+        {reversedVersions.map((version, index) => (
             <div key={version.id} className="flex items-center justify-between py-1 border-b border-white last:border-b-0">
               <div className="flex items-center space-x-1">
                 <Badge variant={version.id === activeVersion ? "default" : "secondary"} className="text-[10px]">v{version.versionNumber}</Badge>
