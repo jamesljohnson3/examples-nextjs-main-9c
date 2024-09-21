@@ -210,7 +210,6 @@ export default function EnhancedProductMoodboard() {
     }
   }, [segmentsData]);
   
-
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
@@ -248,10 +247,6 @@ export default function EnhancedProductMoodboard() {
       setSegments(segmentsData.Segment);
     }
   }, [segmentsData]);
-  
-  
-
-
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
@@ -593,42 +588,14 @@ export default function EnhancedProductMoodboard() {
                             )}
                           </Droppable>
                         </DragDropContext>
-
-                        <h3 className="mt-4 text-xs font-semibold">Add Custom Field</h3>
-        <div className="space-y-1 max-w-sm"
-         id="custom-field-form">
-        
-                        
-                          <Input
-                                      className="text-xs h-7"
-                            value={customFieldLabel}
-                            onChange={(e) => setCustomFieldLabel(e.target.value)}
-                            placeholder="Field Label"
-                          />
-                          <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
-                            <SelectTrigger className="text-xs h-7">
-                              <SelectValue  placeholder="Field Type">{customFieldType}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem className="text-xs" value="text">Text</SelectItem>
-                              <SelectItem className="text-xs"  value="textarea">Textarea</SelectItem>
-                              <SelectItem className="text-xs"  value="number">Number</SelectItem>
-                              <SelectItem className="text-xs"  value="select">Select</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {customFieldType === 'select' && (
-                               <Input
-              placeholder="Enter options (comma-separated)"
-                              value={customFieldOptions}
-                              onChange={(e) => setCustomFieldOptions(e.target.value)}
-                              className="text-xs h-7"
-
-                             />
-                          )}
-                          <Button  className="text-xs h-7" size="sm" onClick={handleAddCustomField}>
-                            <PlusIcon className="mr-1" /> Add Field
-                          </Button>
-                        </div>
+                        <Button
+            size="sm"
+            className="h-6 text-center mx-auto items-center justify-center"
+            onClick={handleSave}
+          >
+            <Save className="h-3 w-3 mr-1" />
+            Save
+          </Button>
                       </CardContent>
                     </Card>
 
@@ -807,6 +774,52 @@ export default function EnhancedProductMoodboard() {
                 </Card>
               </AccordionContent>
             </AccordionItem>
+
+
+             {/* Add Custom Field */}
+             <AccordionItem value="primary-photo">
+              <AccordionTrigger className="text-sm font-semibold">
+              Custom Fields
+              </AccordionTrigger>
+              <AccordionContent>
+               
+              <h3 className="mt-4 text-xs font-semibold">Add Custom Field</h3>
+        <div className="space-y-1 max-w-sm"
+         id="custom-field-form">
+        
+                        
+                          <Input
+                                      className="text-xs h-7"
+                            value={customFieldLabel}
+                            onChange={(e) => setCustomFieldLabel(e.target.value)}
+                            placeholder="Field Label"
+                          />
+                          <Select value={customFieldType} onValueChange={(value) => setCustomFieldType(value)}>
+                            <SelectTrigger className="text-xs h-7">
+                              <SelectValue  placeholder="Field Type">{customFieldType}</SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem className="text-xs" value="text">Text</SelectItem>
+                              <SelectItem className="text-xs"  value="textarea">Textarea</SelectItem>
+                              <SelectItem className="text-xs"  value="number">Number</SelectItem>
+                              <SelectItem className="text-xs"  value="select">Select</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {customFieldType === 'select' && (
+                               <Input
+              placeholder="Enter options (comma-separated)"
+                              value={customFieldOptions}
+                              onChange={(e) => setCustomFieldOptions(e.target.value)}
+                              className="text-xs h-7"
+
+                             />
+                          )}
+                          <Button  className="text-xs h-7" size="sm" onClick={handleAddCustomField}>
+                            <PlusIcon className="mr-1" /> Add Field
+                          </Button>
+                        </div>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
         );
       case 'refine':
@@ -909,14 +922,7 @@ export default function EnhancedProductMoodboard() {
                     <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
                   </CardContent>
                 </Card>
-                <Button
-            size="sm"
-            className="h-6"
-            onClick={handleSave}
-          >
-            <Save className="h-3 w-3 mr-1" />
-            Save
-          </Button>
+        
           <Button
             size="sm"
             className="h-6"
