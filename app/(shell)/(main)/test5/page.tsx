@@ -307,7 +307,7 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="flex flex-row h-screen">
-      <ResizablePanelGroup>
+      <ResizablePanelGroup direction={'horizontal'}>
         <ResizablePanel minSize={20}>
           <Tabs defaultValue="form">
             <TabsList className="m-2 w-full grid grid-cols-2">
