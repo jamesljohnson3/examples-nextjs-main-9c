@@ -10,7 +10,7 @@ import '@uppy/drag-drop/dist/style.css';
 import { RadioGroup } from '@headlessui/react';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Button } from '@/app/components/Button';
+import { Button } from '@/components/ui/button';
 
 const CDNURL = "https://hjhncoqotxlxpvrljjgz.supabase.co/storage/v1/object/public/images/";
 
