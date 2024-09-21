@@ -13,18 +13,9 @@ const CDNURL = "https://hjhncoqotxlxpvrljjgz.supabase.co/storage/v1/object/publi
 const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
 const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
 
-const deliveryMethods = [
-  { id: 1, title: 'Standard', turnaround: '4–10 business days', price: '$5.00' },
-  { id: 2, title: 'Express', turnaround: '2–5 business days', price: '$16.00' },
-];
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
-
-// Initialize Uppy instance outside the component
+// Initialize Uppy outside the component
 const uppyInstance = new Uppy({
-  autoProceed: true,
+  autoProceed: false, // Set to false so you can control when the upload starts
 }).use(Transloadit, {
   params: {
     auth: { key: TRANSLOADIT_KEY },
@@ -32,133 +23,103 @@ const uppyInstance = new Uppy({
   },
 });
 
-// Event listener for Uppy complete event
+// Custom Event Listener for Uppy
+uppyInstance.on('file-added', (file) => {
+  console.log('File added:', file);
+});
+
+uppyInstance.on('upload', (data) => {
+  console.log('Upload started:', data);
+});
+
+uppyInstance.on('upload-success', (file, response) => {
+  console.log('Upload success:', file, response);
+});
+
 uppyInstance.on('complete', (result) => {
-  console.log('Upload complete! We\'ve uploaded these files: ', result.successful);
-  if (result.successful && result.successful.length > 0) {
-    const { uploadURL } = result.successful[0];
-    if (uploadURL) {
-      // You can now use the uploadURL for whatever you need
-      console.log('File uploaded to: ', uploadURL);
-    }
-  }
+  console.log('Upload complete! Files:', result.successful);
 });
 
-uppyInstance.on('transloadit:complete', (assembly) => {
-  const files = assembly.results[':original'];
-  console.log('Uploaded Files:', files);
-});
+const CustomUploadUI = () => {
+  const [files, setFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-uppyInstance.on('transloadit:error', (error) => {
-  console.error(error);
-});
-
-const Upload = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
-  const [nameOnCard, setNameOnCard] = useState('');
-  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState();
-  const [images, setImages] = useState([]);
-
-  // Extract URL params
-  const urlParams = new URLSearchParams(window.location.search);
-  const role = urlParams.get('role');
-  const project = urlParams.get('projects');
-  const campaign = urlParams.get('campaign');
-  const assetId = urlParams.get('assetId');
-
-  console.log('Role:', role);
-  console.log('Project:', project);
-  console.log('Campaign:', campaign);
-
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Update uploadedFiles state with the files
-      const files = uppyInstance.getFiles();
-      setUploadedFiles(files);
-
-      const response = await fetch('api/my-api-endpoint', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          result: files,
-          assetId,
-          name: nameOnCard,
-          role,
-          project,
-          campaign,
-          deliverymethod: selectedDeliveryMethod,
-          event_type: 'update',
-          userId: 'teestig',
-          type: 'collections',
-        }),
+  // Handle file upload event
+  const handleFileInput = (event) => {
+    const selectedFiles = event.target.files;
+    for (let i = 0; i < selectedFiles.length; i++) {
+      uppyInstance.addFile({
+        name: selectedFiles[i].name,
+        type: selectedFiles[i].type,
+        data: selectedFiles[i],
       });
-
-      if (response.ok) {
-        console.log('Data posted to API successfully');
-        // Reload after 2.5 seconds to avoid premature reload
-        setTimeout(() => {
-          window.location.reload();
-        }, 2500);
-      } else {
-        throw new Error('Error posting data to API');
-      }
-    } catch (error) {
-      console.error(error);
     }
+    setFiles(uppyInstance.getFiles());
+  };
+
+  // Start uploading files
+  const handleUpload = () => {
+    setIsUploading(true);
+    uppyInstance.upload().then((result) => {
+      if (result.failed.length > 0) {
+        console.error('Failed uploads:', result.failed);
+      } else {
+        console.log('Upload successful:', result.successful);
+      }
+      setIsUploading(false);
+    });
+  };
+
+  // Cancel all uploads
+  const handleCancel = () => {
+    uppyInstance.cancelAll();
+    setFiles([]);
   };
 
   return (
-    <>
-      <div className="p-10">
-        <DragDrop uppy={uppyInstance} />
-        <form className="needs-validation" onSubmit={handleFormSubmit}>
-          <div className="transloadit-drop-area">
-            <div id="upload-progress-bar"></div>
-          </div>
-
-          <div className="mt-10 border-t border-gray-200 pt-10">
-            <div className="col-span-4">
-              <label htmlFor="name-on-card" className="block text-sm font-medium text-gray-700">
-                Enter new title
-              </label>
-              <div className="mt-1">
-                <input
-                  type="text"
-                  id="name"
-                  onChange={(e) => setNameOnCard(e.currentTarget.value)}
-                  name="name-on-card"
-                  className="mt-2 block w-full rounded-xl border-2 border-muted-3 bg-transparent px-4 py-2.5 font-semibold text-heading placeholder:text-text/50 focus:border-primary focus:outline-none focus:ring-0 sm:text-sm"
-                />
-              </div>
-            </div>
-            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-              <Button type="submit">Add Collection</Button>
-
-              <button
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                type="submit"
-              >
-                Distribute
-              </button>
-
-              <a
-                href="https://spaces.unlimitpotential.com/edit"
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Cancel
-              </a>
-            </div>
-          </div>
-        </form>
-        <StatusBar uppy={uppyInstance} />
+    <div className="upload-container">
+      {/* Custom File Input */}
+      <div className="custom-file-input">
+        <label htmlFor="file-input" className="upload-label">
+          Choose files
+        </label>
+        <input
+          id="file-input"
+          type="file"
+          multiple
+          onChange={handleFileInput}
+          className="hidden"
+        />
       </div>
-    </>
+
+      {/* Display Selected Files */}
+      <div className="file-list">
+        {files.map((file) => (
+          <div key={file.id} className="file-item">
+            <span>{file.name}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Custom Upload Buttons */}
+      <div className="upload-actions">
+        <button onClick={handleUpload} disabled={isUploading}>
+          {isUploading ? 'Uploading...' : 'Start Upload'}
+        </button>
+        <button onClick={handleCancel} disabled={files.length === 0}>
+          Cancel Upload
+        </button>
+      </div>
+
+      {/* Custom Progress Bar */}
+      {isUploading && (
+        <div className="upload-progress">
+          <progress value={progress} max="100"></progress>
+        </div>
+      )}
+    </div>
   );
 };
 
-export default Upload;
+export default CustomUploadUI;
