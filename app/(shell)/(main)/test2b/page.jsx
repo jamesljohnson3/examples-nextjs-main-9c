@@ -93,8 +93,8 @@ const Upload = () => {
   
 
 
-  const promise = () => new Promise<ToastData>((resolve) => setTimeout(() => resolve({ name: 'Added Images' }), 2000));
 
+  
   const handleFormSubmit = async (e) => {
     e.preventDefault();
   
@@ -183,7 +183,9 @@ type="submit">Distribute</button>  <a      href="https://spaces.unlimitpotential
           
              </form>
       <StatusBar uppy={uppy} />
-      <form>    <input type="file" accept="image/png, image/jpeg" onChange={(e) => uploadImage(e)}/>
+      <form>   
+        
+
 </form>
 
      </div>
