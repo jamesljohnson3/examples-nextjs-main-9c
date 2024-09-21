@@ -7,8 +7,6 @@ import Transloadit from '@uppy/transloadit';
 import '@uppy/core/dist/style.css';
 import '@uppy/status-bar/dist/style.css';
 import '@uppy/drag-drop/dist/style.css';
-import { RadioGroup } from '@headlessui/react';
-import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 
 const CDNURL = "https://hjhncoqotxlxpvrljjgz.supabase.co/storage/v1/object/public/images/";
@@ -36,12 +34,18 @@ const uppyInstance = new Uppy({
 
 // Event listener for Uppy complete event
 uppyInstance.on('complete', (result) => {
-  console.log(result);
+  console.log('Upload complete! We\'ve uploaded these files: ', result.successful);
+  if (result.successful && result.successful.length > 0) {
+    const { uploadURL } = result.successful[0];
+    if (uploadURL) {
+      // You can now use the uploadURL for whatever you need
+      console.log('File uploaded to: ', uploadURL);
+    }
+  }
 });
 
 uppyInstance.on('transloadit:complete', (assembly) => {
   const files = assembly.results[':original'];
-  // Handle the uploaded files (in state or otherwise)
   console.log('Uploaded Files:', files);
 });
 
