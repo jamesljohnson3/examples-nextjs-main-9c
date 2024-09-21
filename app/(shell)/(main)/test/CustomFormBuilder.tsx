@@ -120,6 +120,7 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
 
   const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
@@ -1007,11 +1008,12 @@ export default function EnhancedProductMoodboard() {
               <div>
                 <div className="relative w-full mb-4">
                   <div className="w-full" style={{ paddingBottom: '56.25%' }}>
-                    <img
-                      src={primaryPhoto}
-                      alt="Primary"
-                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
-                    />
+                  <img
+  src={primaryPhoto || '/placeholder.svg'} // Ensure fallback is handled
+  alt="Primary"
+  className="absolute inset-0 w-full h-full object-cover rounded-lg"
+/>
+
                   </div>
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">{productData.name}</h3>
