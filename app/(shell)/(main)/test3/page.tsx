@@ -465,8 +465,10 @@ const ImageUploader: React.FC = () => {
               </div>
             )}
           </div>
+
+          <VersionControl productId={PRODUCT_ID} setProductData={setProductData} previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} />
+
         </ResizablePanel>
-        <VersionControl productId={PRODUCT_ID} setProductData={setProductData} previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} />
       </ResizablePanelGroup>
     </div>
   );
