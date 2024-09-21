@@ -49,7 +49,7 @@ import { Badge } from "@/components/ui/badge";
 import { GitBranch } from 'lucide-react';
 import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client'; 
-import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT } from '@/app/(shell)/(main)/queries';
+import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT, GET_PRODUCT_VERSIONS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
  import { DELETE_SEGMENT } from './mutations';
 
@@ -108,16 +108,136 @@ const initialAvailableFields: FormField[] = [
   { id: 'category', type: 'select', label: 'Category', options: ['Electronics', 'Clothing', 'Food'] },
 ];
 
-const sampleProductData: ProductData = {
-  id: 'PROD-12345',
-  name: 'Wireless Earbuds',
-  description: 'High-quality wireless earbuds with noise cancellation',
-  price: 99.99,
-  quantity: 500,
-  category: 'Electronics',
-};
+interface Version {
+  id: string;
+  versionNumber: number;
+  changes: string;
+  data: any;
+  createdAt: string;
+}
 
+function VersionControl({ productId, setProductData, previewData }: { productId: string, setProductData: any, previewData: any }) {
+  const [versions, setVersions] = useState<Version[]>([]);
+  const [activeVersion, setActiveVersion] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
+    variables: { productId },
+  });
+
+  const [saveProductVersion] = useMutation(UPDATE_PRODUCT_VERSION, {
+    onCompleted: (data: any) => {
+      console.log('Version saved:', data);
+      fetchVersions();
+      setHasUnsavedChanges(false);
+    },
+    onError: (error: any) => {
+      console.error('Error saving version:', error);
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      const storedVersionId = localStorage.getItem('productVersionId');
+      const loadedProductVersions = data.ProductVersion;
+      setVersions(loadedProductVersions);
+
+      // Set the active version based on localStorage or the latest version
+      if (storedVersionId) {
+        const storedVersion = loadedProductVersions.find((version: { id: string; }) => version.id === storedVersionId);
+        if (storedVersion) {
+          setActiveVersion(storedVersion.id);
+          setProductData(storedVersion.data);
+        }
+      } else {
+        const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
+        setActiveVersion(latestVersion.id);
+        setProductData(latestVersion.data);
+      }
+    }
+  }, [data]);
+
+  const fetchVersions = () => {
+    // Fetch versions again if needed or handle via refetch
+  };
+
+  const handleSave = () => {
+    console.log('Saving changes...');
+    console.log("Form Data:", previewData);
+    console.log("Custom Fields:", versions);
+
+    const newVersion: Version = {
+      id: uuidv4(),
+      versionNumber: versions.length + 1,
+      changes: 'Updated product information',
+      data: previewData,
+      createdAt: new Date().toISOString(),
+    };
+
+    saveProductVersion({
+      variables: {
+        productId,
+        versionNumber: newVersion.versionNumber,
+        changes: newVersion.changes,
+        data: JSON.stringify(previewData),
+      },
+    });
+
+    setVersions([...versions, newVersion]);
+    setActiveVersion(newVersion.id);
+    setHasUnsavedChanges(false);
+
+    // Update the active version in localStorage
+    localStorage.setItem('productVersionId', newVersion.id);
+  };
+
+  const handleSwitchVersion = (version: Version) => {
+    setActiveVersion(version.id);
+    setProductData(version.data);
+
+    // Store the selected version ID in localStorage
+    localStorage.setItem('productVersionId', version.id);
+  };
+
+  if (loading) return <div>Loading versions...</div>;
+  if (error) return <div>Error loading versions: {error.message}</div>;
+
+  return (
+    <Card className="mt-2 bg-white backdrop-blur-lg border-0">
+      <CardHeader>
+        <CardTitle className="text-xs">Version History</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[100px]">
+          {versions.map((version) => (
+            <div key={version.id} className="flex items-center justify-between py-1 border-b border-white last:border-b-0">
+              <div className="flex items-center space-x-1">
+                <Badge variant={version.id === activeVersion ? "default" : "secondary"} className="text-[10px]">v{version.versionNumber}</Badge>
+                <span className="text-[10px]">{new Date(version.createdAt).toLocaleString()}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" onClick={() => handleSwitchVersion(version)} className="h-5 w-5 p-0">
+                      <GitBranch className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-[10px]">Switch to this version</p>
+                  </TooltipContent>
+                </Tooltip>
+                <span className="text-[10px] text-muted-foreground">{version.changes}</span>
+              </div>
+            </div>
+          ))}
+        </ScrollArea>
+        <Button variant="outline" onClick={handleSave} disabled={!hasUnsavedChanges}>
+          Save New Version
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 
 export default function EnhancedProductMoodboard() {
@@ -871,7 +991,7 @@ export default function EnhancedProductMoodboard() {
         </ResizablePanel>
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={20}>
+        <ResizablePanel className="flex flex-col gap-8" defaultSize={30}>
         <Card>
                   <CardContent>
                     <div className="flex items-center space-x-4">
@@ -907,7 +1027,8 @@ export default function EnhancedProductMoodboard() {
                     <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
                   </CardContent>
                 </Card>
-        
+                <VersionControl productId={PRODUCT_ID} setProductData={setProductData} previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} />
+
           <Button
             size="sm"
             className="h-6"
