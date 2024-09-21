@@ -104,23 +104,41 @@ const ProductPage: React.FC = () => {
   useEffect(() => {
     if (productDataQuery?.Product) {
       const product = productDataQuery.Product[0];
-
-      // Initialize formFields with fetched data
+  
+      // Initialize formFields with fetched product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: product[field.id] || ''
       }));
-
-      setFormFields(initialFields);
-
+  
       // Exclude these fields from remainingFields
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
-
+  
+      setFormFields(initialFields);
       setRemainingFields(updatedRemainingFields);
       setProductData(product);
     }
   }, [productDataQuery]);
+  
+  useEffect(() => {
+    if (segmentsData) {
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
+        Object.values(segment.post).map(field => ({
+          id: field.id || uuidv4(), // Ensure each field has a unique ID
+          type: field.type || 'text',
+          label: field.label || '',
+          value: field.value || '',
+          options: field.options || []
+        }))
+      );
+  
+      // Merge segment fields with existing form fields
+      setFormFields(prevFields => [...prevFields, ...segmentFields]);
+      setSegments(segmentsData.Segment);
+    }
+  }, [segmentsData]);
+  
 
   useEffect(() => {
     if (segmentsData) {

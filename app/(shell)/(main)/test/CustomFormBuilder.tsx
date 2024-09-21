@@ -172,23 +172,44 @@ export default function EnhancedProductMoodboard() {
   const [saveProduct] = useMutation(SAVE_PRODUCT);
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
-    // Load product data into state
-    useEffect(() => {
-      if (productData) {
-        setPrimaryPhoto(productData.primaryPhoto || localStorage.getItem('primaryPhoto'));
-        setOgImage(productData.ogImage || null);
-        setMetadata({
-          title: productData.metadata?.title || '',
-          description: productData.metadata?.description || '',
-          keywords: productData.metadata?.keywords || '',
-        });
-        const initialGallery = productData.imageGallery?.map((url) => ({
-          id: url,
-          url,
-        })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
-        setImageGallery(initialGallery);
-      }
-    }, [productData]);
+  useEffect(() => {
+    if (productDataQuery?.Product) {
+      const product = productDataQuery.Product[0];
+  
+      // Initialize formFields with fetched product data
+      const initialFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: product[field.id] || ''
+      }));
+  
+      // Exclude these fields from remainingFields
+      const excludedFields = new Set(initialFields.map(field => field.id));
+      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+  
+      setFormFields(initialFields);
+      setRemainingFields(updatedRemainingFields);
+      setProductData(product);
+    }
+  }, [productDataQuery]);
+  
+  useEffect(() => {
+    if (segmentsData) {
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
+        Object.values(segment.post).map(field => ({
+          id: field.id || uuidv4(), // Ensure each field has a unique ID
+          type: field.type || 'text',
+          label: field.label || '',
+          value: field.value || '',
+          options: field.options || []
+        }))
+      );
+  
+      // Merge segment fields with existing form fields
+      setFormFields(prevFields => [...prevFields, ...segmentFields]);
+      setSegments(segmentsData.Segment);
+    }
+  }, [segmentsData]);
+  
 
   useEffect(() => {
     if (productDataQuery?.Product) {
