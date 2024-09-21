@@ -1,21 +1,24 @@
 
 "use client"
 import React, { useEffect, useState } from 'react';
-import Uppy from '@uppy/core';
-import { StatusBar, DragDrop } from '@uppy/react';
+import Uppy, { UploadedUppyFile, UppyFile } from '@uppy/core';
+import { DragDrop, StatusBar } from '@uppy/react';
 import Transloadit from '@uppy/transloadit';
 import '@uppy/core/dist/style.css';
 import '@uppy/status-bar/dist/style.css';
 import '@uppy/drag-drop/dist/style.css';
 import { Button } from '@/components/ui/button';
 
-const CDNURL = "https://hjhncoqotxlxpvrljjgz.supabase.co/storage/v1/object/public/images/";
 const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
 const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
 
-// Initialize Uppy outside the component
+// Initialize Uppy with restrictions and autoProceed set to true
 const uppyInstance = new Uppy({
-  autoProceed: false, // Set to false so you can control when the upload starts
+  autoProceed: true, // Automatically upload files
+  restrictions: {
+    maxNumberOfFiles: 20, // Restrict to max 20 files
+    allowedFileTypes: ['image/*'], // Only allow images
+  },
 }).use(Transloadit, {
   params: {
     auth: { key: TRANSLOADIT_KEY },
@@ -24,7 +27,7 @@ const uppyInstance = new Uppy({
 });
 
 // Custom Event Listener for Uppy
-uppyInstance.on('file-added', (file) => {
+uppyInstance.on('file-added', (file: UppyFile) => {
   console.log('File added:', file);
 });
 
@@ -35,40 +38,40 @@ uppyInstance.on('upload', (data) => {
 uppyInstance.on('upload-success', (file, response) => {
   console.log('Upload success:', file, response);
 });
-
 uppyInstance.on('complete', (result) => {
   console.log('Upload complete! Files:', result.successful);
 });
 
-const CustomUploadUI = () => {
-  const [files, setFiles] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+const CustomUploadUI: React.FC = () => {
+  const [files, setFiles] = useState<UppyFile[]>([]);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
 
   // Handle file upload event
-  const handleFileInput = (event) => {
+  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
-    for (let i = 0; i < selectedFiles.length; i++) {
-      uppyInstance.addFile({
-        name: selectedFiles[i].name,
-        type: selectedFiles[i].type,
-        data: selectedFiles[i],
-      });
+    if (selectedFiles) {
+      for (let i = 0; i < selectedFiles.length; i++) {
+        uppyInstance.addFile({
+          name: selectedFiles[i].name,
+          type: selectedFiles[i].type,
+          data: selectedFiles[i],
+        });
+      }
+      setFiles(uppyInstance.getFiles());
     }
-    setFiles(uppyInstance.getFiles());
   };
 
   // Start uploading files
-  const handleUpload = () => {
+  const handleUpload = async () => {
     setIsUploading(true);
-    uppyInstance.upload().then((result) => {
-      if (result.failed.length > 0) {
-        console.error('Failed uploads:', result.failed);
-      } else {
-        console.log('Upload successful:', result.successful);
-      }
-      setIsUploading(false);
-    });
+    const result = await uppyInstance.upload();
+    if (result.failed.length > 0) {
+      console.error('Failed uploads:', result.failed);
+    } else {
+      console.log('Upload successful:', result.successful);
+    }
+    setIsUploading(false);
   };
 
   // Cancel all uploads

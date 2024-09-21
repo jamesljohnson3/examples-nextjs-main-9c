@@ -156,10 +156,7 @@ export const GET_DESIGN_ELEMENT_VERSIONS = gql`
       versionNumber
       elementData
       screenshot
-      createdBy {
-        id
-        username
-      }
+      createdById
       createdAt
     }
   }
