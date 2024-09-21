@@ -711,14 +711,14 @@ export default function EnhancedProductMoodboard() {
                             )}
                           </Droppable>
                         </DragDropContext>
-                        <Button
-            size="sm"
-            className="h-6 text-center mx-auto items-center justify-center"
-            onClick={handleSave}
-          >
-            <Save className="h-3 w-3 mr-1" />
+                        {hasUnsavedChanges && <div className="flex items-center space-x-4">
+          <Button size="sm" onClick={handleSave}>
+            <Save className="h-4 w-4 mr-2" />
             Save
           </Button>
+         
+        </div>}
+
                       </CardContent>
                     </Card>
 
