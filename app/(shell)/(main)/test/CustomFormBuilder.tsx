@@ -648,7 +648,7 @@ export default function EnhancedProductMoodboard() {
                             {(provided) => (
                               <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-1">
                                  {loading && <p>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+
       {/* Render your form and segment data here */}
                                 {formFields.map((field, index) => (
                                   <Draggable key={field.id} draggableId={field.id} index={index}>
