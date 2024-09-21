@@ -853,25 +853,10 @@ export default function EnhancedProductMoodboard() {
           {renderTabContent()}
           <div className="flex items-center space-x-2">
         
-          <Button
-            size="sm"
-            className="h-6"
-            onClick={handleSave}
-          >
-            <Save className="h-3 w-3 mr-1" />
-            Save
-          </Button>
-          <Button
-            size="sm"
-            className="h-6"
-            onClick={handlePublish}
-          >
-            <Upload className="h-3 w-3 mr-1" />
-            Publish
-          </Button>
+         
         </div>
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={20}>
         <Card>
@@ -896,7 +881,7 @@ export default function EnhancedProductMoodboard() {
                   </div>
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">{productData.name}</h3>
-                <p className="text-sm text-muted">{productData.description}</p>
+                <p className="text-sm">{productData.description}</p>
                 <p className="text-sm">Category: {productData.category}</p>
                 <p className="text-sm">Price: ${productData.price?.toFixed(2)}</p>
                 <p className="text-sm">Quantity: {productData.quantity}</p>
@@ -909,6 +894,22 @@ export default function EnhancedProductMoodboard() {
                     <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleDeleteSegment(SEGMENT_ID)}>Delete Segment</button>
                   </CardContent>
                 </Card>
+                <Button
+            size="sm"
+            className="h-6"
+            onClick={handleSave}
+          >
+            <Save className="h-3 w-3 mr-1" />
+            Save
+          </Button>
+          <Button
+            size="sm"
+            className="h-6"
+            onClick={handlePublish}
+          >
+            <Upload className="h-3 w-3 mr-1" />
+            Publish
+          </Button>
         </ResizablePanel>
       </ResizablePanelGroup>
 

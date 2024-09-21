@@ -149,20 +149,27 @@ const ProductPage: React.FC = () => {
   
 
 
-
-  const handleInputChange = useCallback((fieldId: string, value: string | number) => {
+const handleInputChange = useCallback(
+  (fieldId: string, value: string | number) => {
     if (productData) {
-      const parsedValue = (typeof value === 'string' && isNaN(Number(value))) ? value : parseFloat(value as string);
-      setProductData(prev => ({
+      const parsedValue =
+        typeof value === "string" && isNaN(Number(value)) ? value : parseFloat(value as string);
+      setProductData((prev) => ({
         ...prev!,
-        [fieldId]: parsedValue
+        [fieldId]: parsedValue,
       }));
     }
-    setFormFields(prev =>
-      prev.map(field => (field.id === fieldId ? { ...field, value } : field))
+
+    setFormFields((prev) =>
+      prev.map((field) =>
+        field.id === fieldId ? { ...field, value: value } : field
+      )
     );
     setHasUnsavedChanges(true);
-  }, [productData, formFields]);
+  },
+  [productData]
+);
+
 
   const handleAddField = (newField: FormField) => {
     setFormFields(prev => [...prev, newField]);
@@ -281,39 +288,46 @@ const ProductPage: React.FC = () => {
       alert('Error publishing segment.');
     }
   };
-
   const handleAddCustomField = () => {
     if (!customFieldLabel.trim()) {
-      alert('Field label cannot be empty.');
+      alert("Field label cannot be empty.");
       return;
     }
-    const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, '_');
-    if (RESERVED_FIELDS.has(newFieldId)) {
-      alert('Cannot use reserved field ID.');
+    
+    const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, "_");
+    if (RESERVED_FIELDS.has(newFieldId.toLowerCase())) { // Case-insensitive check
+      alert("Cannot use reserved field ID.");
       return;
     }
-    if (formFields.find(field => field.id === newFieldId)) {
-      alert('Field with this label already exists.');
+  
+    if (formFields.find((field) => field.id === newFieldId)) {
+      alert("Field with this label already exists.");
       return;
     }
-
-    const newField: FormField = {
+  
+    const newField = {
       id: newFieldId,
       type: customFieldType,
       label: customFieldLabel,
-      options: customFieldType === 'select' ? customFieldOptions.split(',').map(opt => opt.trim()) : undefined,
+      options: customFieldType === "select" ? customFieldOptions.split(",").map((opt) => opt.trim()) : undefined,
     };
-
+  
     handleAddField(newField);
-
-    setCustomFieldLabel('');
-    setCustomFieldType('text');
-    setCustomFieldOptions('');
+  
+    setCustomFieldLabel("");
+    setCustomFieldType("text");
+    setCustomFieldOptions("");
   };
+  
   
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
+  
+  if (!productData || !formFields.length) {
+    return <div>No product data available.</div>;
+  }
+  
 
   if (deleteLoading) return <p>Deleting...</p>;
   if (deleteError) return <p>Error deleting segment.</p>;
