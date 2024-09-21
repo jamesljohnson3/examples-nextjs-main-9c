@@ -140,9 +140,8 @@ const Upload = () => {
       console.error(error);
     }
   };
-  useEffect(() => {
-    getImages();
-  }, [uploadedFiles]);
+
+
   return (
     <>
     <div className="p-10">
