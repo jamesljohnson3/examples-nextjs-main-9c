@@ -212,7 +212,7 @@ const ImageUploader = () => {
               {provided.placeholder}
               {/* Add new image */}
               <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                <input type="file" className="hidden" onChange={handleGalleryImageUpload} accept="image/*" multiple />
+                <input type="file" className="hidden" onChange={handleFileInput} accept="image/*" multiple />
                 <PlusIcon className="h-6 w-6 text-muted-foreground" />
               </label>
             </div>
