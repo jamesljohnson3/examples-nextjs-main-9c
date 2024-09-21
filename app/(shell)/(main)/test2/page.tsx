@@ -237,13 +237,6 @@ const SEGMENT_ID = 'unique-segment-id';
 
 const ImageUploader: React.FC = () => {
   
-  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
-    variables: { productId: PRODUCT_ID }
-  });
-
-  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
-    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
-  });
 
 
 
@@ -266,6 +259,13 @@ const ImageUploader: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'form' | 'refine' | 'analytics'>(
     'form'
   );
+  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+    variables: { productId: PRODUCT_ID }
+  });
+
+  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
+    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
+  });
 
   const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
     onCompleted: () => alert('Segment deleted successfully!'),
