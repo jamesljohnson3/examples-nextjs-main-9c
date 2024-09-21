@@ -43,7 +43,29 @@ interface Version {
   createdAt: string;
 }
 
-function VersionControl({ productId, setProductData, previewData, primaryPhoto, setPrimaryPhoto }: { productId: string, setProductData: any, previewData: any, primaryPhoto: string | null, setPrimaryPhoto: any }) {
+function VersionControl({ 
+  productId, 
+  setProductData, 
+  previewData, 
+  primaryPhoto, 
+  setPrimaryPhoto, 
+  setMetadata,
+  ogImage, 
+  setOgImage, 
+  imageGallery, 
+  setImageGallery 
+}: { 
+  productId: string; 
+  setProductData: any; 
+  previewData: any; 
+  primaryPhoto: string | null; 
+  setPrimaryPhoto: any; 
+  setMetadata: any;
+  ogImage: string | null; 
+  setOgImage: any; 
+  imageGallery: { id: string; url: string }[]; 
+  setImageGallery: any; 
+}) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -124,8 +146,17 @@ useEffect(() => {
     setActiveVersion(version.id);
     setProductData(version.data);
     
-    // Update the primary photo state in the parent
-    setPrimaryPhoto(version.data.primaryPhoto || null); // Ensure primaryPhoto is updated
+    // Update primary photo, ogImage, imageGallery, and metadata states in the parent
+    setPrimaryPhoto(version.data.primaryPhoto || null);
+    setOgImage(version.data.ogImage || null);
+    setImageGallery(version.data.imageGallery || []);
+    
+    setMetadata({
+        title: version.data.metadata?.title || '',
+        description: version.data.metadata?.description || '',
+        keywords: version.data.metadata?.keywords || '',
+    });
+
     localStorage.setItem('productVersionId', version.id);
 };
 
@@ -476,9 +507,15 @@ const ImageUploader: React.FC = () => {
   productId={PRODUCT_ID} 
   setProductData={setProductData} 
   previewData={{ primaryPhoto, imageGallery, ogImage, metadata }} 
-  primaryPhoto={primaryPhoto} // Pass the primaryPhoto state
-  setPrimaryPhoto={setPrimaryPhoto} // Pass the function to update it
+  primaryPhoto={primaryPhoto} 
+  setPrimaryPhoto={setPrimaryPhoto} 
+  ogImage={ogImage} // Pass the ogImage state
+  setOgImage={setOgImage} // Pass the function to update it
+  imageGallery={imageGallery} // Pass the imageGallery state
+  setImageGallery={setImageGallery} // Pass the function to update it
+  setMetadata={setMetadata}
 />
+
 
         </ResizablePanel>
       </ResizablePanelGroup>
