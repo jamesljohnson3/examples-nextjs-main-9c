@@ -1,343 +1,436 @@
 'use client'
-
-import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { Button } from "@/components/ui/button";
-import { PlusIcon, MinusIcon, Image, FileImage } from 'lucide-react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
+import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Card, CardContent } from "@/components/ui/card";
-import { GET_PRODUCT } from '@/app/(shell)/(main)/queries';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { MinusIcon, GripVertical, PlusIcon } from 'lucide-react';
+import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT } from '@/app/(shell)/(main)/queries';
+import { v4 as uuidv4 } from 'uuid';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { DELETE_SEGMENT } from './mutations';
 
+const RESERVED_FIELDS = new Set([
+  'id', 'name', 'description', 'price', 'quantity', 'category', 'organizationId', 'createdById',
+  'primaryPhoto', 'imageGallery', 'ogImage', 'metadata', 'createdAt', 'updatedAt', 'designConcepts',
+  'aiSuggestions', 'Segment'
+]);
 
-
+interface FormField {
+  id: string;
+  type: string;
+  label: string;
+  options?: string[];
+  value?: string | number;
+}
 
 interface ProductData {
   id: string;
   name: string;
   description: string;
+  price: number;
   quantity: number;
   category: string;
-  price?: number;
-  primaryPhoto?: string;
-  imageGallery?: string[];
-  ogImage?: string;
-  metadata?: {
-    title?: string;
-    description?: string;
-    keywords?: string;
-  };
-
   [key: string]: any;
 }
 
-const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn"; // Example product ID
+interface Segment {
+  id: string;
+  name: string;
+  slug: string;
+  post: { [key: string]: FormField };
+}
 
-const ImageUploader: React.FC = () => {
-  const { data, loading, error } = useQuery<{ Product: ProductData[] }>(GET_PRODUCT, {
-    variables: { productId: PRODUCT_ID },
-  });
-  
-  const productData = data?.Product[0];
-  
-  const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
-  const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
-  const [ogImage, setOgImage] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState({
-    title: '',
-    description: '',
-    keywords: '',
-  });
+const initialAvailableFields: FormField[] = [
+  { id: 'name', type: 'text', label: 'Name' },
+  { id: 'description', type: 'textarea', label: 'Description' },
+  { id: 'price', type: 'number', label: 'Price' },
+  { id: 'quantity', type: 'number', label: 'Quantity' },
+  { id: 'category', type: 'select', label: 'Category', options: ['Electronics', 'Clothing', 'Food'] },
+];
 
-  // Load product data into state
-  useEffect(() => {
-    if (productData) {
-      setPrimaryPhoto(productData.primaryPhoto || localStorage.getItem('primaryPhoto'));
-      setOgImage(productData.ogImage || null);
-      setMetadata({
-        title: productData.metadata?.title || '',
-        description: productData.metadata?.description || '',
-        keywords: productData.metadata?.keywords || '',
-      });
-      const initialGallery = productData.imageGallery?.map((url) => ({
-        id: url,
-        url,
-      })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
-      setImageGallery(initialGallery);
+const ProductPage: React.FC = () => {
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  const [remainingFields, setRemainingFields] = useState<FormField[]>(initialAvailableFields);
+  const [productData, setProductData] = useState<ProductData | null>(null);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const [customFieldLabel, setCustomFieldLabel] = useState('');
+  const [customFieldType, setCustomFieldType] = useState('text');
+  const [customFieldOptions, setCustomFieldOptions] = useState('');
+
+  const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+  const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
+  const SEGMENT_ID = 'unique-segment-id';
+
+  const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
+    onCompleted: () => alert('Segment deleted successfully!'),
+    onError: (error) => {
+      console.error('Error deleting segment:', error);
+      alert('Error deleting segment.');
     }
+  });
+  
+  const handleDeleteSegment = async (segmentId: any) => {
+    if (!window.confirm('Are you sure you want to delete this segment?')) {
+      return;
+    }
+    try {
+      await deleteSegment({ variables: { segmentId } });
+    } catch (error) {
+      console.error('Error executing delete mutation:', error);
+    }
+  };
+  
+  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+    variables: { productId: PRODUCT_ID }
+  });
+
+  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
+    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
+  });
+
+  const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
+  const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
+  const [saveProduct] = useMutation(SAVE_PRODUCT);
+  const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
+  
+  useEffect(() => {
+    if (productDataQuery?.Product) {
+      const product = productDataQuery.Product[0];
+
+      // Initialize formFields with fetched data
+      const initialFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: product[field.id] || ''
+      }));
+
+      setFormFields(initialFields);
+
+      // Exclude these fields from remainingFields
+      const excludedFields = new Set(initialFields.map(field => field.id));
+      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+
+      setRemainingFields(updatedRemainingFields);
+      setProductData(product);
+    }
+  }, [productDataQuery]);
+
+  useEffect(() => {
+    if (segmentsData) {
+      setSegments(segmentsData.Segment);
+  
+      // Flatten and extract form fields from segments
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
+        Object.values(segment.post).map(field => ({
+          id: field.id || uuidv4(), // Ensure each field has a unique ID
+          type: field.type || 'text',
+          label: field.label || '',
+          value: field.value || '',
+          options: field.options || []
+        }))
+      );
+  
+      setFormFields(segmentFields);
+    }
+  }, [segmentsData]);
+
+  const handleInputChange = useCallback((fieldId: string, value: string | number) => {
+    if (productData) {
+      const parsedValue = (typeof value === 'string' && isNaN(Number(value))) ? value : parseFloat(value as string);
+      setProductData(prev => ({
+        ...prev!,
+        [fieldId]: parsedValue
+      }));
+    }
+    setFormFields(prev =>
+      prev.map(field => (field.id === fieldId ? { ...field, value } : field))
+    );
+    setHasUnsavedChanges(true);
   }, [productData]);
 
-  // Save gallery and primary photo to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
-  }, [imageGallery]);
-
-  useEffect(() => {
-    if (primaryPhoto) {
-      localStorage.setItem('primaryPhoto', primaryPhoto);
-    } else {
-      localStorage.removeItem('primaryPhoto');
-    }
-  }, [primaryPhoto]);
-
-  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const newImages = files.map((file) => ({
-      id: URL.createObjectURL(file),
-      url: URL.createObjectURL(file),
-    }));
-    setImageGallery(prev => [...prev, ...newImages]);
+  const handleAddField = (newField: FormField) => {
+    setFormFields(prev => [...prev, newField]);
+    setRemainingFields(prev => prev.filter(field => field.id !== newField.id));
+    setHasUnsavedChanges(true);
   };
 
-  const handleRemoveImage = (id: string) => {
-    setImageGallery(prev => prev.filter(image => image.id !== id));
+  const handleRemoveField = (index: number) => {
+    setFormFields(prev => {
+      const updatedFields = [...prev];
+      const removedField = updatedFields.splice(index, 1)[0];
+      setRemainingFields(prev => [...prev, removedField].sort((a, b) => a.label.localeCompare(b.label)));
+      return updatedFields;
+    });
+    setHasUnsavedChanges(true);
   };
 
-  const handleDragEnd = (result: any) => {
+  const onDragEnd = (result: any) => {
     if (!result.destination) return;
-
-    const reorderedImages = Array.from(imageGallery);
-    const [movedImage] = reorderedImages.splice(result.source.index, 1);
-    reorderedImages.splice(result.destination.index, 0, movedImage);
-
-    setImageGallery(reorderedImages);
+    const reorderedFields = Array.from(formFields);
+    const [reorderedItem] = reorderedFields.splice(result.source.index, 1);
+    reorderedFields.splice(result.destination.index, 0, reorderedItem);
+    setFormFields(reorderedFields);
+    setHasUnsavedChanges(true);
   };
 
-  const handleMetadataChange = (key: string, value: string) => {
-    setMetadata((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const handleSave = async () => {
+    if (!productData) {
+      alert('No product data to save!');
+      return;
+    }
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      if (type === 'primary') {
-        setPrimaryPhoto(imageUrl);
-      } else if (type === 'og') {
-        setOgImage(imageUrl);
-      }
+    const { id, name, description, price, quantity, category } = productData;
+    const parsedPrice = parseFloat(price as unknown as string);
+    const parsedQuantity = parseInt(quantity as unknown as string);
+
+    if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
+      alert('Invalid price or quantity');
+      return;
+    }
+
+    try {
+      await saveProduct({
+        variables: {
+          productId: PRODUCT_ID,
+          name,
+          description,
+          price: parsedPrice,
+          quantity: parsedQuantity,
+          category,
+        },
+      });
+
+      const versionNumber = Math.floor(Date.now() / 1000);
+      const uuid = uuidv4();
+
+      await updateProductVersion({
+        variables: {
+          productId: PRODUCT_ID,
+          versionNumber,
+          changes: "Updated product version",
+          data: productData,
+          id: uuid,
+        },
+      });
+
+      localStorage.setItem('productVersionId', uuid);
+      setHasUnsavedChanges(false);
+      alert('Product version updated and saved!');
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Failed to save product.');
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error loading product data: {error.message}</div>;
+  const handlePublish = async () => {
+    try {
+      const productVersionId = localStorage.getItem('productVersionId');
+
+      if (!productVersionId) {
+        alert('Product version ID not found in local storage.');
+        return;
+      }
+
+      const postData = formFields.reduce((acc, field) => {
+        acc[field.id] = {
+          type: field.type,
+          label: field.label,
+          value: field.value,
+        };
+        return acc;
+      }, {} as Record<string, any>);
+
+      const publishSegment = {
+        id: SEGMENT_ID,
+        name: 'Published Segment',
+        productId: PRODUCT_ID,
+        domainId: DOMAIN_ID,
+        productVersionId,
+        post: postData,
+      };
+
+      await publishSegments({ variables: { input: publishSegment } });
+      await UpdateSegment({ variables: { id: SEGMENT_ID, post: postData } });
+
+      alert('Segments published successfully!');
+    } catch (error) {
+      console.error('Error publishing segments:', error);
+      alert('Failed to publish segments.');
+    }
+  };
+
+  const handleAddCustomField = () => {
+    if (!customFieldLabel.trim()) {
+      alert('Field label cannot be empty.');
+      return;
+    }
+
+    const newFieldId = customFieldLabel.toLowerCase().replace(/\s+/g, '_');
+    if (RESERVED_FIELDS.has(newFieldId.toLowerCase())) {
+      alert('Cannot use reserved field ID.');
+      return;
+    }
+
+    if (formFields.find((field) => field.id === newFieldId)) {
+      alert('Field with this label already exists.');
+      return;
+    }
+
+    const newField: FormField = {
+      id: newFieldId,
+      type: customFieldType,
+      label: customFieldLabel,
+      options: customFieldType === 'select' ? customFieldOptions.split(',').map((opt) => opt.trim()) : undefined,
+    };
+
+    handleAddField(newField);
+
+    setCustomFieldLabel('');
+    setCustomFieldType('text');
+    setCustomFieldOptions('');
+  };
+
+  if (loadingProduct || loadingSegments) {
+    return <div>Loading...</div>;
+  }
+
+  if (!productData || !formFields.length) {
+    return <div>No product data available.</div>;
+  }
 
   return (
-    <div className="w-full space-y-2">
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={70}>
-          <Accordion type="single" collapsible className="w-full space-y-4">
-            
-            {/* Primary Photo Section */}
-            <AccordionItem value="primary-photo">
-              <AccordionTrigger className="text-sm font-semibold">
-                Primary Photo
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex items-center space-x-2">
-                  {primaryPhoto ? (
-                    <div className="relative w-16 h-16">
-                      <img
-                        src={primaryPhoto}
-                        alt="Primary"
-                        className="w-full h-full object-cover rounded"
-                      />
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="absolute top-0 right-0 h-4 w-4 p-0"
-                        onClick={() => setPrimaryPhoto(null)}
-                      >
-                        <MinusIcon className="h-2 w-2" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => handleImageUpload(e, 'primary')}
-                        accept="image/*"
-                      />
-                      <Image className="h-6 w-6 text-muted-foreground" />
-                    </label>
-                  )}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+    <div className="flex flex-row h-screen">
+      <ResizablePanelGroup>
+        <ResizablePanel minSize={20}>
+          <Tabs defaultValue="form">
+            <TabsList className="m-2 w-full grid grid-cols-2">
+              <TabsTrigger value="form">Form</TabsTrigger>
+              <TabsTrigger value="actions">Actions</TabsTrigger>
+            </TabsList>
 
-            {/* Gallery Section */}
-            <AccordionItem value="image-gallery">
-              <AccordionTrigger className="text-sm font-semibold">
-                Image Gallery
-              </AccordionTrigger>
-              <AccordionContent>
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="gallery">
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="flex flex-wrap gap-2"
-                      >
-                        {imageGallery.map((image, index) => (
-                          <Draggable key={image.id} draggableId={image.id} index={index}>
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="relative w-16 h-16"
-                                style={{ ...provided.draggableProps.style }}
-                              >
-                                <img
-                                  src={image.url}
-                                  alt={`Gallery ${index}`}
-                                  className="w-full h-full object-cover rounded"
-                                />
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  className="absolute top-0 right-0 h-4 w-4 p-0"
-                                  onClick={() => handleRemoveImage(image.id)}
-                                >
-                                  <MinusIcon className="h-2 w-2" />
-                                </Button>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                        <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                          <input
-                            type="file"
-                            className="hidden"
-                            onChange={handleGalleryImageUpload}
-                            accept="image/*"
-                            multiple
-                          />
-                          <PlusIcon className="h-6 w-6 text-muted-foreground" />
-                        </label>
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </AccordionContent>
-            </AccordionItem>
+            <div className="flex flex-col px-4 pt-6">
+              <Button onClick={handleSave} disabled={!hasUnsavedChanges}>Save Changes</Button>
+              <Button onClick={handlePublish}>Publish</Button>
+            </div>
+          </Tabs>
 
-            {/* OG Image Section */}
-            <AccordionItem value="og-image">
-              <AccordionTrigger className="text-sm font-semibold">
-                OG Image
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      {ogImage ? (
-                        <div className="w-16 h-16 relative">
-                          <img
-                            src={ogImage}
-                            alt="OG"
-                            className="w-full h-full object-cover rounded"
-                          />
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="absolute top-0 right-0 h-4 w-4 p-0"
-                            onClick={() => setOgImage(null)}
+          <div className="flex flex-col px-4 pt-6">
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="formFields">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                    {formFields.map((field, index) => (
+                      <Draggable key={field.id} draggableId={field.id} index={index}>
+                        {(provided) => (
+                          <Card
+                            className="m-2"
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
                           >
-                            <MinusIcon className="h-2 w-2" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                          <input
-                            type="file"
-                            className="hidden"
-                            onChange={(e) => handleImageUpload(e, 'og')}
-                            accept="image/*"
-                          />
-                          <FileImage className="h-6 w-6 text-muted-foreground" />
-                        </label>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        Set Open Graph image for social sharing
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
+                            <CardContent>
+                              <div className="flex justify-between items-center">
+                                <span>{field.label}</span>
+                                <button onClick={() => handleRemoveField(index)}><MinusIcon /></button>
+                              </div>
 
-            {/* Metadata Section */}
-            <AccordionItem value="metadata">
-              <AccordionTrigger className="text-sm font-semibold">
-                Metadata
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="space-y-1">
-                      <Input
-                        placeholder="Meta Title"
-                        className="h-6 text-xs"
-                        value={metadata.title}
-                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('title', e.target.value)}
-                      />
-                      <Textarea
-                        placeholder="Meta Description"
-                        className="h-12 text-xs"
-                        value={metadata.description}
-                        onChange={(e) => handleMetadataChange('description', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Keywords (comma-separated)"
-                        className="h-6 text-xs"
-                        value={metadata.keywords}
-                        onChange={(e: { target: { value: string; }; }) => handleMetadataChange('keywords', e.target.value)}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                              {field.type === 'textarea' ? (
+                                <Textarea
+                                  value={field.value as string}
+                                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                />
+                              ) : (
+                                <Input
+                                  value={field.value as string}
+                                  onChange={(e) => handleInputChange(field.id, e.target.value)}
+                                />
+                              )}
+
+                              {field.type === 'select' && field.options && (
+                                <Select
+                                  value={field.value as string}
+                                  onValueChange={(value) => handleInputChange(field.id, value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a value" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {field.options.map((option, index) => (
+                                      <SelectItem key={index} value={option}>
+                                        {option}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            </CardContent>
+                          </Card>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+
+            <Accordion type="single" collapsible>
+              <AccordionItem value="addField">
+                <AccordionTrigger className="m-4 p-2 flex justify-between items-center bg-gray-100">
+                  <span>Add Custom Field</span>
+                  <PlusIcon />
+                </AccordionTrigger>
+                <AccordionContent>
+                  <Input
+                    value={customFieldLabel}
+                    onChange={(e) => setCustomFieldLabel(e.target.value)}
+                    placeholder="Field Label"
+                  />
+                  <Select
+                    value={customFieldType}
+                    onValueChange={setCustomFieldType}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Field Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="textarea">Textarea</SelectItem>
+                      <SelectItem value="select">Select</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {customFieldType === 'select' && (
+                    <Textarea
+                      value={customFieldOptions}
+                      onChange={(e) => setCustomFieldOptions(e.target.value)}
+                      placeholder="Comma-separated options"
+                    />
+                  )}
+
+                  <Button className="m-4" onClick={handleAddCustomField}>Add Field</Button>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
         </ResizablePanel>
 
-        {/* Product Preview Section */}
         <ResizableHandle />
-        <ResizablePanel defaultSize={30}>
-          <div className="p-4">
-            {productData && (
-              <div>
-                <div className="relative w-full mb-4">
-                  <div className="w-full" style={{ paddingBottom: '56.25%' }}>
-                    <img
-                      src={primaryPhoto}
-                      alt="Primary"
-                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                </div>
-                <h3 className="mt-4 text-xl font-semibold">{productData.name}</h3>
-                <p className="text-sm text-muted">{productData.description}</p>
-                <p className="text-sm">Category: {productData.category}</p>
-                <p className="text-sm">Price: ${productData.price?.toFixed(2)}</p>
-                <p className="text-sm">Quantity: {productData.quantity}</p>
-              </div>
-            )}
-          </div>
+
+        <ResizablePanel minSize={20}>
+          <h1>Live Preview</h1>
+          <pre>{JSON.stringify(productData, null, 2)}</pre>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
   );
 };
 
-export default ImageUploader;
+export default memo(ProductPage);
