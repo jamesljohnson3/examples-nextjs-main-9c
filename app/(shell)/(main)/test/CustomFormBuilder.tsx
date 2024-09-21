@@ -297,22 +297,22 @@ export default function EnhancedProductMoodboard() {
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
   
-  // Merged logic for fetching and handling both product and segment fields
+  
   useEffect(() => {
-
-    const reservedFields = RESERVED_FIELDS // Define reserved fields
+    // Reserved fields validation and dynamic check
+    const reservedFields = RESERVED_FIELDS;
 
     if (productDataQuery?.Product) {
       const loadedProductData = productDataQuery.Product[0];
-     // Function to check if reserved fields are present in the product data
-     const hasReservedFields = reservedFields.every(field => field in loadedProductData);
 
-     // If reserved fields are not present, exit early or show an error message
-     if (!hasReservedFields) {
-       console.error('Required reserved fields are missing in product data.');
-       return; // Prevent further execution if required fields are missing
-     }
-      // Set the main product data fields
+      // Check if all reserved fields are present
+      const hasReservedFields = Array.from(reservedFields).every(field => field in loadedProductData);
+      if (!hasReservedFields) {
+        console.error('Missing required reserved fields in product data.');
+        return;  // Exit early if required fields are missing
+      }
+
+      // Set the product data and fields
       setProductData(loadedProductData);
       setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
       setOgImage(loadedProductData.ogImage || null);
@@ -321,55 +321,53 @@ export default function EnhancedProductMoodboard() {
         description: loadedProductData.metadata?.description || '',
         keywords: loadedProductData.metadata?.keywords || '',
       });
-  
-      // Initialize the image gallery
+
+      // Initialize image gallery
       const initialGallery = loadedProductData.imageGallery?.map((url: any) => ({
         id: url,
         url,
       })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
       setImageGallery(initialGallery);
-  
+
       // Initialize form fields from available fields and product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
-        value: loadedProductData[field.id] || '',  // Populate the field value if it exists in product data
+        value: loadedProductData[field.id] || '',
       }));
-  
-      // Exclude fields already in the form from the remaining available fields
+
+      // Filter out fields already populated in the form
       const excludedFields = new Set(initialFields.map(field => field.id));
       const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
-  
-      setFormFields(initialFields);  // Set the initialized fields in the form
-      setRemainingFields(updatedRemainingFields);  // Set any remaining fields that weren't part of the form
+
+      setFormFields(initialFields);  // Set initialized fields
+      setRemainingFields(updatedRemainingFields);  // Set remaining available fields
     }
-  
+
     if (segmentsData) {
       setSegments(segmentsData.Segment);
-  
-      // Extract and flatten fields from segment data (e.g., segment.post)
+
+      // Extract and flatten segment fields
       const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
         Object.values(segment.post).map(field => ({
-          id: field.id || uuidv4(),  // Generate a unique ID if missing
-          type: field.type || 'text',  // Default to 'text' if type is missing
-          label: field.label || '',  // Default to an empty label if missing
-          value: field.value || '',  // Default to an empty value if missing
-          options: field.options || [],  // Default to an empty array for options
+          id: field.id || uuidv4(),  // Unique ID if missing
+          type: field.type || 'text',  // Default to 'text'
+          label: field.label || '',  // Default empty label
+          value: field.value || '',  // Default empty value
+          options: field.options || [],  // Default empty options array
         }))
       );
-  
-      // Merge fields from both formFields and segmentFields, ensuring no duplicates by ID or label
+
+      // Merge formFields and segmentFields, avoiding duplicates by id or label
       const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
         if (!acc.find(field => field.id === current.id || field.label === current.label)) {
           acc.push(current);
         }
         return acc;
       }, []);
-  
-      setFormFields(mergedFields);  // Update the form fields with merged data
+
+      setFormFields(mergedFields);  // Set merged fields in the form
     }
-  }, [productDataQuery, segmentsData]);  // Dependencies include productDataQuery and segmentsData
-  
-  
+  }, [productDataQuery, segmentsData]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
