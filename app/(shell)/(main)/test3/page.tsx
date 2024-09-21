@@ -64,26 +64,28 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
     },
   });
 
-  useEffect(() => {
-    if (data) {
-      const storedVersionId = localStorage.getItem('productVersionId');
+// Modify the useEffect for loading versions
+useEffect(() => {
+  if (data) {
       const loadedProductVersions = data.ProductVersion;
       setVersions(loadedProductVersions);
 
-      // Set the active version based on localStorage or the latest version
+      const storedVersionId = localStorage.getItem('productVersionId');
       if (storedVersionId) {
-        const storedVersion = loadedProductVersions.find((version: { id: string; }) => version.id === storedVersionId);
-        if (storedVersion) {
-          setActiveVersion(storedVersion.id);
-          setProductData(storedVersion.data);
-        }
+          const storedVersion = loadedProductVersions.find((version: { id: string; }) => version.id === storedVersionId);
+          if (storedVersion) {
+              setActiveVersion(storedVersion.id);
+              setProductData(storedVersion.data);
+              setPrimaryPhoto(storedVersion.data.primaryPhoto || null); // Set the primary photo here
+          }
       } else {
-        const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
-        setActiveVersion(latestVersion.id);
-        setProductData(latestVersion.data);
+          const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
+          setActiveVersion(latestVersion.id);
+          setProductData(latestVersion.data);
+          setPrimaryPhoto(latestVersion.data.primaryPhoto || null); // Set the primary photo here
       }
-    }
-  }, [data]);
+  }
+}, [data]);
 
   const fetchVersions = () => {
     // Fetch versions again if needed or handle via refetch
@@ -121,10 +123,15 @@ function VersionControl({ productId, setProductData, previewData }: { productId:
   const handleSwitchVersion = (version: Version) => {
     setActiveVersion(version.id);
     setProductData(version.data);
-    setPrimaryPhoto(version.data.primaryPhoto || null); // Ensure primaryPhoto is updated
+    
+    // Update primaryPhoto based on the version data
+    const newPrimaryPhoto = version.data.primaryPhoto || null;
+    setPrimaryPhoto(newPrimaryPhoto);
+    
     localStorage.setItem('productVersionId', version.id);
-  };
-  
+};
+
+
 
   if (loading) return <div>Loading versions...</div>;
   if (error) return <div>Error loading versions: {error.message}</div>;
