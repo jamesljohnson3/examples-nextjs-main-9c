@@ -2,7 +2,7 @@
 "use client"
 
 import React from 'react';
-import withFileHandling from './file';
+import withFileHandling from './file6';
 import FileInput from './input';
 
 const EnhancedFileInput = withFileHandling(FileInput);

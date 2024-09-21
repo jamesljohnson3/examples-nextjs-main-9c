@@ -19,7 +19,7 @@ import { RadioGroup } from '@headlessui/react';
 
 
 
-import { Button } from '@/app/components/Button';
+import { Button } from '@/components/ui/button';
 
 
 
@@ -35,7 +35,7 @@ function classNames(...classes) {
 }
 
 const Upload = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+
   const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [nameOnCard, setNameOnCard] = useState('');
   const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState(deliveryMethods[0]);
@@ -99,63 +99,7 @@ const Upload = () => {
 
     return instance;
   });
-  async function getImages() {
-    const { data, error } = await supabase
-      .storage
-      .from('images')
-      .list("hello-world2" + "/", {
-        limit: 100,
-        offset: 0,
-        sortBy: { column: "name", order: "asc"}
-      });   // Cooper/
-      // data: [ image1, image2, image3 ]
-      // image1: { name: "subscribeToCooperCodes.png" }
-
-      // to load image1: CDNURL.com/subscribeToCooperCodes.png -> hosted image
-
-      if(data !== null) {
-        setImages(data);
-      } else {
-        alert("Error loading images");
-        console.log(error);
-      }
-  }
   
- 
-
-
-  async function uploadImage(e) {
-    let file = e.target.files[0];
-
-    // userid: Cooper
-    // Cooper/
-    // Cooper/myNameOfImage.png
-    // Lindsay/myNameOfImage.png
-
-    const { data, error } = await supabase
-      .storage
-      .from('images')
-      .upload("hello-world2" + "/" + uuidv4(), file)  // Cooper/ASDFASDFASDF uuid, taylorSwift.png -> taylorSwift.png
-
-    if(data) {
-      getImages();
-    } else {
-      console.log(error);
-    }
-  }
-
-  async function deleteImage(imageName) {
-    const { error } = await supabase
-      .storage
-      .from('images')
-      .remove([ "hello-world2" + "/" + imageName])
-    
-    if(error) {
-      alert(error);
-    } else {
-      getImages();
-    }
-  }
   const promise = () => new Promise<ToastData>((resolve) => setTimeout(() => resolve({ name: 'Added Images' }), 2000));
 
   const handleFormSubmit = async (e) => {
@@ -164,7 +108,8 @@ const Upload = () => {
     try {
       // Update uploadedFiles state with the files
       const files = uppy.getFiles();
-      setUploadedFiles(files);
+    
+      
   
       const response = await fetch('https://hook.us1.make.com/dnyg5bgpnd8fug39da6h3xizaexj43kr', {
         method: 'POST',
@@ -203,9 +148,8 @@ const Upload = () => {
       console.error(error);
     }
   };
-  useEffect(() => {
-    getImages();
-  }, [uploadedFiles]);
+
+  
   return (
     <>
     <div className="p-10">
@@ -288,18 +232,7 @@ type="submit">Distribute</button>  <a      href="https://spaces.unlimitpotential
             </RadioGroup>
           </div>
 
-          <div className="photogallery">
-          <div className="photogallery">
-            {uploadedFiles.map((file) => (
-              <img
-                key={file.id}
-                src={file.url}
-                alt={file.name}
-                className="w-full h-auto bg-gray-200 rounded-md"
-              />
-            ))}
-          </div>
-          </div>          </form>
+                </form>
       <StatusBar uppy={uppy} />
       <form>    <input type="file" accept="image/png, image/jpeg" onChange={(e) => uploadImage(e)}/>
 </form>
