@@ -53,6 +53,33 @@ import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_P
 import { v4 as uuidv4 } from 'uuid';
  import { DELETE_SEGMENT } from './mutations';
 
+ import Uppy, { SuccessResponse, UppyFile } from '@uppy/core';
+ import Transloadit from '@uppy/transloadit';
+ 
+
+ import '@uppy/core/dist/style.css';
+ import '@uppy/drag-drop/dist/style.css';
+ 
+ const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
+ const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
+ const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
+ const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
+ 
+ const uppyInstance = new Uppy({
+   autoProceed: true,
+   restrictions: { maxNumberOfFiles: 20, allowedFileTypes: ['image/*'] },
+ }).use(Transloadit, {
+   params: {
+     auth: { key: TRANSLOADIT_KEY },
+     template_id: TEMPLATE_ID,
+   },
+ });
+ 
+ interface Image {
+   id: string;
+   url: string;
+ }
+ 
 interface FormElement {
   id: string;
   type: 'text' | 'textarea' | 'number' | 'select';
@@ -512,7 +539,10 @@ export default function EnhancedProductMoodboard() {
     setCustomFieldType('text');
     setCustomFieldOptions('');
   };
-
+  
+  const saveImage = async (file: UppyFile, uploadedUrl: string) => {
+    setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
+  };
     // Save gallery and primary photo to localStorage whenever they change
     useEffect(() => {
       localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
@@ -526,34 +556,33 @@ export default function EnhancedProductMoodboard() {
       }
     }, [primaryPhoto]);
 
-    
+    useEffect(() => {
+      uppyInstance.on('upload-success', (file: UppyFile | undefined, response: SuccessResponse) => {
+        if (file) {
+          const uploadedUrl = response.body.url; // Adjust based on your response structure
+          saveImage(file, uploadedUrl);
+        } else {
+          console.error('File not found in upload-success event');
+        }
+      });
+  
+      return () => {
+        uppyInstance.close();
+      };
+    }, []);
+  
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
-
-
-  const handleImageUpload = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    type: 'gallery' | 'primary' | 'og'
-  ) => {
-    const file = event.target.files[0];
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
+    const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        switch (type) {
-          case 'gallery':
-            setImageGallery([...imageGallery, reader.result as string]);
-            break;
-          case 'primary':
-            setPrimaryPhoto(reader.result as string);
-            break;
-          case 'og':
-            setOgImage(reader.result as string);
-            break;
-        }
-        setHasUnsavedChanges(true);
-      };
-      reader.readAsDataURL(file);
+      const imageUrl = URL.createObjectURL(file);
+      if (type === 'primary') {
+        setPrimaryPhoto(imageUrl);
+      } else if (type === 'og') {
+        setOgImage(imageUrl);
+      }
     }
   };
 
@@ -568,14 +597,17 @@ export default function EnhancedProductMoodboard() {
 
 
 
-  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const newImages = files.map((file) => ({
-      id: URL.createObjectURL(file),
-      url: URL.createObjectURL(file),
-    }));
-    setImageGallery(prev => [...prev, ...newImages]);
+  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    for (const file of selectedFiles) {
+      uppyInstance.addFile({ name: file.name, type: file.type, data: file });
+    }
   };
+
+  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileInput(event)
+  };
+
 
   const handleRemoveImage = (id: string) => {
     setImageGallery(prev => prev.filter(image => image.id !== id));

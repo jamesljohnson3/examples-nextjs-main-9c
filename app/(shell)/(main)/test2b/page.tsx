@@ -98,7 +98,9 @@ const ImageUploader: React.FC = () => {
     localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
     alert('Image order saved!');
   };
-
+  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileInput(event)
+  };
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
@@ -139,7 +141,7 @@ const ImageUploader: React.FC = () => {
               ))}
               {provided.placeholder}
               <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                <input type="file" className="hidden" onChange={handleFileInput} accept="image/*" multiple />
+                <input type="file" className="hidden" onChange={handleGalleryImageUpload} accept="image/*" multiple />
                 <PlusIcon className="h-6 w-6 text-muted-foreground" />
               </label>
             </div>
