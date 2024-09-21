@@ -890,7 +890,7 @@ export default function EnhancedProductMoodboard() {
 
 
              {/* Add Custom Field */}
-             <AccordionItem value="primary-photo">
+             <AccordionItem value="custom-fields">
               <AccordionTrigger className="text-sm font-semibold">
               Custom Fields
               </AccordionTrigger>
