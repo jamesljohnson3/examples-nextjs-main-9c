@@ -32,6 +32,7 @@ const useSimulatedQuery = () => {
       setData([
         { id: '1', url: 'https://via.placeholder.com/150' },
         { id: '2', url: 'https://via.placeholder.com/150' },
+        { id: '3', url: 'https://via.placeholder.com/150' }, // Simulated new file after upload
       ]);
     }, 1000);
   };
@@ -140,23 +141,33 @@ const MediaUpload: React.FC = () => {
                 </Draggable>
               ))}
               {provided.placeholder}
+              {/* Display simulated data as draggable items */}
+              {data.map((media) => (
+                <Draggable key={media.id} draggableId={media.id} index={files.length + data.indexOf(media)}>
+                  {(provided) => (
+                    <div
+                      className="file-item"
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <img src={media.url} alt={`Media ${media.id}`} className="thumbnail" />
+                      <span>Media {media.id}</span>
+                      <Button onClick={() => console.log(`Delete media ${media.id}`)}>
+                        <MinusIcon />
+                      </Button>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
             </div>
           )}
         </Droppable>
       </DragDropContext>
 
       <Button onClick={handleUpload}>Upload Files</Button>
-
-      {/* Display simulated data */}
-      <div>
-        <h2>Uploaded Media Files</h2>
-        {data.map(media => (
-          <img key={media.id} src={media.url} alt={`Media ${media.id}`} className="thumbnail" />
-        ))}
-      </div>
     </div>
   );
 };
 
 export default MediaUpload;
-
