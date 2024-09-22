@@ -116,34 +116,33 @@ const ImageUploader: React.FC = () => {
 
   // Handle Uppy completion
   useEffect(() => {
-    uppyInstance.on('upload', () => {
-      setIsUploading(true);
-    });
-
-    uppyInstance.on('upload-progress', (file, progress) => {
-      setUploadProgress(progress.percentage);
-    });
-
     uppyInstance.on('upload-success', (file, response) => {
-      if (file) { // Check if file is defined
-        const uploadedUrl = response.body.url; // Adjust based on your response structure
-        setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
-        setUploadProgress(0); // Reset progress
+      if (file) {
+        const uploadedUrl = response.body.url; 
+        setImageGallery((prev) => {
+          // Check for duplicates before adding
+          if (!prev.some((img) => img.url === uploadedUrl)) {
+            return [...prev, { id: file.id, url: uploadedUrl }];
+          }
+          return prev;
+        });
+        setUploadProgress(0); 
       }
     });
-    
+  
     uppyInstance.on('complete', async (result) => {
       const uploadedImages = result.successful;
       for (const file of uploadedImages) {
-        await saveImage(file); // Save each image
+        await saveImage(file); 
         setIsUploading(false);
       }
     });
-
+  
     return () => {
-      uppyInstance.close(); // Cleanup Uppy instance on unmount
+      uppyInstance.close(); 
     };
   }, []);
+  
 
 
   
