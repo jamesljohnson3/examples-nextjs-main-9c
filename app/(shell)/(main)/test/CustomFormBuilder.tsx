@@ -637,8 +637,8 @@ export default function EnhancedProductMoodboard() {
         } else {
           setErrorMessage(null); // Clear error message
         }
-        const imageUrl = URL.createObjectURL(file);
-        const downloadLink = await uploadtoBucket(file);
+        const imageUrl = await uploadtoBucket(file);
+        const downloadLink = URL.createObjectURL(file);
   
         if (type === 'primary') {
           setPrimaryPhoto(imageUrl);
