@@ -188,7 +188,6 @@ const ImageUploader: React.FC = () => {
                         variant="destructive"
                         className="absolute top-0 right-0 h-4 w-4 p-0"
                         onClick={() => handleRemoveImage(image.id)}
-                        disabled={!hasUnsavedImageGalleryChanges}
                       >
                         <MinusIcon className="h-2 w-2" />
                       </Button>

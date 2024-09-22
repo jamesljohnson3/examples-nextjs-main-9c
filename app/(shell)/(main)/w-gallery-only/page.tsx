@@ -315,12 +315,20 @@ const ImageUploader: React.FC = () => {
         keywords: loadedProductData.metadata?.keywords || '',
       });
 
+
       // Initialize image gallery
-      const initialGallery = loadedProductData.imageGallery?.map((url: any) => ({
-        id: url,
-        url,
-      })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
-      setImageGallery(initialGallery);
+    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
+    
+    // Use stored images if available, otherwise use loaded product data
+    const initialGallery = storedImages.length > 0 
+      ? storedImages 
+      : (loadedProductData.imageGallery?.map((url: any) => ({
+          id: url,
+          url,
+        })) || []);
+
+    setImageGallery(initialGallery);
+
 
       // Initialize form fields from available fields and product data
       const initialFields = initialAvailableFields.map(field => ({
@@ -362,10 +370,7 @@ const ImageUploader: React.FC = () => {
     }
   }, [productDataQuery, segmentsData]);
 
-  useEffect(() => {
-    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
-    setImageGallery(storedImages);
-  }, []);
+
 
   // Handle adding files to Uppy
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
