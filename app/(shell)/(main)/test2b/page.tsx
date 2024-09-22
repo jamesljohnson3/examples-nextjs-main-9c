@@ -50,7 +50,15 @@ const ImageUploader: React.FC = () => {
   });
   // Load product data into state
   
-  
+  useEffect(() => {
+    if (productDataQuery) {
+      console.log("Product Data:", JSON.stringify(productDataQuery, null, 2));
+    }
+    if (segmentsData) {
+      console.log("Segments Data:", JSON.stringify(segmentsData, null, 2));
+    }
+  }, [productDataQuery, segmentsData]);
+
   
   
   // Handle adding files to Uppy
