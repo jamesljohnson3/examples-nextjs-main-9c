@@ -50,7 +50,8 @@ const ImageUploadComponent = () => {
   };
 
   return (
-    <>
+    <>          <Accordion type="single" collapsible className="w-full space-y-2">
+
       {/* Primary Photo Section */}
       <AccordionItem value="primary-photo">
         <AccordionTrigger className="text-sm font-semibold">Primary Photo</AccordionTrigger>
@@ -129,7 +130,7 @@ const ImageUploadComponent = () => {
             </a>
           )}
         </AccordionContent>
-      </AccordionItem>
+      </AccordionItem></Accordion>
     </>
   );
 };

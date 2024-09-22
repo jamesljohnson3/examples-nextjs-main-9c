@@ -160,6 +160,7 @@ const ImageUploadComponent: React.FC = () => {
   return (
     <>
       {/* Primary Photo Section */}
+      <Accordion type="single" collapsible className="w-full space-y-2">
       <AccordionItem value="primary-photo">
         <AccordionTrigger className="text-sm font-semibold">Primary Photo</AccordionTrigger>
         <AccordionContent>
@@ -238,6 +239,7 @@ const ImageUploadComponent: React.FC = () => {
           )}
         </AccordionContent>
       </AccordionItem>
+      </Accordion>
     </>
   );
 };
