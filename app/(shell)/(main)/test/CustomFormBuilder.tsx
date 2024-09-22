@@ -375,34 +375,6 @@ export default function EnhancedProductMoodboard() {
     if (productDataQuery?.Product && !loadingProduct && !loadingSegments) {
       const loadedProductData = productDataQuery.Product[0];
 
-      
-
-
-      // Set the product data and fields
-      setProductData(loadedProductData);
-      setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
-      setOgImage(loadedProductData.ogImage || null);
-      setMetadata({
-        title: loadedProductData.metadata?.title || '',
-        description: loadedProductData.metadata?.description || '',
-        keywords: loadedProductData.metadata?.keywords || '',
-      });
-
-
-      // Initialize image gallery
-    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
-    
-    // Use stored images if available, otherwise use loaded product data
-    const initialGallery = storedImages.length > 0 
-      ? storedImages 
-      : (loadedProductData.imageGallery?.map((url: any) => ({
-          id: url,
-          url,
-        })) || []);
-
-    setImageGallery(initialGallery);
-
-
       // Initialize form fields from available fields and product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
@@ -444,8 +416,30 @@ export default function EnhancedProductMoodboard() {
       // Set product data and image states
       const loadedProductData = productDataQuery.Product[0];
       setProductData(loadedProductData);
-      // ... set primaryPhoto, ogImage, metadata, imageGallery ... 
 
+      // Set the product data and fields
+      setProductData(loadedProductData);
+      setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
+      setOgImage(loadedProductData.ogImage || null);
+      setMetadata({
+        title: loadedProductData.metadata?.title || '',
+        description: loadedProductData.metadata?.description || '',
+        keywords: loadedProductData.metadata?.keywords || '',
+      });
+
+
+      // Initialize image gallery
+    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
+    
+    // Use stored images if available, otherwise use loaded product data
+    const initialGallery = storedImages.length > 0 
+      ? storedImages 
+      : (loadedProductData.imageGallery?.map((url: any) => ({
+          id: url,
+          url,
+        })) || []);
+
+    setImageGallery(initialGallery);
       // Set form fields and remaining fields
       setFormFields(mergedFields);
       setRemainingFields(initialAvailableFields.filter(field => !mergedFields.some((mergedField: { id: string; }) => mergedField.id === field.id)));
