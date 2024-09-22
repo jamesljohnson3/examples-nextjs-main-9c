@@ -2,19 +2,15 @@
 "use client"
 import { Button } from "@/components/ui/button";
 import { PlusIcon, MinusIcon } from "lucide-react";
-
 import { v4 as uuidv4 } from 'uuid';
-
-import Uppy, { SuccessResponse, UploadedUppyFile, UppyFile } from '@uppy/core';
-import { DragDrop, StatusBar } from '@uppy/react';
-import Transloadit from '@uppy/transloadit';
-
+import Uppy, { UploadedUppyFile, UppyFile } from '@uppy/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN } from '@/app/(shell)/(main)/queries';
 import React, { useState, useEffect } from 'react';
 import '@uppy/core/dist/style.css';
 import '@uppy/drag-drop/dist/style.css';
+import Transloadit from '@uppy/transloadit';
 
 const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
 const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
@@ -30,7 +26,6 @@ const uppyInstance = new Uppy({
     template_id: TEMPLATE_ID,
   },
 });
-
 
 interface Image {
   id: string;
@@ -51,8 +46,8 @@ const ImageUploader: React.FC = () => {
   const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
-  // Load product data into state
-  
+
+  // Load product and segments data into state
   useEffect(() => {
     if (productDataQuery) {
       console.log("Product Data:", JSON.stringify(productDataQuery, null, 2));
@@ -62,18 +57,15 @@ const ImageUploader: React.FC = () => {
     }
   }, [productDataQuery, segmentsData]);
 
-  
   useEffect(() => {
     const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
     setImageGallery(storedImages);
   }, []);
 
-  
   // Handle adding files to Uppy
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
-  
-    if (selectedFiles) { // Null check
+    if (selectedFiles) {
       for (let i = 0; i < selectedFiles.length; i++) {
         uppyInstance.addFile({
           name: selectedFiles[i].name,
@@ -82,11 +74,22 @@ const ImageUploader: React.FC = () => {
         });
       }
       setFiles(uppyInstance.getFiles());
-      setHasUnsavedImageGalleryChanges(true); // Mark as changed
-
+      setHasUnsavedImageGalleryChanges(true);
     }
   };
-  
+
+  // Remove duplicates utility function
+  const removeDuplicates = (gallery: Image[]) => {
+    const seen = new Set();
+    return gallery.filter(image => {
+      if (seen.has(image.url)) {
+        return false;
+      }
+      seen.add(image.url);
+      return true;
+    });
+  };
+
   // Trigger file upload
   const handleUpload = () => {
     setIsUploading(true);
@@ -108,50 +111,52 @@ const ImageUploader: React.FC = () => {
 
   // Save uploaded image to backend or state (simulating database save here)
   const saveImage = async (file: UploadedUppyFile<Record<string, unknown>, Record<string, unknown>>) => {
-    const uploadedUrl = file.uploadURL; // Get URL from Transloadit
-    setImageGallery((prev) => [...prev, { id: uuidv4(), url: uploadedUrl }]); // Save to gallery
-    setHasUnsavedImageGalleryChanges(true); // Mark as changed
-
+    const uploadedUrl = file.uploadURL;
+    setImageGallery((prev) => {
+      const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
+      return removeDuplicates(newGallery); // Remove duplicates after adding
+    });
+    setHasUnsavedImageGalleryChanges(true);
   };
 
-  // Handle Uppy completion
+  // Handle Uppy events and completion
   useEffect(() => {
+    uppyInstance.on('upload', () => {
+      setIsUploading(true);
+    });
+
+    uppyInstance.on('upload-progress', (file, progress) => {
+      setUploadProgress(progress.percentage);
+    });
+
     uppyInstance.on('upload-success', (file, response) => {
       if (file) {
-        const uploadedUrl = response.body.url; 
+        const uploadedUrl = response.body.url;
         setImageGallery((prev) => {
-          // Check for duplicates before adding
-          if (!prev.some((img) => img.url === uploadedUrl)) {
-            return [...prev, { id: file.id, url: uploadedUrl }];
-          }
-          return prev;
+          const newGallery = [...prev, { id: file.id, url: uploadedUrl }];
+          return removeDuplicates(newGallery); // Ensure no duplicates are added
         });
-        setUploadProgress(0); 
+        setUploadProgress(0);
       }
     });
-  
+
     uppyInstance.on('complete', async (result) => {
       const uploadedImages = result.successful;
       for (const file of uploadedImages) {
-        await saveImage(file); 
-        setIsUploading(false);
+        await saveImage(file); // Save each image and ensure no duplicates
       }
+      setIsUploading(false);
     });
-  
+
     return () => {
-      uppyInstance.close(); 
+      uppyInstance.close(); // Cleanup Uppy instance on unmount
     };
   }, []);
-  
-
-
-  
 
   // Handle removing image from gallery
   const handleRemoveImage = (id: string) => {
     setImageGallery((prev) => prev.filter((image) => image.id !== id));
-    setHasUnsavedImageGalleryChanges(true); // Mark as changed
-
+    setHasUnsavedImageGalleryChanges(true);
   };
 
   // Handle drag-and-drop reordering of images
@@ -161,19 +166,20 @@ const ImageUploader: React.FC = () => {
     const [movedImage] = reorderedImages.splice(result.source.index, 1);
     reorderedImages.splice(result.destination.index, 0, movedImage);
     setImageGallery(reorderedImages);
-    setHasUnsavedImageGalleryChanges(true); // Mark as changed
-
+    setHasUnsavedImageGalleryChanges(true);
   };
 
+  // Save image order to localStorage
   const handleSaveOrder = () => {
     localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
-    setHasUnsavedImageGalleryChanges(false); // Reset to no unsaved changes
+    setHasUnsavedImageGalleryChanges(false);
     alert('Image order saved!');
   };
-  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileInput(event)
-  };
 
+  // Handle additional gallery image upload
+  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileInput(event);
+  };
 
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
@@ -184,10 +190,10 @@ const ImageUploader: React.FC = () => {
       <div className="flex justify-between items-center">
         {isUploading && <div>Uploading...</div>}
         {isUploading && (
-        <div className="progress-bar">
-          <div className="progress" style={{ width: `${uploadProgress}%` }} />
-        </div>
-      )}
+          <div className="progress-bar">
+            <div className="progress" style={{ width: `${uploadProgress}%` }} />
+          </div>
+        )}
         <input type="file" multiple onChange={handleFileInput} accept="image/*" />
         <Button onClick={handleSaveOrder}>Save Order</Button>
       </div>
