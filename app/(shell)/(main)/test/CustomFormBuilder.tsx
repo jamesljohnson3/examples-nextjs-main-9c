@@ -319,66 +319,58 @@ export default function EnhancedProductMoodboard() {
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
   
-  useEffect(() => {
+  // Calculate merged fields using useMemo OUTSIDE of useEffect 
+  const mergedFields = useMemo(() => {
     if (productDataQuery?.Product && !loadingProduct && !loadingSegments) {
       const loadedProductData = productDataQuery.Product[0];
-  
+
+      const initialFields = initialAvailableFields.map(field => ({
+        ...field,
+        value: loadedProductData[field.id] || '',
+      }));
+
+      if (segmentsData) {
+        const segmentFields = segmentsData.Segment.flatMap((segment: Segment) => {
+          if (typeof segment.post !== 'object') {
+            console.error('Invalid segment.post data:', segment.post);
+            return [];
+          }
+
+          return Object.values(segment.post).map((field) => ({
+            id: field.id || uuidv4(),
+            type: field.type || 'text',
+            label: field.label || '',
+            value: field.value || '',
+            options: field.options || [],
+          }));
+        });
+
+        return [...initialFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
+          if (!acc.find(field => field.id === current.id || field.label === current.label)) {
+            acc.push(current);
+          }
+          return acc;
+        }, []);
+      } else {
+        return initialFields; 
+      }
+    } else { 
+      return []; // Return empty array while data is loading
+    }
+  }, [productDataQuery, loadingSegments, loadingProduct, segmentsData]); 
+
+  useEffect(() => {
+    if (mergedFields.length > 0) { // Only update states if mergedFields is calculated
       // Set product data and image states
+      const loadedProductData = productDataQuery.Product[0];
       setProductData(loadedProductData);
-      setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
-      setOgImage(loadedProductData.ogImage || null);
-      setMetadata({
-        title: loadedProductData.metadata?.title || '',
-        description: loadedProductData.metadata?.description || '',
-        keywords: loadedProductData.metadata?.keywords || '',
-      });
-  
-      const initialGallery = loadedProductData.imageGallery?.map((url: any) => ({
-        id: url,
-        url,
-      })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
-      setImageGallery(initialGallery);
-  
-      // Calculate merged fields using useMemo
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const mergedFields = useMemo(() => {
-        const initialFields = initialAvailableFields.map(field => ({
-          ...field,
-          value: loadedProductData[field.id] || '',
-        }));
-  
-        if (segmentsData) {
-          const segmentFields = segmentsData.Segment.flatMap((segment: Segment) => {
-            if (typeof segment.post !== 'object') {
-              console.error('Invalid segment.post data:', segment.post);
-              return [];
-            }
-  
-            return Object.values(segment.post).map((field) => ({
-              id: field.id || uuidv4(),
-              type: field.type || 'text',
-              label: field.label || '',
-              value: field.value || '',
-              options: field.options || [],
-            }));
-          });
-  
-          return [...initialFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
-            if (!acc.find(field => field.id === current.id || field.label === current.label)) {
-              acc.push(current);
-            }
-            return acc;
-          }, []);
-        } else {
-          return initialFields; 
-        }
-      }, [loadedProductData, segmentsData]); 
-  
+      // ... set primaryPhoto, ogImage, metadata, imageGallery ... 
+
       // Set form fields and remaining fields
       setFormFields(mergedFields);
       setRemainingFields(initialAvailableFields.filter(field => !mergedFields.some((mergedField: { id: string; }) => mergedField.id === field.id)));
     }
-  }, [productDataQuery, loadingSegments, loadingProduct, segmentsData]);
+  }, [mergedFields]); 
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
