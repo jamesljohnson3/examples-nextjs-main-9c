@@ -204,7 +204,7 @@ const ImageUploader: React.FC = () => {
           </div>
         )}
 
-        <Button onClick={handleSaveOrder}>Save Order</Button>
+        <Button disabled={!hasUnsavedImageGalleryChanges} onClick={handleSaveOrder}>Save Order</Button>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
