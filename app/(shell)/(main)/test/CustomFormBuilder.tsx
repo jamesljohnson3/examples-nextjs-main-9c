@@ -386,7 +386,7 @@ export default function EnhancedProductMoodboard() {
 
       setFormFields(mergedFields);  // Set merged fields in the form
     }
-  }, [productDataQuery, segmentsData]);
+  }, [productDataQuery, loadingProduct, setProductData, setPrimaryPhoto, setOgImage]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
