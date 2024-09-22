@@ -357,6 +357,11 @@ const ImageUploader: React.FC = () => {
       setFormFields(mergedFields);  // Set merged fields in the form
     }
   }, [productDataQuery, segmentsData]);
+  
+  useEffect(() => {
+    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
+    setImageGallery(storedImages);
+  }, []);
 
   // Handle adding files to Uppy
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
