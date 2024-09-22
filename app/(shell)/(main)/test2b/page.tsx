@@ -7,13 +7,11 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from "@/components/ui/button";
 import { PlusIcon, MinusIcon } from "lucide-react";
 
-// Define a type for media files
 interface MediaFile {
   id: string;
   url: string;
 }
 
-// Simulated query for media files
 const useSimulatedQuery = () => {
   const [data, setData] = useState<MediaFile[]>([]);
 
@@ -42,7 +40,6 @@ const useSimulatedQuery = () => {
 const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
 const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
 
-// Initialize Uppy instance
 const uppyInstance = new Uppy({
   autoProceed: false,
   restrictions: {
@@ -56,7 +53,6 @@ const uppyInstance = new Uppy({
   },
 });
 
-// Main component
 const MediaUpload: React.FC = () => {
   const [files, setFiles] = useState<UppyFile[]>([]);
   const { data, refetch } = useSimulatedQuery();
@@ -90,8 +86,13 @@ const MediaUpload: React.FC = () => {
   };
 
   const handleUpload = async () => {
-    await uppyInstance.upload();
-    refetch();
+    const result = await uppyInstance.upload();
+    if (result.failed.length > 0) {
+      console.error('Upload failed:', result.failed);
+    } else {
+      console.log('Upload successful:', result.successful);
+      refetch();
+    }
   };
 
   return (
