@@ -97,10 +97,16 @@ const MediaUpload: React.FC = () => {
 
   return (
     <div className="upload-container">
+      {/* File input button */}
+      <Button onClick={() => document.getElementById('file-input')?.click()}>
+        Select Files
+      </Button>
       <input
         type="file"
+        id="file-input"
         multiple
         onChange={handleFileInput}
+        className="hidden"
       />
 
       <DragDropContext onDragEnd={handleReorderFiles}>
