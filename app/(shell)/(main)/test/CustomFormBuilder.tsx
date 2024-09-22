@@ -37,6 +37,7 @@ import {
   Image,
   FileImage,
   X,
+  RefreshCcw
 } from 'lucide-react';
 import {
   ResizableHandle,
@@ -53,12 +54,13 @@ import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_P
 import { v4 as uuidv4 } from 'uuid';
  import { DELETE_SEGMENT } from './mutations';
 
- import Uppy, { SuccessResponse, UppyFile } from '@uppy/core';
+ import Uppy, { SuccessResponse, UploadedUppyFile, UppyFile } from '@uppy/core';
  import Transloadit from '@uppy/transloadit';
  
 
  import '@uppy/core/dist/style.css';
  import '@uppy/drag-drop/dist/style.css';
+import { MagicWandIcon } from "@radix-ui/react-icons";
  
  const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
  const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
@@ -259,6 +261,7 @@ export default function EnhancedProductMoodboard() {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasUnsavedImageGalleryChanges, setHasUnsavedImageGalleryChanges] = useState(false);
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
@@ -273,6 +276,11 @@ export default function EnhancedProductMoodboard() {
   const [activeTab, setActiveTab] = useState<'form' | 'refine' | 'analytics'>(
     'form'
   );
+  const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  
+  
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   const SEGMENT_ID = 'unique-segment-id';
@@ -296,13 +304,14 @@ export default function EnhancedProductMoodboard() {
     }
   };
   
-  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+  const { data: productDataQuery, loading: loadingProduct, refetch } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
 
   const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
+  const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
 
   const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
   const [publishSegments] = useMutation(PUBLISH_SEGMENTS);
@@ -540,9 +549,45 @@ export default function EnhancedProductMoodboard() {
     setCustomFieldOptions('');
   };
   
-  const saveImage = async (file: UppyFile, uploadedUrl: string) => {
-    setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
+
+  const handleSaveOrder = () => {
+    localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
+    setHasUnsavedImageGalleryChanges(false); // Reset to no unsaved changes
+    alert('Image order saved!');
   };
+
+
+  // Remove duplicates utility function
+  const removeDuplicates = (gallery: Image[]) => {
+    const seen = new Set();
+    return gallery.filter(image => {
+      if (!image.url || seen.has(image.url)) {  // Ensure valid URL and no duplicates
+        return false;
+      }
+      seen.add(image.url);
+      return true;
+    });
+  };
+
+  // Cancel all uploads
+  const handleCancel = () => {
+    uppyInstance.cancelAll();
+    setFiles([]);
+  };
+
+  // Save uploaded image to backend or state (simulating database save here)
+  const saveImage = async (file: UploadedUppyFile<Record<string, unknown>, Record<string, unknown>>) => {
+    const uploadedUrl = file.uploadURL;
+    
+    if (uploadedUrl) { // Ensure valid upload URL
+      setImageGallery((prev) => {
+        const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
+        return removeDuplicates(newGallery); // Remove duplicates after adding
+      });
+      setHasUnsavedImageGalleryChanges(true);
+    }
+  };
+
     // Save gallery and primary photo to localStorage whenever they change
     useEffect(() => {
       localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
@@ -556,20 +601,46 @@ export default function EnhancedProductMoodboard() {
       }
     }, [primaryPhoto]);
 
-    useEffect(() => {
-      uppyInstance.on('upload-success', (file: UppyFile | undefined, response: SuccessResponse) => {
-        if (file) {
-          const uploadedUrl = response.body.url; // Adjust based on your response structure
-          saveImage(file, uploadedUrl);
-        } else {
-          console.error('File not found in upload-success event');
+   
+  // Handle Uppy events and completion
+  useEffect(() => {
+    uppyInstance.on('upload', () => {
+      setIsUploading(true);
+    });
+
+    uppyInstance.on('upload-progress', (file, progress) => {
+      setUploadProgress(progress.percentage);
+    });
+
+    uppyInstance.on('upload-success', (file, response) => {
+      if (file) { // Ensure 'file' is not undefined
+        const uploadedUrl = response.body.url; // Ensure URL exists
+        if (uploadedUrl) {
+          setImageGallery((prev) => {
+            const newGallery = [...prev, { id: file.id, url: uploadedUrl }];
+            return removeDuplicates(newGallery); // Ensure no duplicates are added
+          });
+          setUploadProgress(0);
         }
-      });
-  
-      return () => {
-        uppyInstance.close();
-      };
-    }, []);
+      }
+    });
+    
+    uppyInstance.on('complete', async (result) => {
+      const uploadedImages = result.successful;
+      
+      // Filter out any empty or invalid image objects
+      const validImages = uploadedImages.filter(file => file.uploadURL);
+      
+      for (const file of validImages) {
+        await saveImage(file); // Save each image and ensure no duplicates
+      }
+      setIsUploading(false);
+    });
+
+    return () => {
+      uppyInstance.close(); // Cleanup Uppy instance on unmount
+    };
+  }, []);
   
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
@@ -596,11 +667,21 @@ export default function EnhancedProductMoodboard() {
 
 
 
-
+  // Handle adding files to Uppy
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files || []);
-    for (const file of selectedFiles) {
-      uppyInstance.addFile({ name: file.name, type: file.type, data: file });
+    const selectedFiles = event.target.files;
+  
+    if (selectedFiles) { // Null check
+      for (let i = 0; i < selectedFiles.length; i++) {
+        uppyInstance.addFile({
+          name: selectedFiles[i].name,
+          type: selectedFiles[i].type,
+          data: selectedFiles[i],
+        });
+      }
+      setFiles(uppyInstance.getFiles());
+      setHasUnsavedImageGalleryChanges(true); // Mark as changed
+
     }
   };
 
@@ -780,22 +861,19 @@ export default function EnhancedProductMoodboard() {
                         {...provided.droppableProps}
                         className="flex flex-wrap gap-2"
                       >
-                        {imageGallery.map((image, index) => (
-                          <Draggable key={image.id} draggableId={image.id} index={index}>
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="relative w-16 h-16"
-                                style={{ ...provided.draggableProps.style }}
-                              >
-                                <img
-                                  src={image.url}
-                                  alt={`Gallery ${index}`}
-                                  className="w-full h-full object-cover rounded"
-                                />
-                                <Button
+                        {imageGallery
+                .filter(image => image.url) // Only show images with a valid URL
+                .map((image, index) => (
+                  <Draggable key={image.id} draggableId={image.id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className="relative w-16 h-16"
+                      >
+                        <img src={image.url} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded" />
+                    <Button
                                   size="sm"
                                   variant="destructive"
                                   className="absolute top-0 right-0 h-4 w-4 p-0"
@@ -803,10 +881,10 @@ export default function EnhancedProductMoodboard() {
                                 >
                                   <MinusIcon className="h-2 w-2" />
                                 </Button>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
                         {provided.placeholder}
                         <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
                           <input
@@ -822,8 +900,36 @@ export default function EnhancedProductMoodboard() {
                     )}
                   </Droppable>
                 </DragDropContext>
+                {isUploading && <div>Uploading...</div>}
+        {isUploading && (
+        <div className="progress-bar">
+          <div className="progress" style={{ width: `${uploadProgress}%` }} />
+        </div>
+      )}   {/* Reload button to trigger refetch */}
+
+{!storedImages?.length && (
+  <Button onClick={() => refetch()}>
+    <RefreshCcw />
+  </Button>
+)}
+
+
+                <Button onClick={handleCancel} disabled={files.length === 0}>
+          Cancel Upload
+        </Button>
+
+
+                                <Button                         disabled={!hasUnsavedImageGalleryChanges}
+ onClick={handleSaveOrder}>Save Order</Button>
+ <Button onClick={() => refetch()}>
+ <MagicWandIcon />
+</Button>
+
+
               </AccordionContent>
             </AccordionItem>
+
+          
 
             {/* OG Image Section */}
             <AccordionItem value="og-image">
