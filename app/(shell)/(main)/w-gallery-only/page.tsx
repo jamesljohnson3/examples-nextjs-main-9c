@@ -524,22 +524,19 @@ const ImageUploader: React.FC = () => {
                         {...provided.droppableProps}
                         className="flex flex-wrap gap-2"
                       >
-                        {imageGallery.map((image, index) => (
-                          <Draggable key={image.id} draggableId={image.id} index={index}>
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="relative w-16 h-16"
-                                style={{ ...provided.draggableProps.style }}
-                              >
-                                <img
-                                  src={image.url}
-                                  alt={`Gallery ${index}`}
-                                  className="w-full h-full object-cover rounded"
-                                />
-                                <Button
+                        {imageGallery
+                .filter(image => image.url) // Only show images with a valid URL
+                .map((image, index) => (
+                  <Draggable key={image.id} draggableId={image.id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className="relative w-16 h-16"
+                      >
+                        <img src={image.url} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded" />
+                    <Button
                                   size="sm"
                                   variant="destructive"
                                   className="absolute top-0 right-0 h-4 w-4 p-0"
@@ -547,10 +544,10 @@ const ImageUploader: React.FC = () => {
                                 >
                                   <MinusIcon className="h-2 w-2" />
                                 </Button>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
                         {provided.placeholder}
                         <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
                           <input
