@@ -98,6 +98,10 @@ interface Segment {
   slug: string;
   post: { [key: string]: FormField };
 }
+interface Image {
+  id: string;
+  url: string;
+}
 
 
 const initialAvailableFields: FormField[] = [
@@ -357,7 +361,7 @@ const ImageUploader: React.FC = () => {
       setFormFields(mergedFields);  // Set merged fields in the form
     }
   }, [productDataQuery, segmentsData]);
-  
+
   useEffect(() => {
     const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
     setImageGallery(storedImages);
