@@ -639,7 +639,7 @@ export default function EnhancedProductMoodboard() {
         }
         const imageUrl = await uploadtoBucket(file);
         const downloadLink = URL.createObjectURL(file);
-  
+        setHasUnsavedChanges(true)
         if (type === 'primary') {
           setPrimaryPhoto(imageUrl);
           setDownloadPrimaryPhotoLink(downloadLink);
@@ -726,6 +726,7 @@ export default function EnhancedProductMoodboard() {
   const handleGalleryRemoveImage = (id: string) => {
     setImageGallery((prev) => prev.filter((image) => image.id !== id));
     setHasUnsavedImageGalleryChanges(true); // Mark as changed
+    setHasUnsavedChanges(true)
 
   };
 
@@ -737,6 +738,7 @@ export default function EnhancedProductMoodboard() {
     reorderedImages.splice(result.destination.index, 0, movedImage);
     setImageGallery(reorderedImages);
     setHasUnsavedImageGalleryChanges(true); // Mark as changed
+    setHasUnsavedChanges(true)
 
   };
 
