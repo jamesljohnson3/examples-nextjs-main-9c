@@ -279,8 +279,9 @@ export default function EnhancedProductMoodboard() {
   const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
-  
+  const [downloadOgLink, setDownloadOgLink] = useState(null);
+  const [downloadPrimaryPhotoLink, setDownloadPrimaryPhotoLink] = useState(null);
+
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   const SEGMENT_ID = 'unique-segment-id';
@@ -658,13 +659,44 @@ export default function EnhancedProductMoodboard() {
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
+
+  const upload = async () => {
+    const { file } = previewFile;
+
+    const fileExt = file.name.substring(file.name.lastIndexOf('.') + 1);
+    const uuid = uuidv4(); // Generate a UUID
+    const fileName = `${uuid}-file.${fileExt}`; // Append UUID to the image name
+
+    try {
+      const { data } = await axios.post(`/api/uploader`, file, {
+        headers: {
+          'content-type': file.type,
+          'x-filename': fileName,
+        },
+      });
+
+      // Construct the download link
+      const downloadLink = `${data.url}`;
+if primary or case priimary og for seperateliinks
+      // Set the download link state
+      setDownloadLink(downloadLink);
+    } catch (err) {
+      console.error(err);
+    }
+
+    setPreviewFile(null);
+  };
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       if (type === 'primary') {
+        upload()
         setPrimaryPhoto(imageUrl);
       } else if (type === 'og') {
+        upload()
+
         setOgImage(imageUrl);
       }
     }
