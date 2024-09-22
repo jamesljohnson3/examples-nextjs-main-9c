@@ -38,7 +38,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, ChangeEvent } from 'react';
 import { useQuery, useMutation } from '@apollo/client'; 
 
 
@@ -49,6 +49,7 @@ import { Input } from "@/components/ui/input";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT } from '@/app/(shell)/(main)/queries';
 import { DELETE_SEGMENT } from './mutations';
+import axios from 'axios';
 
 
 const RESERVED_FIELDS = new Set([
