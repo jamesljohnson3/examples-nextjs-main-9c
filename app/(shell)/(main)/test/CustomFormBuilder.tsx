@@ -186,22 +186,22 @@ function VersionControl({
 
 }) {
 
-  const [activeVersion, setActiveVersion] = useState<string | null>(null);
-
   const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
   });
 
+  const [activeVersion, setActiveVersion] = useState<string | null>(null);
+
   useEffect(() => {
-    if (versions.length > 0) {
-      const latestVersion = versions[versions.length - 1];
+    if (data?.ProductVersion.length > 0) {
+      const latestVersion = data.ProductVersion[data.ProductVersion.length - 1];
       setActiveVersion(latestVersion.id);
       setProductData(latestVersion.data);
       setPrimaryPhoto(latestVersion.data.primaryPhoto || null);
       setOgImage(latestVersion.data.ogImage || null);
       setImageGallery(latestVersion.data.imageGallery || []);
     }
-  }, [versions]);  // Re-run effect when versions update
+  }, [data]); // Re-run when data updates
 
   
   const handleSwitchVersion = async (version: Version) => {
