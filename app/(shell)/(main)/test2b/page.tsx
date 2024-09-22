@@ -1,5 +1,6 @@
 
 "use client"
+
 import React, { useState, useEffect } from 'react';
 import Uppy, { UppyFile } from '@uppy/core';
 import Transloadit from '@uppy/transloadit';
@@ -171,3 +172,4 @@ const MediaUpload: React.FC = () => {
 };
 
 export default MediaUpload;
+
