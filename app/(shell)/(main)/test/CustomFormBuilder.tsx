@@ -279,8 +279,9 @@ export default function EnhancedProductMoodboard() {
   const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
-  
+  const [downloadOgLink, setDownloadOgLink] = useState(null);
+  const [downloadPrimaryPhotoLink, setDownloadPrimaryPhotoLink] = useState(null);
+
   const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   const SEGMENT_ID = 'unique-segment-id';
@@ -293,7 +294,17 @@ export default function EnhancedProductMoodboard() {
     }
   });
   
-
+  const handleDeleteSegment = async (segmentId: any) => {
+    if (!window.confirm('Are you sure you want to delete this segment?')) {
+      return;
+    }
+    try {
+      await deleteSegment({ variables: { segmentId } });
+    } catch (error) {
+      console.error('Error executing delete mutation:', error);
+    }
+  };
+  
   const { data: productDataQuery, loading: loadingProduct, refetch } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -553,6 +564,12 @@ export default function EnhancedProductMoodboard() {
   };
   
 
+  const handleSaveOrder = () => {
+    localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
+    setHasUnsavedImageGalleryChanges(false); // Reset to no unsaved changes
+    alert('Image order saved!');
+  };
+
 
   // Remove duplicates utility function
   const removeDuplicates = (gallery: Image[]) => {
@@ -581,7 +598,6 @@ export default function EnhancedProductMoodboard() {
         const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
         return removeDuplicates(newGallery); // Remove duplicates after adding
       });
-      uploadtoBucket()
       setHasUnsavedImageGalleryChanges(true);
     }
   };
@@ -599,23 +615,7 @@ export default function EnhancedProductMoodboard() {
       }
     }, [primaryPhoto]);
 
-    const uploadtoBucket = async () => {};
-
-    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
-      const file = event.target.files?.[0];
-      if (file) {
-        const imageUrl = URL.createObjectURL(file);
-        if (type === 'primary') {
-          uploadtoBucket()
-          setPrimaryPhoto(imageUrl);
-        } else if (type === 'og') {
-          uploadtoBucket()
-  
-          setOgImage(imageUrl);
-        }
-      }
-    };
-  
+   
   // Handle Uppy events and completion
   useEffect(() => {
     uppyInstance.on('upload', () => {
@@ -648,6 +648,7 @@ export default function EnhancedProductMoodboard() {
       for (const file of validImages) {
         await saveImage(file); // Save each image and ensure no duplicates
       }
+      uploadtoBucket()
       setIsUploading(false);
     });
 
@@ -659,6 +660,33 @@ export default function EnhancedProductMoodboard() {
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
   }
+
+  const uploadtoBucket = async () => {};
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      if (type === 'primary') {
+        uploadtoBucket()
+        setPrimaryPhoto(imageUrl);
+      } else if (type === 'og') {
+        uploadtoBucket()
+
+        setOgImage(imageUrl);
+      }
+    }
+  };
+
+  const handleMetadataChange = (
+    key: 'title' | 'description' | 'keywords',
+    value: string
+  ) => {
+    setMetadata({ ...metadata, [key]: value });
+    setHasUnsavedChanges(true);
+  };
+
+
 
   // Handle adding files to Uppy
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -683,12 +711,6 @@ export default function EnhancedProductMoodboard() {
   };  // Handle removing image from gallery
 
 
-  const handleSaveOrder = () => {
-    localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
-    setHasUnsavedImageGalleryChanges(false); // Reset to no unsaved changes
-    alert('Image order saved!');
-  };
-
   const handleGalleryRemoveImage = (id: string) => {
     setImageGallery((prev) => prev.filter((image) => image.id !== id));
     setHasUnsavedImageGalleryChanges(true); // Mark as changed
@@ -705,27 +727,6 @@ export default function EnhancedProductMoodboard() {
     setHasUnsavedImageGalleryChanges(true); // Mark as changed
 
   };
-
-
-  const handleMetadataChange = (
-    key: 'title' | 'description' | 'keywords',
-    value: string
-  ) => {
-    setMetadata({ ...metadata, [key]: value });
-    setHasUnsavedChanges(true);
-  };
-
-  const handleDeleteSegment = async (segmentId: any) => {
-    if (!window.confirm('Are you sure you want to delete this segment?')) {
-      return;
-    }
-    try {
-      await deleteSegment({ variables: { segmentId } });
-    } catch (error) {
-      console.error('Error executing delete mutation:', error);
-    }
-  };
-  
 
   if (deleteLoading) return <p>Deleting...</p>;
   if (deleteError) return <p>Error deleting segment.</p>;
