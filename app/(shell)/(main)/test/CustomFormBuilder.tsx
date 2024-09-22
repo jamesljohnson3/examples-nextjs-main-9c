@@ -131,6 +131,9 @@ interface Segment {
 }
 
 
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB in bytes
+
+
 const initialAvailableFields: FormField[] = [
   { id: 'name', type: 'text', label: 'Name' },
   { id: 'description', type: 'textarea', label: 'Description' },
@@ -269,6 +272,7 @@ export default function EnhancedProductMoodboard() {
   const [ogImage, setOgImage] = useState<string | null>(null);
   const [downloadPrimaryPhotoLink, setDownloadPrimaryPhotoLink] = useState<string | null>(null);
   const [downloadOgLink, setDownloadOgLink] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [metadata, setMetadata] = useState({
     title: '',
@@ -626,6 +630,13 @@ export default function EnhancedProductMoodboard() {
     const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
       const file = event.target.files?.[0];
       if (file) {
+        // Check file size
+        if (file.size > MAX_FILE_SIZE) {
+          setErrorMessage("File size must be 4 MB or less.");
+          return;
+        } else {
+          setErrorMessage(null); // Clear error message
+        }
         const imageUrl = URL.createObjectURL(file);
         const downloadLink = await uploadtoBucket(file);
   
@@ -859,9 +870,11 @@ export default function EnhancedProductMoodboard() {
         <AccordionTrigger className="text-sm font-semibold">Primary Photo</AccordionTrigger>
         <AccordionContent>
           <div className="flex items-center space-x-2">
-            {downloadPrimaryPhotoLink ? (
+          {errorMessage && <div className="text-red-500">{errorMessage}</div>}
+
+            {primaryPhoto ? (
               <div className="relative w-16 h-16">
-                <img src={downloadPrimaryPhotoLink} alt="Primary" className="w-full h-full object-cover rounded" />
+                <img src={primaryPhoto} alt="Primary" className="w-full h-full object-cover rounded" />
                 <Button
                   size="sm"
                   variant="destructive"
@@ -982,10 +995,13 @@ export default function EnhancedProductMoodboard() {
             <AccordionItem value="og-image">
         <AccordionTrigger className="text-sm font-semibold">OG Image</AccordionTrigger>
         <AccordionContent>
+
+        {errorMessage && <div className="text-red-500">{errorMessage}</div>}
+
           <div className="flex items-center space-x-2">
-            {downloadOgLink ? (
+            {ogImage ? (
               <div className="relative w-16 h-16">
-                <img src={downloadOgLink} alt="OG" className="w-full h-full object-cover rounded" />
+                <img src={ogImage} alt="OG" className="w-full h-full object-cover rounded" />
                 <Button
                   size="sm"
                   variant="destructive"
