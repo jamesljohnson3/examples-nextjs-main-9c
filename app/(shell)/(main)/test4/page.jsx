@@ -57,9 +57,9 @@ const ImageUploadComponent = () => {
         <AccordionTrigger className="text-sm font-semibold">Primary Photo</AccordionTrigger>
         <AccordionContent>
           <div className="flex items-center space-x-2">
-            {primaryPhoto ? (
+            {downloadPrimaryPhotoLink ? (
               <div className="relative w-16 h-16">
-                <img src={primaryPhoto} alt="Primary" className="w-full h-full object-cover rounded" />
+                <img src={downloadPrimaryPhotoLink} alt="Primary" className="w-full h-full object-cover rounded" />
                 <Button
                   size="sm"
                   variant="destructive"
@@ -97,9 +97,9 @@ const ImageUploadComponent = () => {
         <AccordionTrigger className="text-sm font-semibold">OG Image</AccordionTrigger>
         <AccordionContent>
           <div className="flex items-center space-x-2">
-            {ogImage ? (
+            {downloadOgLink ? (
               <div className="relative w-16 h-16">
-                <img src={ogImage} alt="OG" className="w-full h-full object-cover rounded" />
+                <img src={downloadOgLink} alt="OG" className="w-full h-full object-cover rounded" />
                 <Button
                   size="sm"
                   variant="destructive"
@@ -130,7 +130,8 @@ const ImageUploadComponent = () => {
             </a>
           )}
         </AccordionContent>
-      </AccordionItem></Accordion>
+      </AccordionItem>
+      </Accordion>
     </>
   );
 };

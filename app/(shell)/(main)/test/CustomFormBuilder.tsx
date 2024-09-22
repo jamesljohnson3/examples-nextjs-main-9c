@@ -48,7 +48,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { GitBranch } from 'lucide-react';
-import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo, ChangeEvent } from 'react';
 import { useQuery, useMutation } from '@apollo/client'; 
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT, GET_PRODUCT_VERSIONS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
@@ -61,7 +61,9 @@ import { v4 as uuidv4 } from 'uuid';
  import '@uppy/core/dist/style.css';
  import '@uppy/drag-drop/dist/style.css';
 import { MagicWandIcon } from "@radix-ui/react-icons";
- 
+import axios from 'axios';
+
+
  const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
  const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
  const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
@@ -265,6 +267,9 @@ export default function EnhancedProductMoodboard() {
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
   const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
+  const [downloadPrimaryPhotoLink, setDownloadPrimaryPhotoLink] = useState<string | null>(null);
+  const [downloadOgLink, setDownloadOgLink] = useState<string | null>(null);
+
   const [metadata, setMetadata] = useState({
     title: '',
     description: '',
@@ -581,7 +586,6 @@ export default function EnhancedProductMoodboard() {
         const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
         return removeDuplicates(newGallery); // Remove duplicates after adding
       });
-      uploadtoBucket()
       setHasUnsavedImageGalleryChanges(true);
     }
   };
@@ -599,19 +603,38 @@ export default function EnhancedProductMoodboard() {
       }
     }, [primaryPhoto]);
 
-    const uploadtoBucket = async () => {};
-
-    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
+    const uploadtoBucket = async (file: File): Promise<string | null> => {
+      const fileExt = file.name.substring(file.name.lastIndexOf('.') + 1);
+      const uuid = uuidv4();
+      const fileName = `${uuid}-file.${fileExt}`;
+  
+      try {
+        const { data } = await axios.post(`/api/uploader`, file, {
+          headers: {
+            'content-type': file.type,
+            'x-filename': fileName,
+          },
+        });
+  
+        return data.url; // Return the download link
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    };
+  
+    const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
       const file = event.target.files?.[0];
       if (file) {
         const imageUrl = URL.createObjectURL(file);
-        if (type === 'primary') {
-          uploadtoBucket()
-          setPrimaryPhoto(imageUrl);
-        } else if (type === 'og') {
-          uploadtoBucket()
+        const downloadLink = await uploadtoBucket(file);
   
+        if (type === 'primary') {
+          setPrimaryPhoto(imageUrl);
+          setDownloadPrimaryPhotoLink(downloadLink);
+        } else if (type === 'og') {
           setOgImage(imageUrl);
+          setDownloadOgLink(downloadLink);
         }
       }
     };
@@ -833,41 +856,43 @@ export default function EnhancedProductMoodboard() {
              
             {/* Primary Photo Section */}
             <AccordionItem value="primary-photo">
-              <AccordionTrigger className="text-sm font-semibold">
-                Primary Photo
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="flex items-center space-x-2">
-                  {primaryPhoto ? (
-                    <div className="relative w-16 h-16">
-                      <img
-                        src={primaryPhoto}
-                        alt="Primary"
-                        className="w-full h-full object-cover rounded"
-                      />
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="absolute top-0 right-0 h-4 w-4 p-0"
-                        onClick={() => setPrimaryPhoto(null)}
-                      >
-                        <MinusIcon className="h-2 w-2" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                      <input
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => handleImageUpload(e, 'primary')}
-                        accept="image/*"
-                      />
-                      <Image className="h-6 w-6 text-muted-foreground" />
-                    </label>
-                  )}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+        <AccordionTrigger className="text-sm font-semibold">Primary Photo</AccordionTrigger>
+        <AccordionContent>
+          <div className="flex items-center space-x-2">
+            {downloadPrimaryPhotoLink ? (
+              <div className="relative w-16 h-16">
+                <img src={downloadPrimaryPhotoLink} alt="Primary" className="w-full h-full object-cover rounded" />
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="absolute top-0 right-0 h-4 w-4 p-0"
+                  onClick={() => {
+                    setPrimaryPhoto(null);
+                    setDownloadPrimaryPhotoLink(null);
+                  }}
+                >
+                  <MinusIcon className="h-2 w-2" />
+                </Button>
+              </div>
+            ) : (
+              <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleImageUpload(e, 'primary')}
+                  accept="image/*"
+                />
+                <Image className="h-6 w-6 text-muted-foreground" />
+              </label>
+            )}
+          </div>
+          {downloadPrimaryPhotoLink && (
+            <a href={downloadPrimaryPhotoLink} target="_blank" rel="noopener noreferrer">
+              Download Primary Photo
+            </a>
+          )}
+        </AccordionContent>
+      </AccordionItem>
 
             {/* Gallery Section */}
             <AccordionItem value="image-gallery">
@@ -955,48 +980,43 @@ export default function EnhancedProductMoodboard() {
 
             {/* OG Image Section */}
             <AccordionItem value="og-image">
-              <AccordionTrigger className="text-sm font-semibold">
-                OG Image
-              </AccordionTrigger>
-              <AccordionContent>
-                <Card>
-                  <CardContent className="p-2 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      {ogImage ? (
-                        <div className="w-16 h-16 relative">
-                          <img
-                            src={ogImage}
-                            alt="OG"
-                            className="w-full h-full object-cover rounded"
-                          />
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="absolute top-0 right-0 h-4 w-4 p-0"
-                            onClick={() => setOgImage(null)}
-                          >
-                            <MinusIcon className="h-2 w-2" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                          <input
-                            type="file"
-                            className="hidden"
-                            onChange={(e) => handleImageUpload(e, 'og')}
-                            accept="image/*"
-                          />
-                          <FileImage className="h-6 w-6 text-muted-foreground" />
-                        </label>
-                      )}
-                      <span className="text-xs text-muted-foreground">
-                        Set Open Graph image for social sharing
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
+        <AccordionTrigger className="text-sm font-semibold">OG Image</AccordionTrigger>
+        <AccordionContent>
+          <div className="flex items-center space-x-2">
+            {downloadOgLink ? (
+              <div className="relative w-16 h-16">
+                <img src={downloadOgLink} alt="OG" className="w-full h-full object-cover rounded" />
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="absolute top-0 right-0 h-4 w-4 p-0"
+                  onClick={() => {
+                    setOgImage(null);
+                    setDownloadOgLink(null);
+                  }}
+                >
+                  <MinusIcon className="h-2 w-2" />
+                </Button>
+              </div>
+            ) : (
+              <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleImageUpload(e, 'og')}
+                  accept="image/*"
+                />
+                <FileImage className="h-6 w-6 text-muted-foreground" />
+              </label>
+            )}
+          </div>
+          {downloadOgLink && (
+            <a href={downloadOgLink} target="_blank" rel="noopener noreferrer">
+              Download OG Image
+            </a>
+          )}
+        </AccordionContent>
+      </AccordionItem>
 
             {/* Metadata Section */}
             <AccordionItem value="metadata">
