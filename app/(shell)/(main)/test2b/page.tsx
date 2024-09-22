@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { Button } from "@/components/ui/button";
-import { PlusIcon, MinusIcon, Image, FileImage } from 'lucide-react';
+import { PlusIcon, RefreshCcw, MinusIcon, Image, FileImage } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -178,6 +178,10 @@ const ImageUploader: React.FC = () => {
                     )}
                   </Droppable>
                 </DragDropContext>
+                <Button onClick={refetch}>
+        <RefreshCcw />
+      </Button>
+
               </AccordionContent>
             </AccordionItem>
 

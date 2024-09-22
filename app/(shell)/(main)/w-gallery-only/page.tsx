@@ -38,6 +38,7 @@ import {
   Image,
   FileImage,
   X,
+  RefreshCcw,
 } from 'lucide-react';
 import {
   ResizableHandle,
@@ -285,7 +286,7 @@ const ImageUploader: React.FC = () => {
     keywords: '',
   });
   
-  const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
+  const { data: productDataQuery, loading: loadingProduct, refetch } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
 
@@ -545,7 +546,10 @@ const ImageUploader: React.FC = () => {
         <div className="progress-bar">
           <div className="progress" style={{ width: `${uploadProgress}%` }} />
         </div>
-      )}
+      )}   {/* Reload button to trigger refetch */}
+      <Button onClick={refetch}>
+        <RefreshCcw />
+      </Button>
                 <Button onClick={handleCancel} disabled={files.length === 0}>
           Cancel Upload
         </Button>
