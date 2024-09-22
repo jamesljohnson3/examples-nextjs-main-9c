@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Input } from "@/components/ui/input";
@@ -103,49 +103,58 @@ const ProductPage: React.FC = () => {
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
   
-  useEffect(() => {
-    if (productDataQuery?.Product) {
-      const product = productDataQuery.Product[0];
+  // Calculate merged fields using useMemo OUTSIDE of useEffect 
+  const mergedFields = useMemo(() => {
+    if (productDataQuery?.Product && !loadingProduct && !loadingSegments) {
+      const loadedProductData = productDataQuery.Product[0];
 
-      // Initialize formFields with fetched data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
-        value: product[field.id] || ''
+        value: loadedProductData[field.id] || '',
       }));
 
-      setFormFields(initialFields);
+      if (segmentsData) {
+        const segmentFields = segmentsData.Segment.flatMap((segment: Segment) => {
+          if (typeof segment.post !== 'object') {
+            console.error('Invalid segment.post data:', segment.post);
+            return [];
+          }
 
-      // Exclude these fields from remainingFields
-      const excludedFields = new Set(initialFields.map(field => field.id));
-      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+          return Object.values(segment.post).map((field) => ({
+            id: field.id || uuidv4(),
+            type: field.type || 'text',
+            label: field.label || '',
+            value: field.value || '',
+            options: field.options || [],
+          }));
+        });
 
-      setRemainingFields(updatedRemainingFields);
-      setProductData(product);
+        return [...initialFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
+          if (!acc.find(field => field.id === current.id || field.label === current.label)) {
+            acc.push(current);
+          }
+          return acc;
+        }, []);
+      } else {
+        return initialFields; 
+      }
+    } else { 
+      return []; // Return empty array while data is loading
     }
-  }, [productDataQuery]);
+  }, [productDataQuery, loadingSegments, loadingProduct, segmentsData]); 
+
   useEffect(() => {
-    if (segmentsData) {
-      console.log(segmentsData);
-      setSegments(segmentsData.Segment);
-  
-      // Flatten and extract form fields from segments
-      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
-        Object.values(segment.post).map(field => ({
-          id: field.id || uuidv4(), // Ensure each field has a unique ID
-          type: field.type || 'text',
-          label: field.label || '',
-          value: field.value || '',
-          options: field.options || []
-        }))
-      );
-  
-      // Log the transformed segment fields
-      console.log('formfields', segmentFields);
-  
-      setFormFields(segmentFields);
+    if (mergedFields.length > 0) { // Only update states if mergedFields is calculated
+      // Set product data and image states
+      const loadedProductData = productDataQuery.Product[0];
+      setProductData(loadedProductData);
+      // ... set primaryPhoto, ogImage, metadata, imageGallery ... 
+
+      // Set form fields and remaining fields
+      setFormFields(mergedFields);
+      setRemainingFields(initialAvailableFields.filter(field => !mergedFields.some((mergedField: { id: string; }) => mergedField.id === field.id)));
     }
-  }, [segmentsData]);
-  
+  }, [mergedFields]); 
   
 
 

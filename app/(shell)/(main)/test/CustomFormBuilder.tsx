@@ -324,6 +324,35 @@ export default function EnhancedProductMoodboard() {
     if (productDataQuery?.Product && !loadingProduct && !loadingSegments) {
       const loadedProductData = productDataQuery.Product[0];
 
+      
+
+
+      // Set the product data and fields
+      setProductData(loadedProductData);
+      setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
+      setOgImage(loadedProductData.ogImage || null);
+      setMetadata({
+        title: loadedProductData.metadata?.title || '',
+        description: loadedProductData.metadata?.description || '',
+        keywords: loadedProductData.metadata?.keywords || '',
+      });
+
+
+      // Initialize image gallery
+    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
+    
+    // Use stored images if available, otherwise use loaded product data
+    const initialGallery = storedImages.length > 0 
+      ? storedImages 
+      : (loadedProductData.imageGallery?.map((url: any) => ({
+          id: url,
+          url,
+        })) || []);
+
+    setImageGallery(initialGallery);
+
+
+      // Initialize form fields from available fields and product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: loadedProductData[field.id] || '',
@@ -671,22 +700,24 @@ export default function EnhancedProductMoodboard() {
 
   const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     handleFileInput(event)
+  };  // Handle removing image from gallery
+
+
+  const handleGalleryRemoveImage = (id: string) => {
+    setImageGallery((prev) => prev.filter((image) => image.id !== id));
+    setHasUnsavedImageGalleryChanges(true); // Mark as changed
+
   };
 
-
-  const handleRemoveImage = (id: string) => {
-    setImageGallery(prev => prev.filter(image => image.id !== id));
-  };
-
+  // Handle drag-and-drop reordering of images
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-
     const reorderedImages = Array.from(imageGallery);
     const [movedImage] = reorderedImages.splice(result.source.index, 1);
     reorderedImages.splice(result.destination.index, 0, movedImage);
-
     setImageGallery(reorderedImages);
-    setHasUnsavedChanges(true);
+    setHasUnsavedImageGalleryChanges(true); // Mark as changed
+
   };
 
   if (deleteLoading) return <p>Deleting...</p>;
@@ -861,7 +892,7 @@ export default function EnhancedProductMoodboard() {
                                   size="sm"
                                   variant="destructive"
                                   className="absolute top-0 right-0 h-4 w-4 p-0"
-                                  onClick={() => handleRemoveImage(image.id)}
+                                  onClick={() => handleGalleryRemoveImage(image.id)}
                                 >
                                   <MinusIcon className="h-2 w-2" />
                                 </Button>
