@@ -648,7 +648,7 @@ export default function EnhancedProductMoodboard() {
       for (const file of validImages) {
         await saveImage(file); // Save each image and ensure no duplicates
       }
-      uploadtoBucket()
+
       setIsUploading(false);
     });
 
@@ -661,18 +661,18 @@ export default function EnhancedProductMoodboard() {
     return <div>Loading...</div>;
   }
 
-  const uploadtoBucket = async () => {};
 
+  
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'primary' | 'og') => {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       if (type === 'primary') {
-        uploadtoBucket()
+
         setPrimaryPhoto(imageUrl);
       } else if (type === 'og') {
-        uploadtoBucket()
 
+        
         setOgImage(imageUrl);
       }
     }
