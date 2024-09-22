@@ -162,7 +162,10 @@ function VersionControl({
   setOgImage, 
   imageGallery, 
   setImageGallery,
-  refetchVersions
+  refetchProduct,
+  refetchVersions,
+  handleSave,
+  versions
 }: { 
   productId: string; 
   setProductData: any;
@@ -174,42 +177,34 @@ function VersionControl({
   ogImage: string | null; 
   setOgImage: any; 
   imageGallery: { id: string; url: string }[]; 
-  setImageGallery: any; 
-  refetchVersions: () => void;
+  setImageGallery: any;   
+  refetchProduct: () => Promise<any>;
+  refetchVersions: () => Promise<any>;
+  handleSave: () => void; // Add handleSave as a prop
+  versions: Version[];  // Receive versions as a prop
+
 
 }) {
-  const [versions, setVersions] = useState<Version[]>([]);
+
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
 
-  const { data, loading, error, refetch } = useQuery(GET_PRODUCT_VERSIONS, {
+  const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
   });
 
   useEffect(() => {
-    if (data) {
-      const loadedProductVersions = data.ProductVersion;
-      setVersions(loadedProductVersions);
-
-      const storedVersionId = localStorage.getItem('productVersionId');
-      if (storedVersionId) {
-        const storedVersion = loadedProductVersions.find(
-          (version: { id: string }) => version.id === storedVersionId
-        );
-        if (storedVersion) {
-          setActiveVersion(storedVersion.id);
-          setProductData(storedVersion.data);
-          setPrimaryPhoto(storedVersion.data.primaryPhoto || null);
-        }
-      } else {
-        const latestVersion = loadedProductVersions[loadedProductVersions.length - 1];
-        setActiveVersion(latestVersion.id);
-        setProductData(latestVersion.data);
-        setPrimaryPhoto(latestVersion.data.primaryPhoto || null);
-      }
+    if (versions.length > 0) {
+      const latestVersion = versions[versions.length - 1];
+      setActiveVersion(latestVersion.id);
+      setProductData(latestVersion.data);
+      setPrimaryPhoto(latestVersion.data.primaryPhoto || null);
+      setOgImage(latestVersion.data.ogImage || null);
+      setImageGallery(latestVersion.data.imageGallery || []);
     }
-  }, [data]);
+  }, [versions]);  // Re-run effect when versions update
 
-  const handleSwitchVersion = (version: Version) => {
+  
+  const handleSwitchVersion = async (version: Version) => {
     setActiveVersion(version.id);
     setProductData(version.data);
     setPrimaryPhoto(version.data.primaryPhoto || null);
@@ -222,6 +217,9 @@ function VersionControl({
     });
     setHasUnsavedChanges(true);
     localStorage.setItem('productVersionId', version.id);
+
+    // Refetch product data when switching versions
+    await refetchProduct();
   };
   const reversedVersions = versions.slice().reverse(); // Create a copy and reverse
 
@@ -358,10 +356,13 @@ export default function EnhancedProductMoodboard() {
   });
   
 
-  const { data: productDataQuery, loading: loadingProduct, refetch } = useQuery(GET_PRODUCT, {
+  const { data: productDataQuery, loading: loadingProduct, refetch: refetchProduct  } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
-
+  // Query to get product versions
+  const {data: versionData,  refetch: refetchVersions } = useQuery(GET_PRODUCT_VERSIONS, {
+    variables: { productId: PRODUCT_ID }, // Adjust productId as needed
+  });
   const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
@@ -541,7 +542,7 @@ const handleSave = async () => {
 
     localStorage.setItem('productVersionId', uuid);
     setHasUnsavedChanges(false);
-    refetch();
+    await refetchVersions();  // This will refetch the version history
 
     alert('Product version updated and saved with message: ' + changes);
   } catch (error) {
@@ -1024,7 +1025,7 @@ const handleSave = async () => {
       )}   {/* Reload button to trigger refetch */}
 
 {!storedImages?.length && (
-  <Button onClick={() => refetch()}>
+  <Button onClick={() => refetchProduct()}>
     <RefreshCcw />
   </Button>
 )}
@@ -1037,7 +1038,7 @@ const handleSave = async () => {
 
                                 <Button                         disabled={!hasUnsavedImageGalleryChanges}
  onClick={handleSaveOrder}>Save Order</Button>
- <Button onClick={() => refetch()}>
+ <Button onClick={() => refetchProduct()}>
  <MagicWandIcon />
 </Button>
 
@@ -1282,8 +1283,10 @@ const handleSave = async () => {
           setOgImage={setOgImage}
           imageGallery={imageGallery}
           setImageGallery={setImageGallery}
-          refetchVersions={refetch}
-
+          handleSave={handleSave}  // Pass the save handler here
+          versions={versionData?.ProductVersion || []}  // Pass the latest version data
+          refetchProduct={refetchProduct}
+          refetchVersions={refetchVersions}
         />
 
 
