@@ -40,21 +40,14 @@ const ImageUploader: React.FC = () => {
   const [imageGallery, setImageGallery] = useState<Image[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
-  const [hasUnsavedImageGalleryChanges, setHasUnsavedImageGalleryChanges] = useState(false);
 
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
-    variables: { productId: PRODUCT_ID },
+    variables: { productId: PRODUCT_ID }
   });
+
   const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
-    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID },
+    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
-
-  useEffect(() => {
-    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
-    setImageGallery(storedImages);
-  }, []);
-
-
   // Load product data into state
   
   useEffect(() => {
@@ -81,8 +74,6 @@ const ImageUploader: React.FC = () => {
         });
       }
       setFiles(uppyInstance.getFiles());
-      setHasUnsavedImageGalleryChanges(true);
-
     }
   };
   
@@ -105,17 +96,18 @@ const ImageUploader: React.FC = () => {
     setFiles([]);
   };
 
-  const saveImage = async (file: UppyFile, uploadedUrl: string) => {
-    setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
-    setHasUnsavedImageGalleryChanges(true);
+  // Save uploaded image to backend or state (simulating database save here)
+  const saveImage = async (file: UploadedUppyFile<Record<string, unknown>, Record<string, unknown>>) => {
+    const uploadedUrl = file.uploadURL; // Get URL from Transloadit
+    setImageGallery((prev) => [...prev, { id: uuidv4(), url: uploadedUrl }]); // Save to gallery
   };
 
   // Handle Uppy completion
   useEffect(() => {
-      uppyInstance.on('upload-success', (file: UppyFile | undefined, response: SuccessResponse) => {
-      if (file) {
-        const uploadedUrl = response.body.url; // Adjust based on your response structure
-        saveImage(file, uploadedUrl);
+    uppyInstance.on('complete', async (result) => {
+      const uploadedImages = result.successful;
+      for (const file of uploadedImages) {
+        await saveImage(file); // Save each image
       }
     });
 
@@ -126,30 +118,28 @@ const ImageUploader: React.FC = () => {
 
 
   
- 
- 
-  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileInput(event)
-  };
 
+  // Handle removing image from gallery
   const handleRemoveImage = (id: string) => {
     setImageGallery((prev) => prev.filter((image) => image.id !== id));
-    setHasUnsavedImageGalleryChanges(true);
   };
 
+  // Handle drag-and-drop reordering of images
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
     const reorderedImages = Array.from(imageGallery);
     const [movedImage] = reorderedImages.splice(result.source.index, 1);
     reorderedImages.splice(result.destination.index, 0, movedImage);
     setImageGallery(reorderedImages);
-    setHasUnsavedImageGalleryChanges(true);
   };
 
+ 
   const handleSaveOrder = () => {
     localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
-    setHasUnsavedImageGalleryChanges(false);
     alert('Image order saved!');
+  };
+  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileInput(event)
   };
 
 
