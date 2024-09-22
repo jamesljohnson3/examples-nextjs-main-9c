@@ -321,7 +321,7 @@ export default function EnhancedProductMoodboard() {
   
       // Check if the image gallery has changed
       const initialGallery = loadedProductData.imageGallery?.map((img: any) => img?.url) || [];
-      const currentGallery = imageGallery.map((img) => img?.url);
+      const currentGallery = imageGallery.map((img) => img?.url).filter(Boolean);
       if (JSON.stringify(initialGallery) !== JSON.stringify(currentGallery)) {
         changes += "Updated image gallery. ";
       }
@@ -520,7 +520,7 @@ const handleSave = async () => {
         },
         primaryPhoto,
         ogImage,
-        imageGallery: imageGallery.map((img) => img.url), // Save the updated image gallery order
+        imageGallery: imageGallery.map((img) => img?.url).filter(Boolean), // Filter out any falsy values (null or undefined)Save the updated image gallery order
       },
     });
 
@@ -989,7 +989,7 @@ const handleSave = async () => {
                         {...provided.dragHandleProps}
                         className="relative w-16 h-16"
                       >
-                        <img src={image.url} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded" />
+                     <img src={image?.url} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded" />
                     <Button
                                   size="sm"
                                   variant="destructive"
