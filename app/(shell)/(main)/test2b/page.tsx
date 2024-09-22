@@ -101,7 +101,6 @@ const MediaUpload: React.FC = () => {
         type="file"
         multiple
         onChange={handleFileInput}
-        className="hidden"
       />
 
       <DragDropContext onDragEnd={handleReorderFiles}>
