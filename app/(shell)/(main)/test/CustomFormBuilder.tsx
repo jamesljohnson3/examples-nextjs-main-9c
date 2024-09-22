@@ -294,6 +294,58 @@ export default function EnhancedProductMoodboard() {
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku';
   const SEGMENT_ID = 'unique-segment-id';
 
+
+  const detectChanges = () => {
+    let changes = "";
+  
+    if (productData && productDataQuery) {
+      const loadedProductData = productDataQuery.Product[0];
+  
+      // Check if product metadata (title, description, keywords) has changed
+      if (
+        metadata.title !== loadedProductData.metadata?.title ||
+        metadata.description !== loadedProductData.metadata?.description ||
+        metadata.keywords !== loadedProductData.metadata?.keywords
+      ) {
+        changes += "Updated product metadata. ";
+      }
+  
+      // Check if primary photo or OG image has changed
+      if (primaryPhoto !== loadedProductData.primaryPhoto) {
+        changes += "Updated primary photo. ";
+      }
+      if (ogImage !== loadedProductData.ogImage) {
+        changes += "Updated OG image. ";
+      }
+  
+      // Check if the image gallery has changed
+      const initialGallery = loadedProductData.imageGallery?.map((img: any) => img.url) || [];
+      const currentGallery = imageGallery.map((img) => img.url);
+      if (JSON.stringify(initialGallery) !== JSON.stringify(currentGallery)) {
+        changes += "Updated image gallery. ";
+      }
+  
+      // Check if any of the basic product fields (name, description, price, quantity, category) have changed
+      if (
+        productData.name !== loadedProductData.name ||
+        productData.description !== loadedProductData.description ||
+        productData.price !== loadedProductData.price ||
+        productData.quantity !== loadedProductData.quantity ||
+        productData.category !== loadedProductData.category
+      ) {
+        changes += "Updated product details. ";
+      }
+  
+      // If no specific changes were detected, mark it as a general product version update
+      if (!changes) {
+        changes = "Updated product version.";
+      }
+    }
+  
+    return changes.trim();
+  };
+
+  
   const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
     onCompleted: () => alert('Segment deleted successfully!'),
     onError: (error) => {
@@ -438,64 +490,67 @@ export default function EnhancedProductMoodboard() {
     setFormFields(reorderedFields);
     setHasUnsavedChanges(true);
   };
+const handleSave = async () => {
+  if (!productData) {
+    alert('No product data to save!');
+    return;
+  }
 
-  const handleSave = async () => {
-    if (!productData) {
-      alert('No product data to save!');
-      return;
-    }
+  const { id, name, description, price, quantity, category } = productData;
+  const parsedPrice = parseFloat(price as unknown as string);
+  const parsedQuantity = parseInt(quantity as unknown as string);
 
-    const { id, name, description, price, quantity, category } = productData;
-    const parsedPrice = parseFloat(price as unknown as string);
-    const parsedQuantity = parseInt(quantity as unknown as string);
+  if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
+    alert('Invalid price or quantity');
+    return;
+  }
 
-    if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
-      alert('Invalid price or quantity');
-      return;
-    }
-
-    try {
-      // Save product information including metadata, primary photo, OG image, and gallery
-      await saveProduct({
-        variables: {
-          productId: PRODUCT_ID,
-          name,
-          description,
-          price: parsedPrice,
-          quantity: parsedQuantity,
-          category,
-          metadata: {
-            title: metadata.title,
-            description: metadata.description,
-            keywords: metadata.keywords,
-          },
-          primaryPhoto,
-          ogImage,
-          imageGallery: imageGallery.map((img) => img.url), // Save the updated image gallery order
+  try {
+    // Save product information including metadata, primary photo, OG image, and gallery
+    await saveProduct({
+      variables: {
+        productId: PRODUCT_ID,
+        name,
+        description,
+        price: parsedPrice,
+        quantity: parsedQuantity,
+        category,
+        metadata: {
+          title: metadata.title,
+          description: metadata.description,
+          keywords: metadata.keywords,
         },
-      });
+        primaryPhoto,
+        ogImage,
+        imageGallery: imageGallery.map((img) => img.url), // Save the updated image gallery order
+      },
+    });
 
-      const versionNumber = Math.floor(Date.now() / 1000);
-      const uuid = uuidv4();
+    // Detect changes and update product version with appropriate message
+    const changes = detectChanges();
 
-      await updateProductVersion({
-        variables: {
-          productId: PRODUCT_ID,
-          versionNumber,
-          changes: "Updated product version",
-          data: productData,
-          id: uuid,
-        },
-      });
+    const versionNumber = Math.floor(Date.now() / 1000);
+    const uuid = uuidv4();
 
-      localStorage.setItem('productVersionId', uuid);
-      setHasUnsavedChanges(false);
-      alert('Product version updated and saved!');
-    } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product.');
-    }
-  };
+    await updateProductVersion({
+      variables: {
+        productId: PRODUCT_ID,
+        versionNumber,
+        changes,
+        data: productData,
+        id: uuid,
+      },
+    });
+
+    localStorage.setItem('productVersionId', uuid);
+    setHasUnsavedChanges(false);
+    alert('Product version updated and saved with message: ' + changes);
+  } catch (error) {
+    console.error('Error saving product:', error);
+    alert('Failed to save product.');
+  }
+};
+
 
   const handlePublish = async () => {
     try {
@@ -639,7 +694,6 @@ export default function EnhancedProductMoodboard() {
         }
         const imageUrl = await uploadtoBucket(file);
         const downloadLink = URL.createObjectURL(file);
-        setHasUnsavedImageGalleryChanges(true); // Mark as changed
         setHasUnsavedChanges(true)
         if (type === 'primary') {
           setPrimaryPhoto(imageUrl);
@@ -1134,7 +1188,7 @@ export default function EnhancedProductMoodboard() {
   };
 
   return (
-    <div className="container mx-auto p-2 space-y-2 text-xs">
+    <div className=" mx-auto p-2 space-y-2 text-xs">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" className="h-6">
