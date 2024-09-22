@@ -545,8 +545,8 @@ const ImageUploader: React.FC = () => {
           <div className="progress" style={{ width: `${uploadProgress}%` }} />
         </div>
       )}   {/* Reload button to trigger refetch */}
-      <Button onClick={refetch}>
-        <RefreshCcw />
+<Button onClick={() => refetch()}>
+<RefreshCcw />
       </Button>
                 <Button onClick={handleCancel} disabled={files.length === 0}>
           Cancel Upload

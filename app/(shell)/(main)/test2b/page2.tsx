@@ -178,8 +178,8 @@ const ImageUploader: React.FC = () => {
                     )}
                   </Droppable>
                 </DragDropContext>
-                <Button onClick={refetch}>
-        <RefreshCcw />
+                <Button onClick={() => refetch()}>
+                <RefreshCcw />
       </Button>
 
               </AccordionContent>
