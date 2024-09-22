@@ -2,13 +2,8 @@
 "use client"
 import { Button } from "@/components/ui/button";
 import { PlusIcon, MinusIcon } from "lucide-react";
-
-import { v4 as uuidv4 } from 'uuid';
-
-import Uppy, { SuccessResponse, UploadedUppyFile, UppyFile } from '@uppy/core';
-import { DragDrop, StatusBar } from '@uppy/react';
+import Uppy, { SuccessResponse, UppyFile } from '@uppy/core';
 import Transloadit from '@uppy/transloadit';
-
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN } from '@/app/(shell)/(main)/queries';
@@ -39,17 +34,19 @@ interface Image {
 const ImageUploader: React.FC = () => {
   const [imageGallery, setImageGallery] = useState<Image[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
 
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
-    variables: { productId: PRODUCT_ID }
+    variables: { productId: PRODUCT_ID },
+  });
+  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
+    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID },
   });
 
-  const { data: segmentsData, loading: loadingSegments } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
-    variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
-  });
-  // Load product data into state
-  
+  useEffect(() => {
+    const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
+    setImageGallery(storedImages);
+  }, []);
+
   useEffect(() => {
     if (productDataQuery) {
       console.log("Product Data:", JSON.stringify(productDataQuery, null, 2));
@@ -59,72 +56,36 @@ const ImageUploader: React.FC = () => {
     }
   }, [productDataQuery, segmentsData]);
 
-  
-  
-  // Handle adding files to Uppy
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-  
-    if (selectedFiles) { // Null check
-      for (let i = 0; i < selectedFiles.length; i++) {
-        uppyInstance.addFile({
-          name: selectedFiles[i].name,
-          type: selectedFiles[i].type,
-          data: selectedFiles[i],
-        });
-      }
-      setFiles(uppyInstance.getFiles());
+    const selectedFiles = Array.from(event.target.files || []);
+    for (const file of selectedFiles) {
+      uppyInstance.addFile({ name: file.name, type: file.type, data: file });
     }
   };
-  
-  // Trigger file upload
-  const handleUpload = () => {
-    setIsUploading(true);
-    uppyInstance.upload().then((result) => {
-      if (result.failed.length > 0) {
-        console.error('Failed uploads:', result.failed);
-      } else {
-        console.log('Upload successful:', result.successful);
-      }
-      setIsUploading(false);
-    });
-  };
 
-  // Cancel all uploads
-  const handleCancel = () => {
-    uppyInstance.cancelAll();
-    setFiles([]);
-  };
-
-  // Save uploaded image to backend or state (simulating database save here)
-  const saveImage = async (file: UploadedUppyFile<Record<string, unknown>, Record<string, unknown>>) => {
-    const uploadedUrl = file.uploadURL; // Get URL from Transloadit
-    setImageGallery((prev) => [...prev, { id: uuidv4(), url: uploadedUrl }]); // Save to gallery
-  };
-
-  // Handle Uppy completion
   useEffect(() => {
-    uppyInstance.on('complete', async (result) => {
-      const uploadedImages = result.successful;
-      for (const file of uploadedImages) {
-        await saveImage(file); // Save each image
+    uppyInstance.on('upload-success', (file: UppyFile | undefined, response: SuccessResponse) => {
+      if (file) {
+        const uploadedUrl = response.body.url; // Adjust based on your response structure
+        saveImage(file, uploadedUrl);
+      } else {
+        console.error('File not found in upload-success event');
       }
     });
 
     return () => {
-      uppyInstance.close(); // Cleanup Uppy instance on unmount
+      uppyInstance.close();
     };
   }, []);
 
+  const saveImage = async (file: UppyFile, uploadedUrl: string) => {
+    setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
+  };
 
-  
-
-  // Handle removing image from gallery
   const handleRemoveImage = (id: string) => {
     setImageGallery((prev) => prev.filter((image) => image.id !== id));
   };
 
-  // Handle drag-and-drop reordering of images
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
     const reorderedImages = Array.from(imageGallery);
@@ -133,15 +94,10 @@ const ImageUploader: React.FC = () => {
     setImageGallery(reorderedImages);
   };
 
- 
   const handleSaveOrder = () => {
     localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
     alert('Image order saved!');
   };
-  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileInput(event)
-  };
-
 
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
@@ -183,7 +139,7 @@ const ImageUploader: React.FC = () => {
               ))}
               {provided.placeholder}
               <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
-                <input type="file" className="hidden" onChange={handleGalleryImageUpload} accept="image/*" multiple />
+                <input type="file" className="hidden" onChange={handleFileInput} accept="image/*" multiple />
                 <PlusIcon className="h-6 w-6 text-muted-foreground" />
               </label>
             </div>
