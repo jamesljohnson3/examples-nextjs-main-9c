@@ -323,7 +323,7 @@ export default function EnhancedProductMoodboard() {
   useEffect(() => {
     // Reserved fields validation and dynamic check
     // const reservedFields = RESERVED_FIELDS;
-
+    if (productDataQuery?.Product && !loadingProduct && !loadingSegments) { // Check all relevant loading states
     if (productDataQuery?.Product) {
       const loadedProductData = productDataQuery.Product[0];
 
@@ -386,7 +386,8 @@ export default function EnhancedProductMoodboard() {
 
       setFormFields(mergedFields);  // Set merged fields in the form
     }
-  }, [productDataQuery, loadingProduct, setProductData, setPrimaryPhoto, setOgImage]);
+}
+}, [productDataQuery,loadingSegments, loadingProduct, setProductData, setPrimaryPhoto, setOgImage]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
