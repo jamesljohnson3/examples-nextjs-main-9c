@@ -48,7 +48,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { GitBranch } from 'lucide-react';
-import React, { useState, useEffect, memo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client'; 
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT, GET_PRODUCT_VERSIONS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
@@ -319,19 +319,11 @@ export default function EnhancedProductMoodboard() {
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
   
-  
   useEffect(() => {
-    // Reserved fields validation and dynamic check
-    // const reservedFields = RESERVED_FIELDS;
-    if (productDataQuery?.Product && !loadingProduct && !loadingSegments) { // Check all relevant loading states
-    if (productDataQuery?.Product) {
+    if (productDataQuery?.Product && !loadingProduct && !loadingSegments) {
       const loadedProductData = productDataQuery.Product[0];
-
-     
-      
-
-
-      // Set the product data and fields
+  
+      // Set product data and image states
       setProductData(loadedProductData);
       setPrimaryPhoto(loadedProductData.primaryPhoto || localStorage.getItem('primaryPhoto'));
       setOgImage(loadedProductData.ogImage || null);
@@ -340,61 +332,53 @@ export default function EnhancedProductMoodboard() {
         description: loadedProductData.metadata?.description || '',
         keywords: loadedProductData.metadata?.keywords || '',
       });
-
-      // Initialize image gallery
+  
       const initialGallery = loadedProductData.imageGallery?.map((url: any) => ({
         id: url,
         url,
       })) || JSON.parse(localStorage.getItem('imageGallery') || '[]');
       setImageGallery(initialGallery);
-
-      // Initialize form fields from available fields and product data
-      const initialFields = initialAvailableFields.map(field => ({
-        ...field,
-        value: loadedProductData[field.id] || '',
-      }));
-
-      // Filter out fields already populated in the form
-      const excludedFields = new Set(initialFields.map(field => field.id));
-      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
-
-      setFormFields(initialFields);  // Set initialized fields
-      setRemainingFields(updatedRemainingFields);  // Set remaining available fields
-    }
-
-    if (segmentsData) {
-      setSegments(segmentsData.Segment);
-
-      // Extract and flatten segment fields
-      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) => {
-        // Validate segment.post structure here (e.g., check if it's an object)
-        if (typeof segment.post !== 'object') {
-          console.error('Invalid segment.post data:', segment.post);
-          return []; // Return an empty array to avoid errors
-        }
-    
-        return Object.values(segment.post).map((field) => ({
-          id: field.id || uuidv4(),  // Unique ID if missing
-          type: field.type || 'text',  // Default to 'text'
-          label: field.label || '',  // Default empty label
-          value: field.value || '',  // Default empty value
-          options: field.options || [],  // Default empty options array
+  
+      // Calculate merged fields using useMemo
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const mergedFields = useMemo(() => {
+        const initialFields = initialAvailableFields.map(field => ({
+          ...field,
+          value: loadedProductData[field.id] || '',
         }));
-      });
-    
-
-      // Merge formFields and segmentFields, avoiding duplicates by id or label
-      const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
-        if (!acc.find(field => field.id === current.id || field.label === current.label)) {
-          acc.push(current);
+  
+        if (segmentsData) {
+          const segmentFields = segmentsData.Segment.flatMap((segment: Segment) => {
+            if (typeof segment.post !== 'object') {
+              console.error('Invalid segment.post data:', segment.post);
+              return [];
+            }
+  
+            return Object.values(segment.post).map((field) => ({
+              id: field.id || uuidv4(),
+              type: field.type || 'text',
+              label: field.label || '',
+              value: field.value || '',
+              options: field.options || [],
+            }));
+          });
+  
+          return [...initialFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
+            if (!acc.find(field => field.id === current.id || field.label === current.label)) {
+              acc.push(current);
+            }
+            return acc;
+          }, []);
+        } else {
+          return initialFields; 
         }
-        return acc;
-      }, []);
-
-      setFormFields(mergedFields);  // Set merged fields in the form
+      }, [loadedProductData, segmentsData]); 
+  
+      // Set form fields and remaining fields
+      setFormFields(mergedFields);
+      setRemainingFields(initialAvailableFields.filter(field => !mergedFields.some((mergedField: { id: string; }) => mergedField.id === field.id)));
     }
-}
-}, [productDataQuery, loadingSegments, loadingProduct, segmentsData]); // Correct dependencies
+  }, [productDataQuery, loadingSegments, loadingProduct, segmentsData]);
 
   const handleInputChange = useCallback((fieldId: string, value: string | number) => {
     if (productData) {
