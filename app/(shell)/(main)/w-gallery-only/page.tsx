@@ -60,6 +60,7 @@ import { v4 as uuidv4 } from 'uuid';
  import '@uppy/core/dist/style.css';
  import '@uppy/status-bar/dist/style.css';
  import '@uppy/drag-drop/dist/style.css';
+import { MagicWandIcon } from "@radix-ui/react-icons";
 
  const RESERVED_FIELDS = new Set([
   'id', 'name', 'description', 'price', 'quantity', 'category', 'organizationId', 'createdById',
@@ -401,46 +402,71 @@ const ImageUploader: React.FC = () => {
   };
 
   
-
+  // Remove duplicates utility function
+  const removeDuplicates = (gallery: Image[]) => {
+    const seen = new Set();
+    return gallery.filter(image => {
+      if (!image.url || seen.has(image.url)) {  // Ensure valid URL and no duplicates
+        return false;
+      }
+      seen.add(image.url);
+      return true;
+    });
+  };
 
   // Save uploaded image to backend or state (simulating database save here)
   const saveImage = async (file: UploadedUppyFile<Record<string, unknown>, Record<string, unknown>>) => {
-    const uploadedUrl = file.uploadURL; // Get URL from Transloadit
-    setImageGallery((prev) => [...prev, { id: uuidv4(), url: uploadedUrl }]); // Save to gallery
-    setHasUnsavedImageGalleryChanges(true); // Mark as changed
-
+    const uploadedUrl = file.uploadURL;
+    
+    if (uploadedUrl) { // Ensure valid upload URL
+      setImageGallery((prev) => {
+        const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
+        return removeDuplicates(newGallery); // Remove duplicates after adding
+      });
+      setHasUnsavedImageGalleryChanges(true);
+    }
   };
 
 
-  // Handle Uppy completion
+  // Handle Uppy events and completion
   useEffect(() => {
+    uppyInstance.on('upload', () => {
+      setIsUploading(true);
+    });
+
+    uppyInstance.on('upload-progress', (file, progress) => {
+      setUploadProgress(progress.percentage);
+    });
+
     uppyInstance.on('upload-success', (file, response) => {
-      if (file) {
-        const uploadedUrl = response.body.url; 
-        setImageGallery((prev) => {
-          // Check for duplicates before adding
-          if (!prev.some((img) => img.url === uploadedUrl)) {
-            return [...prev, { id: file.id, url: uploadedUrl }];
-          }
-          return prev;
-        });
-        setUploadProgress(0); 
+      if (file) { // Ensure 'file' is not undefined
+        const uploadedUrl = response.body.url; // Ensure URL exists
+        if (uploadedUrl) {
+          setImageGallery((prev) => {
+            const newGallery = [...prev, { id: file.id, url: uploadedUrl }];
+            return removeDuplicates(newGallery); // Ensure no duplicates are added
+          });
+          setUploadProgress(0);
+        }
       }
     });
-  
+    
     uppyInstance.on('complete', async (result) => {
       const uploadedImages = result.successful;
-      for (const file of uploadedImages) {
-        await saveImage(file); 
-        setIsUploading(false);
+      
+      // Filter out any empty or invalid image objects
+      const validImages = uploadedImages.filter(file => file.uploadURL);
+      
+      for (const file of validImages) {
+        await saveImage(file); // Save each image and ensure no duplicates
       }
+      setIsUploading(false);
     });
-  
+
     return () => {
-      uppyInstance.close(); 
+      uppyInstance.close(); // Cleanup Uppy instance on unmount
     };
   }, []);
-  
   
 
   // Handle removing image from gallery
@@ -547,7 +573,7 @@ const ImageUploader: React.FC = () => {
         </div>
       )}   {/* Reload button to trigger refetch */}
 
-{!storedImages && (
+{!storedImages?.length && (
   <Button onClick={() => refetch()}>
     <RefreshCcw />
   </Button>
@@ -561,6 +587,9 @@ const ImageUploader: React.FC = () => {
 
                                 <Button                         disabled={!hasUnsavedImageGalleryChanges}
  onClick={handleSaveOrder}>Save Order</Button>
+ <Button onClick={() => refetch()}>
+ <MagicWandIcon />
+</Button>
 
 
               </AccordionContent>

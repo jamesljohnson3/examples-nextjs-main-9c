@@ -223,14 +223,14 @@ const ImageUploader: React.FC = () => {
                         className="relative w-16 h-16"
                       >
                         <img src={image.url} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded" />
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleRemoveImage(image.id)}
-                          className="absolute top-0 right-0"
-                        >
-                          <MinusIcon />
-                        </Button>
+                    <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="absolute top-0 right-0 h-4 w-4 p-0"
+                                  onClick={() => handleRemoveImage(image.id)}
+                                >
+                                  <MinusIcon className="h-2 w-2" />
+                                </Button>
                       </div>
                     )}
                   </Draggable>
