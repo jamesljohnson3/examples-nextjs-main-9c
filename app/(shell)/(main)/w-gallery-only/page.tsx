@@ -266,6 +266,7 @@ const ImageUploader: React.FC = () => {
   const [remainingFields, setRemainingFields] = useState<FormField[]>(initialAvailableFields);
   const [segments, setSegments] = useState<Segment[]>([]); 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasUnsavedImageGalleryChanges, setHasUnsavedImageGalleryChanges] = useState(false);
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -357,7 +358,6 @@ const ImageUploader: React.FC = () => {
     }
   }, [productDataQuery, segmentsData]);
 
-  
   // Handle adding files to Uppy
   const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
@@ -371,32 +371,27 @@ const ImageUploader: React.FC = () => {
         });
       }
       setFiles(uppyInstance.getFiles());
+      setHasUnsavedImageGalleryChanges(true); // Mark as changed
+
     }
   };
-  
-  // Trigger file upload
-  const handleUpload = () => {
-    setIsUploading(true);
-    uppyInstance.upload().then((result) => {
-      if (result.failed.length > 0) {
-        console.error('Failed uploads:', result.failed);
-      } else {
-        console.log('Upload successful:', result.successful);
-      }
-      setIsUploading(false);
-    });
-  };
 
+  
   // Cancel all uploads
   const handleCancel = () => {
     uppyInstance.cancelAll();
     setFiles([]);
   };
 
+  
+
+
   // Save uploaded image to backend or state (simulating database save here)
   const saveImage = async (file: UploadedUppyFile<Record<string, unknown>, Record<string, unknown>>) => {
     const uploadedUrl = file.uploadURL; // Get URL from Transloadit
     setImageGallery((prev) => [...prev, { id: uuidv4(), url: uploadedUrl }]); // Save to gallery
+    setHasUnsavedImageGalleryChanges(true); // Mark as changed
+
   };
 
   // Handle Uppy completion
@@ -413,19 +408,14 @@ const ImageUploader: React.FC = () => {
     };
   }, []);
 
-  // Handle gallery image upload manually (when user selects files)
-  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const newImages = files.map((file) => ({
-      id: URL.createObjectURL(file),
-      url: URL.createObjectURL(file),
-    }));
-    setImageGallery((prev) => [...prev, ...newImages]);
-  };
+
+  
 
   // Handle removing image from gallery
   const handleRemoveImage = (id: string) => {
     setImageGallery((prev) => prev.filter((image) => image.id !== id));
+    setHasUnsavedImageGalleryChanges(true); // Mark as changed
+
   };
 
   // Handle drag-and-drop reordering of images
@@ -435,7 +425,19 @@ const ImageUploader: React.FC = () => {
     const [movedImage] = reorderedImages.splice(result.source.index, 1);
     reorderedImages.splice(result.destination.index, 0, movedImage);
     setImageGallery(reorderedImages);
+    setHasUnsavedImageGalleryChanges(true); // Mark as changed
+
   };
+
+  const handleSaveOrder = () => {
+    localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
+    setHasUnsavedImageGalleryChanges(false); // Reset to no unsaved changes
+    alert('Image order saved!');
+  };
+  const handleGalleryImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileInput(event)
+  };
+
 
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
@@ -506,6 +508,15 @@ const ImageUploader: React.FC = () => {
                     )}
                   </Droppable>
                 </DragDropContext>
+                <Button onClick={handleCancel} disabled={files.length === 0}>
+          Cancel Upload
+        </Button>
+
+
+                                <Button                         disabled={!hasUnsavedImageGalleryChanges}
+ onClick={handleSaveOrder}>Save Order</Button>
+
+
               </AccordionContent>
             </AccordionItem>
 
