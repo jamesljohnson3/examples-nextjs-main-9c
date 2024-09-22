@@ -249,6 +249,7 @@ const uppyInstance = new Uppy({
     template_id: TEMPLATE_ID,
   },
 });
+
 // Custom Event Listener for Uppy
 uppyInstance.on('file-added', (file) => {
   console.log('File added:', file);
@@ -274,7 +275,7 @@ const ImageUploader: React.FC = () => {
   const [productData, setProductData] = useState<ProductData | null>(null);
   const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [imageGallery, setImageGallery] = useState<{ id: string; url: string }[]>([]);
     const [primaryPhoto, setPrimaryPhoto] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
@@ -408,12 +409,30 @@ const ImageUploader: React.FC = () => {
 
   };
 
+
   // Handle Uppy completion
   useEffect(() => {
+    uppyInstance.on('upload', () => {
+      setIsUploading(true);
+    });
+
+    uppyInstance.on('upload-progress', (file, progress) => {
+      setUploadProgress(progress.percentage);
+    });
+
+    uppyInstance.on('upload-success', (file, response) => {
+      if (file) { // Check if file is defined
+        const uploadedUrl = response.body.url; // Adjust based on your response structure
+        setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
+        setUploadProgress(0); // Reset progress
+      }
+    });
+    
     uppyInstance.on('complete', async (result) => {
       const uploadedImages = result.successful;
       for (const file of uploadedImages) {
         await saveImage(file); // Save each image
+        setIsUploading(false);
       }
     });
 
@@ -421,7 +440,6 @@ const ImageUploader: React.FC = () => {
       uppyInstance.close(); // Cleanup Uppy instance on unmount
     };
   }, []);
-
 
   
 
@@ -522,6 +540,12 @@ const ImageUploader: React.FC = () => {
                     )}
                   </Droppable>
                 </DragDropContext>
+                {isUploading && <div>Uploading...</div>}
+        {isUploading && (
+        <div className="progress-bar">
+          <div className="progress" style={{ width: `${uploadProgress}%` }} />
+        </div>
+      )}
                 <Button onClick={handleCancel} disabled={files.length === 0}>
           Cancel Upload
         </Button>

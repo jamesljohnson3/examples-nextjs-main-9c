@@ -31,6 +31,7 @@ const uppyInstance = new Uppy({
   },
 });
 
+
 interface Image {
   id: string;
   url: string;
@@ -41,6 +42,7 @@ const ImageUploader: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState<UppyFile<Record<string, unknown>, Record<string, unknown>>[]>([]);
   const [hasUnsavedImageGalleryChanges, setHasUnsavedImageGalleryChanges] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const { data: productDataQuery, loading: loadingProduct } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
@@ -114,10 +116,27 @@ const ImageUploader: React.FC = () => {
 
   // Handle Uppy completion
   useEffect(() => {
+    uppyInstance.on('upload', () => {
+      setIsUploading(true);
+    });
+
+    uppyInstance.on('upload-progress', (file, progress) => {
+      setUploadProgress(progress.percentage);
+    });
+
+    uppyInstance.on('upload-success', (file, response) => {
+      if (file) { // Check if file is defined
+        const uploadedUrl = response.body.url; // Adjust based on your response structure
+        setImageGallery((prev) => [...prev, { id: file.id, url: uploadedUrl }]);
+        setUploadProgress(0); // Reset progress
+      }
+    });
+    
     uppyInstance.on('complete', async (result) => {
       const uploadedImages = result.successful;
       for (const file of uploadedImages) {
         await saveImage(file); // Save each image
+        setIsUploading(false);
       }
     });
 
@@ -165,6 +184,11 @@ const ImageUploader: React.FC = () => {
     <div className="w-full space-y-2">
       <div className="flex justify-between items-center">
         {isUploading && <div>Uploading...</div>}
+        {isUploading && (
+        <div className="progress-bar">
+          <div className="progress" style={{ width: `${uploadProgress}%` }} />
+        </div>
+      )}
         <input type="file" multiple onChange={handleFileInput} accept="image/*" />
         <Button onClick={handleSaveOrder}>Save Order</Button>
       </div>
