@@ -1,4 +1,5 @@
 'use client'
+import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,7 +50,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { GitBranch } from 'lucide-react';
-import React, { useState, useEffect, memo, useCallback } from 'react';
+
 import { useQuery, useMutation } from '@apollo/client'; 
 import { GET_PRODUCT, SAVE_PRODUCT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT, GET_PRODUCT_VERSIONS } from '@/app/(shell)/(main)/queries';
 import { v4 as uuidv4 } from 'uuid';
@@ -298,14 +299,12 @@ const ImageUploader: React.FC = () => {
   // Load product data into state
   
   
-  useEffect(() => {
-    // Reserved fields validation and dynamic check
-    // const reservedFields = RESERVED_FIELDS;
-
-    if (productDataQuery?.Product) {
+  
+  // Calculate merged fields using useMemo OUTSIDE of useEffect 
+  const mergedFields = useMemo(() => {
+    if (productDataQuery?.Product && !loadingProduct && !loadingSegments) {
       const loadedProductData = productDataQuery.Product[0];
 
-     
       
 
 
@@ -340,40 +339,48 @@ const ImageUploader: React.FC = () => {
         value: loadedProductData[field.id] || '',
       }));
 
-      // Filter out fields already populated in the form
-      const excludedFields = new Set(initialFields.map(field => field.id));
-      const updatedRemainingFields = initialAvailableFields.filter(field => !excludedFields.has(field.id));
+      if (segmentsData) {
+        const segmentFields = segmentsData.Segment.flatMap((segment: Segment) => {
+          if (typeof segment.post !== 'object') {
+            console.error('Invalid segment.post data:', segment.post);
+            return [];
+          }
 
-      setFormFields(initialFields);  // Set initialized fields
-      setRemainingFields(updatedRemainingFields);  // Set remaining available fields
+          return Object.values(segment.post).map((field) => ({
+            id: field.id || uuidv4(),
+            type: field.type || 'text',
+            label: field.label || '',
+            value: field.value || '',
+            options: field.options || [],
+          }));
+        });
+
+        return [...initialFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
+          if (!acc.find(field => field.id === current.id || field.label === current.label)) {
+            acc.push(current);
+          }
+          return acc;
+        }, []);
+      } else {
+        return initialFields; 
+      }
+    } else { 
+      return []; // Return empty array while data is loading
     }
+  }, [productDataQuery, loadingSegments, loadingProduct, segmentsData]); 
 
-    if (segmentsData) {
-      setSegments(segmentsData.Segment);
+  useEffect(() => {
+    if (mergedFields.length > 0) { // Only update states if mergedFields is calculated
+      // Set product data and image states
+      const loadedProductData = productDataQuery.Product[0];
+      setProductData(loadedProductData);
+      // ... set primaryPhoto, ogImage, metadata, imageGallery ... 
 
-      // Extract and flatten segment fields
-      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
-        Object.values(segment.post).map(field => ({
-          id: field.id || uuidv4(),  // Unique ID if missing
-          type: field.type || 'text',  // Default to 'text'
-          label: field.label || '',  // Default empty label
-          value: field.value || '',  // Default empty value
-          options: field.options || [],  // Default empty options array
-        }))
-      );
-
-      // Merge formFields and segmentFields, avoiding duplicates by id or label
-      const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
-        if (!acc.find(field => field.id === current.id || field.label === current.label)) {
-          acc.push(current);
-        }
-        return acc;
-      }, []);
-
-      setFormFields(mergedFields);  // Set merged fields in the form
+      // Set form fields and remaining fields
+      setFormFields(mergedFields);
+      setRemainingFields(initialAvailableFields.filter(field => !mergedFields.some((mergedField: { id: string; }) => mergedField.id === field.id)));
     }
-  }, [productDataQuery, segmentsData]);
-
+  }, [mergedFields]); 
 
 
   // Handle adding files to Uppy

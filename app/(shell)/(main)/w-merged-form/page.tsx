@@ -103,11 +103,26 @@ const ProductPage: React.FC = () => {
   const [UpdateSegment] = useMutation(UPDATE_SEGMENT);
   
   
+  
+  
   // Calculate merged fields using useMemo OUTSIDE of useEffect 
   const mergedFields = useMemo(() => {
     if (productDataQuery?.Product && !loadingProduct && !loadingSegments) {
       const loadedProductData = productDataQuery.Product[0];
 
+      
+
+
+      // Set the product data and fields
+      setProductData(loadedProductData);
+    
+      
+
+
+      
+
+
+      // Initialize form fields from available fields and product data
       const initialFields = initialAvailableFields.map(field => ({
         ...field,
         value: loadedProductData[field.id] || '',
