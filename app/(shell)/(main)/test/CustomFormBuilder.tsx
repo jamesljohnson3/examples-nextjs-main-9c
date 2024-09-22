@@ -161,7 +161,8 @@ function VersionControl({
   ogImage, 
   setOgImage, 
   imageGallery, 
-  setImageGallery 
+  setImageGallery,
+  refetchVersions
 }: { 
   productId: string; 
   setProductData: any;
@@ -174,11 +175,13 @@ function VersionControl({
   setOgImage: any; 
   imageGallery: { id: string; url: string }[]; 
   setImageGallery: any; 
+  refetchVersions: () => void;
+
 }) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [activeVersion, setActiveVersion] = useState<string | null>(null);
 
-  const { data, loading, error } = useQuery(GET_PRODUCT_VERSIONS, {
+  const { data, loading, error, refetch } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId },
   });
 
@@ -538,6 +541,8 @@ const handleSave = async () => {
 
     localStorage.setItem('productVersionId', uuid);
     setHasUnsavedChanges(false);
+    refetch();
+
     alert('Product version updated and saved with message: ' + changes);
   } catch (error) {
     console.error('Error saving product:', error);
@@ -1277,6 +1282,8 @@ const handleSave = async () => {
           setOgImage={setOgImage}
           imageGallery={imageGallery}
           setImageGallery={setImageGallery}
+          refetchVersions={refetch}
+
         />
 
 
