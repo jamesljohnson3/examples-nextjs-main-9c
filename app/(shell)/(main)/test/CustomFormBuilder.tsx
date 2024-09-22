@@ -320,8 +320,8 @@ export default function EnhancedProductMoodboard() {
       }
   
       // Check if the image gallery has changed
-      const initialGallery = loadedProductData.imageGallery?.map((img: any) => img.url) || [];
-      const currentGallery = imageGallery.map((img) => img.url);
+      const initialGallery = loadedProductData.imageGallery?.map((img: any) => img?.url) || [];
+      const currentGallery = imageGallery.map((img) => img?.url);
       if (JSON.stringify(initialGallery) !== JSON.stringify(currentGallery)) {
         changes += "Updated image gallery. ";
       }
