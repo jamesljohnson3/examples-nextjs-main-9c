@@ -366,15 +366,22 @@ export default function EnhancedProductMoodboard() {
       setSegments(segmentsData.Segment);
 
       // Extract and flatten segment fields
-      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) =>
-        Object.values(segment.post).map(field => ({
+      const segmentFields = segmentsData.Segment.flatMap((segment: Segment) => {
+        // Validate segment.post structure here (e.g., check if it's an object)
+        if (typeof segment.post !== 'object') {
+          console.error('Invalid segment.post data:', segment.post);
+          return []; // Return an empty array to avoid errors
+        }
+    
+        return Object.values(segment.post).map((field) => ({
           id: field.id || uuidv4(),  // Unique ID if missing
           type: field.type || 'text',  // Default to 'text'
           label: field.label || '',  // Default empty label
           value: field.value || '',  // Default empty value
           options: field.options || [],  // Default empty options array
-        }))
-      );
+        }));
+      });
+    
 
       // Merge formFields and segmentFields, avoiding duplicates by id or label
       const mergedFields = [...formFields, ...segmentFields].reduce((acc: FormField[], current: FormField) => {
