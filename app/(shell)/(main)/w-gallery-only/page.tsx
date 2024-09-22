@@ -285,7 +285,8 @@ const ImageUploader: React.FC = () => {
     description: '',
     keywords: '',
   });
-  
+  const storedImages = JSON.parse(localStorage.getItem('imageGallery') || '[]') as Image[];
+
   const { data: productDataQuery, loading: loadingProduct, refetch } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
@@ -545,9 +546,14 @@ const ImageUploader: React.FC = () => {
           <div className="progress" style={{ width: `${uploadProgress}%` }} />
         </div>
       )}   {/* Reload button to trigger refetch */}
-<Button onClick={() => refetch()}>
-<RefreshCcw />
-      </Button>
+
+{!storedImages && (
+  <Button onClick={() => refetch()}>
+    <RefreshCcw />
+  </Button>
+)}
+
+
                 <Button onClick={handleCancel} disabled={files.length === 0}>
           Cancel Upload
         </Button>

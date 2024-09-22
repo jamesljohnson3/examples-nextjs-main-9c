@@ -82,7 +82,7 @@ const ImageUploader: React.FC = () => {
   const removeDuplicates = (gallery: Image[]) => {
     const seen = new Set();
     return gallery.filter(image => {
-      if (seen.has(image.url)) {
+      if (!image.url || seen.has(image.url)) {  // Ensure valid URL and no duplicates
         return false;
       }
       seen.add(image.url);
@@ -112,11 +112,14 @@ const ImageUploader: React.FC = () => {
   // Save uploaded image to backend or state (simulating database save here)
   const saveImage = async (file: UploadedUppyFile<Record<string, unknown>, Record<string, unknown>>) => {
     const uploadedUrl = file.uploadURL;
-    setImageGallery((prev) => {
-      const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
-      return removeDuplicates(newGallery); // Remove duplicates after adding
-    });
-    setHasUnsavedImageGalleryChanges(true);
+    
+    if (uploadedUrl) { // Ensure valid upload URL
+      setImageGallery((prev) => {
+        const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
+        return removeDuplicates(newGallery); // Remove duplicates after adding
+      });
+      setHasUnsavedImageGalleryChanges(true);
+    }
   };
 
   // Handle Uppy events and completion
@@ -130,19 +133,25 @@ const ImageUploader: React.FC = () => {
     });
 
     uppyInstance.on('upload-success', (file, response) => {
-      if (file) {
-        const uploadedUrl = response.body.url;
-        setImageGallery((prev) => {
-          const newGallery = [...prev, { id: file.id, url: uploadedUrl }];
-          return removeDuplicates(newGallery); // Ensure no duplicates are added
-        });
-        setUploadProgress(0);
+      if (file) { // Ensure 'file' is not undefined
+        const uploadedUrl = response.body.url; // Ensure URL exists
+        if (uploadedUrl) {
+          setImageGallery((prev) => {
+            const newGallery = [...prev, { id: file.id, url: uploadedUrl }];
+            return removeDuplicates(newGallery); // Ensure no duplicates are added
+          });
+          setUploadProgress(0);
+        }
       }
     });
-
+    
     uppyInstance.on('complete', async (result) => {
       const uploadedImages = result.successful;
-      for (const file of uploadedImages) {
+      
+      // Filter out any empty or invalid image objects
+      const validImages = uploadedImages.filter(file => file.uploadURL);
+      
+      for (const file of validImages) {
         await saveImage(file); // Save each image and ensure no duplicates
       }
       setIsUploading(false);
@@ -194,7 +203,7 @@ const ImageUploader: React.FC = () => {
             <div className="progress" style={{ width: `${uploadProgress}%` }} />
           </div>
         )}
-        <input type="file" multiple onChange={handleFileInput} accept="image/*" />
+
         <Button onClick={handleSaveOrder}>Save Order</Button>
       </div>
 
@@ -202,28 +211,30 @@ const ImageUploader: React.FC = () => {
         <Droppable droppableId="gallery">
           {(provided) => (
             <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-wrap gap-2">
-              {imageGallery.map((image, index) => (
-                <Draggable key={image.id} draggableId={image.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className="relative w-16 h-16"
-                    >
-                      <img src={image.url} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded" />
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="absolute top-0 right-0 h-4 w-4 p-0"
-                        onClick={() => handleRemoveImage(image.id)}
+              {imageGallery
+                .filter(image => image.url) // Only show images with a valid URL
+                .map((image, index) => (
+                  <Draggable key={image.id} draggableId={image.id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className="relative w-16 h-16"
                       >
-                        <MinusIcon className="h-2 w-2" />
-                      </Button>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
+                        <img src={image.url} alt={`Gallery ${index}`} className="w-full h-full object-cover rounded" />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRemoveImage(image.id)}
+                          className="absolute top-0 right-0"
+                        >
+                          <MinusIcon />
+                        </Button>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
               {provided.placeholder}
               <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
                 <input type="file" className="hidden" onChange={handleGalleryImageUpload} accept="image/*" multiple />
@@ -233,6 +244,9 @@ const ImageUploader: React.FC = () => {
           )}
         </Droppable>
       </DragDropContext>
+
+      <Button onClick={handleUpload} disabled={isUploading}>Upload Files</Button>
+      <Button onClick={handleCancel} disabled={!isUploading}>Cancel Upload</Button>
     </div>
   );
 };
