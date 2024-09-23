@@ -21,6 +21,10 @@ import type { VehicleRecord } from '@/types/api'
 export default function EnhancedSegmentCreatePage() {
   const [product, setProduct] = useState({
     name: '',
+    description: '', // Add this property
+    price: '', // Add this property
+    category: '', // Add this property
+    inStock: true, // Add this property
   })
 
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([])  // Store fetched vehicles
@@ -56,17 +60,13 @@ export default function EnhancedSegmentCreatePage() {
 
   const handleCloneVehicle = (vehicle: VehicleRecord) => {
     setProduct({
-        name: vehicle.fields.Name,
-        description: '',  // Assume default or fetch from somewhere
-        price: vehicle.fields["Vehicle details 1"] || 0, // Adjust according to API
-        category: '', // Set category as needed
-        inStock: true, // Assume default
-        images: [vehicle.fields.Attachments[0]?.thumbnails.small.url || ''], // Assuming the vehicle has an image
-    });
-}
-
-  
-
+      name: vehicle.fields.Name,
+      description: vehicle.fields.Notes || '', // Assuming 'Notes' is similar to description
+      price: vehicle.fields["Vehicle details 1"] || '', // Adjust to your price field
+      category: vehicle.fields["Body type"] || '', // Adjust to your category field
+      inStock: true, // Set this to true or false based on your requirement
+    })
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,10 +89,12 @@ export default function EnhancedSegmentCreatePage() {
     <div className="container mx-auto p-2 space-y-2 text-xs">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
-       <Link href={'/'}>  <Button variant="ghost" size="sm" className="h-6">
-            <ChevronLeft className="h-3 w-3 mr-1" />
-            Back to Inventory
-          </Button></Link> 
+          <Link href={'/'}>
+            <Button variant="ghost" size="sm" className="h-6">
+              <ChevronLeft className="h-3 w-3 mr-1" />
+              Back to Inventory
+            </Button>
+          </Link>
           <div className="text-muted-foreground">Dashboard / Create Segment</div>
         </div>
         <Popover>
@@ -127,29 +129,28 @@ export default function EnhancedSegmentCreatePage() {
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
                   <ScrollArea className="h-72 w-full rounded-md border">
-                   <div className="p-4 grid grid-cols-2 gap-4">
-  {vehicles.map((vehicle) => (
-    <Card key={vehicle.id} className="overflow-hidden">
-      <CardContent className="p-2">
-        <img 
-          src={vehicle.fields.Attachments[0]?.thumbnails.small.url} 
-          alt={vehicle.fields.Name} 
-          className="w-10 h-10 object-cover rounded mb-2" 
-        />
-        <span>{vehicle.fields.Name}</span>
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">Price:</span> 
-          <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
-          <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
-            <Copy className="h-3 w-3 mr-1" />
-            Clone
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  ))}
-</div>
-
+                    <div className="p-4 grid grid-cols-2 gap-4">
+                      {vehicles.map((vehicle) => (
+                        <Card key={vehicle.id} className="overflow-hidden">
+                          <CardContent className="p-2">
+                            <img 
+                              src={vehicle.fields.Attachments[0]?.thumbnails.small.url} 
+                              alt={vehicle.fields.Name} 
+                              className="w-10 h-10 object-cover rounded mb-2" 
+                            />
+                            <span>{vehicle.fields.Name}</span>
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold">Price:</span> 
+                              <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
+                              <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
+                                <Copy className="h-3 w-3 mr-1" />
+                                Clone
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </ScrollArea>
 
                   <AccordionItem value="basic-info">
@@ -162,18 +163,34 @@ export default function EnhancedSegmentCreatePage() {
                         </div>
                         <div>
                           <Label htmlFor="description" className="text-xs">Description</Label>
-                         </div>
+                          <Textarea id="description" name="description" value={product.description} onChange={handleInputChange} className="h-20 text-xs" />
+                        </div>
                         <div>
                           <Label htmlFor="price" className="text-xs">Price</Label>
-                         </div>
+                          <Input id="price" name="price" type="number" value={product.price} onChange={handleInputChange} className="h-7 text-xs" />
+                        </div>
                         <div>
                           <Label htmlFor="category" className="text-xs">Category</Label>
-
+                          <Select value={product.category} onValueChange={handleCategoryChange}>
+                            <SelectTrigger className="h-7 text-xs">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="electronics">Electronics</SelectItem>
+                              <SelectItem value="clothing">Clothing</SelectItem>
+                              <SelectItem value="books">Books</SelectItem>
+                              <SelectItem value="furniture">Furniture</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Label htmlFor="in-stock" className="text-xs">In Stock</Label>
-
+                          <Switch 
+                            checked={product.inStock} 
+                            onCheckedChange={(checked) => setProduct(prev => ({ ...prev, inStock: checked }))} 
+                          />
+                          <Label htmlFor="inStock" className="text-xs">In Stock</Label>
                         </div>
+                        <Button type="submit" className="w-full h-8">Submit</Button>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -182,15 +199,6 @@ export default function EnhancedSegmentCreatePage() {
             </Card>
           </ResizablePanel>
         </ResizablePanelGroup>
-
-        <div className="mt-4 flex justify-end">
-       <Link href={'/'}>
-       <Button type="submit" className="text-xs">
-            <Zap className="h-4 w-4 mr-1" />
-            Submit
-          </Button>
-       </Link>  
-        </div>
       </form>
     </div>
   )
