@@ -1,6 +1,6 @@
 
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,45 +8,27 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Search, User } from 'lucide-react';
 import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 
 export default function ProductListHomepage() {
-  const [products, setProducts] = useState<VehicleRecord[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<VehicleRecord | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
 
-  // Fetch the vehicle records (products)
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const vehicles = await api.list();
-        setProducts(vehicles);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
+    async function fetchVehicles() {
+      const vehicleData: VehicleRecord[] = await api.list();
+      setVehicles(vehicleData);
     }
-    fetchProducts();
+    fetchVehicles();
   }, []);
 
-  const handleProductSelect = (product: VehicleRecord) => {
-    setSelectedProduct(product);
+  const handleVehicleSelect = (vehicle: VehicleRecord) => {
+    setSelectedVehicle(vehicle);
   };
-
-  const handleDeleteProduct = async (productId: string) => {
-    try {
-      setProducts((prevProducts) => prevProducts.filter(product => product.id !== productId));
-      setSelectedProduct(null); // Deselect the product after deletion
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    }
-  };
-
-  const filteredProducts = products.filter(product => 
-    product.fields.Name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
@@ -56,9 +38,7 @@ export default function ProductListHomepage() {
             <ChevronLeft className="h-3 w-3 mr-1" />
             Back
           </Button>
-          <div className="text-muted-foreground">
-            Dashboard / Product List
-          </div>
+          <div className="text-muted-foreground">Dashboard / Vehicle List</div>
         </div>
         <div className="flex items-center space-x-2">
           <Popover>
@@ -71,7 +51,7 @@ export default function ProductListHomepage() {
             <PopoverContent className="w-48 p-2">
               <div className="flex items-center space-x-2">
                 <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=32&width=32" />
+                  <AvatarImage src="/path/to/avatar.jpg" />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div>
@@ -83,16 +63,11 @@ export default function ProductListHomepage() {
           </Popover>
         </div>
       </div>
-      
+
       <Card className="mb-2">
         <CardContent className="p-2">
           <div className="flex space-x-2 mb-2">
-            <Input 
-              placeholder="Type a command or search..." 
-              className="flex-grow h-8 text-xs" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Input placeholder="Type a command or search..." className="flex-grow h-8 text-xs" />
             <Button variant="outline" size="sm" className="h-8">
               <Search className="h-4 w-4" />
             </Button>
@@ -104,59 +79,38 @@ export default function ProductListHomepage() {
         <ResizablePanel defaultSize={80}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Product List</CardTitle>
+              <CardTitle className="text-sm">Vehicle List</CardTitle>
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
-                {filteredProducts.map((product) => (
-                  <AccordionItem key={product.id} value={product.id}>
-                    <AccordionTrigger onClick={() => handleProductSelect(product)} className="text-xs">
+                {vehicles.map((vehicle) => (
+                  <AccordionItem key={vehicle.id} value={vehicle.id}>
+                    <AccordionTrigger onClick={() => handleVehicleSelect(vehicle)} className="text-xs">
                       <div className="flex items-center space-x-2">
-                        <img src={product.fields.Image} alt={product.fields.Name} className="w-8 h-8 object-cover rounded" />
-                        <span>{product.fields.Name}</span>
+                        <img src={vehicle.fields.Attachments[0]?.thumbnails.small.url} alt={vehicle.fields.Name} className="w-8 h-8 object-cover rounded" />
+                        <span>{vehicle.fields.Name}</span>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="p-2 space-y-2">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h3 className="font-semibold">{product.fields.Name}</h3>
-                            <p className="text-xs text-muted-foreground">{product.fields.Description}</p>
+                            <h3 className="font-semibold">{vehicle.fields.Name}</h3>
+                            <p className="text-xs text-muted-foreground">{vehicle.fields.Notes}</p>
                           </div>
-                          <Badge>{product.fields.Category}</Badge>
+                          <Badge>{vehicle.fields["Body type"]}</Badge>
                         </div>
                         <div className="flex justify-between items-center">
-
-                          <Button size="sm" onClick={() => handleDeleteProduct(product.id)}>Delete Product</Button>
+                          {selectedVehicle && selectedVehicle.id === vehicle.id && (
+                            <>
+                              <a href={vehicle.fields.Notes} target="_blank" rel="noopener noreferrer">
+                                <span className="text-xs text-blue-500 underline">This is the link to the live website</span>
+                              </a>
+                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
+                            </>
+                          )}
+                          <Button size="sm">Delete Vehicle</Button>
                         </div>
-                        {selectedProduct && selectedProduct.id === product.id && (
-                          <Card className="mt-2">
-                            <CardContent className="p-2">
-                              <h2 className="font-semibold mb-1">Live Product Preview</h2>
-                              <div className="bg-muted p-2 rounded space-y-1">
-                                <img src={selectedProduct.fields.Image} alt={selectedProduct.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
-                                <div className="text-xs">
-                                  <span className="font-semibold">ID:</span> {selectedProduct.id}
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Name:</span> {selectedProduct.fields.Name}
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Description:</span> {selectedProduct.fields.Description}
-                                </div>
-                                <div className="text-xs">
-
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Category:</span> {selectedProduct.fields.Category}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                        <a href={`/product/edit/${product.id}`}>
-                          <Button size="sm">Edit Product</Button>
-                        </a>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -165,7 +119,6 @@ export default function ProductListHomepage() {
             </CardContent>
           </Card>
         </ResizablePanel>
-
         <ResizablePanel defaultSize={20}>
           <Card>
             <CardHeader>
@@ -174,17 +127,17 @@ export default function ProductListHomepage() {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs">Total Products:</span>
-                  <span className="font-bold">{filteredProducts.length}</span>
+                  <span className="text-xs">Total Vehicles:</span>
+                  <span className="font-bold">{vehicles.length}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Categories:</span>
-                  <span className="font-bold">{new Set(filteredProducts.map(p => p.fields.Category)).size}</span>
+                  <span className="font-bold">{new Set(vehicles.map(v => v.fields["Body type"])).size}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Avg. Price:</span>
                   <span className="font-bold">
-                    ${(filteredProducts.reduce((sum, p) => sum + p.fields.Price, 0) / filteredProducts.length).toFixed(2)}
+
                   </span>
                 </div>
               </div>
