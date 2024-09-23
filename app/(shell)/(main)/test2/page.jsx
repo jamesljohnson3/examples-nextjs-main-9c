@@ -128,7 +128,7 @@ export default function EnhancedSegmentCreatePage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" className="h-6">
             <ChevronLeft className="h-3 w-3 mr-1" />
-            Back to Products
+            Back to Inventory
           </Button>
           <div className="text-muted-foreground">
             Dashboard / Create Segment
@@ -158,11 +158,11 @@ export default function EnhancedSegmentCreatePage() {
         </div>
       </div>
       
-      <h1 className="text-lg font-bold text-center mb-2">Create New Segment</h1>
+      <div className="h-7	"> </div>
       
       <form onSubmit={handleSubmit}>
       <ResizablePanelGroup className='space-x-2' direction={"horizontal"}>
-      <ResizablePanel defaultSize={60}>
+      <ResizablePanel defaultSize={80}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Segment Details</CardTitle>
@@ -285,7 +285,7 @@ export default function EnhancedSegmentCreatePage() {
               </CardContent>
             </Card>
           </ResizablePanel>
-          <ResizablePanel className="hidden md:flex" defaultSize={40}>
+          <ResizablePanel className="hidden md:flex" defaultSize={20}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Product Preview & AI Insights</CardTitle>
