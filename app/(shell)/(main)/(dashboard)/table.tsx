@@ -22,10 +22,7 @@ interface SearchTermIndicatorProps {
   }
   
   
-  
   const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField, vehicles }) => {
-    
-    
     
     const isTermInField = (vehicle: VehicleRecord) => {
         const term = searchTerm.toLowerCase();
@@ -45,15 +42,37 @@ interface SearchTermIndicatorProps {
             (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
         );
     };
-    
 
     const matchingVehicles = vehicles.filter(isTermInField);
+
+    const searchFieldLabel = () => {
+        switch (searchField) {
+            case 'price':
+                return 'Price';
+            case 'name':
+                return 'Name';
+            case 'notes':
+                return 'Notes';
+            case 'bodyType':
+                return 'Body Type';
+            case 'exteriorColor':
+                return 'Exterior Color';
+            case 'engine':
+                return 'Engine';
+            case 'vehicleDetails2':
+                return 'Vehicle Details 2';
+            case 'drivetrain':
+                return 'Drivetrain';
+            default:
+                return searchField; // Fallback to searchField string
+        }
+    };
 
     return (
         <>
             {searchTerm && (
                 <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                    Searching {matchingVehicles.length} vehicle(s) by {searchField === "price" ? "Price" : searchField}: {searchTerm}
+                    Searching {matchingVehicles.length} vehicle(s) by {searchFieldLabel()}: {searchTerm}
                 </span>
             )}
         </>
