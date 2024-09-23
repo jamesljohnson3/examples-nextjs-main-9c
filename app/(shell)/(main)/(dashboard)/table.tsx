@@ -94,7 +94,7 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete }) => {
             <Badge>{vehicle.fields["Body type"]}</Badge>
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-bold">${vehicle.fields["Vehicle details 1"] || 0}</span>
+            <span className="font-bold">{vehicle.fields["Vehicle details 1"] || 0}</span>
             <div className="flex space-x-2">
               <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Product</Button>
               <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
@@ -133,7 +133,11 @@ interface QuickStatsProps {
 }
 const QuickStats: React.FC<QuickStatsProps> = ({ vehicles }) => {
     const avgPrice = vehicles.length > 0
-      ? (vehicles.reduce((sum, v) => sum + (Number(v.fields["Vehicle details 1"]) || 0), 0) / vehicles.length).toFixed(2)
+      ? (vehicles.reduce((sum, v) => {
+          const priceStr = v.fields["Vehicle details 1"];
+          const price = Number(priceStr.replace(/[^0-9.-]+/g, '')); // Remove $ and other non-numeric characters
+          return sum + (isNaN(price) ? 0 : price);
+        }, 0) / vehicles.length).toFixed(2)
       : '0.00';
   
     return (
