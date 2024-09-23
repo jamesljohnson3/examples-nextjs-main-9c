@@ -135,7 +135,7 @@ export default function UpdatedDashboard() {
                   <Card key={vehicle.id} className="shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-2">
                       <img 
-                        src={vehicle.fields.Attachments[0]?.thumbnails.small.url} 
+                        src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
                         alt={vehicle.fields.Name} 
                         className="w-full h-32 object-cover rounded-md mb-2" 
                       />

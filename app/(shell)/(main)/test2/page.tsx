@@ -83,10 +83,10 @@ export default function EnhancedSegmentCreatePage() {
     <div className="container mx-auto p-2 space-y-2 text-xs">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="h-6">
+       <Link href={'/'}>  <Button variant="ghost" size="sm" className="h-6">
             <ChevronLeft className="h-3 w-3 mr-1" />
             Back to Inventory
-          </Button>
+          </Button></Link> 
           <div className="text-muted-foreground">Dashboard / Create Segment</div>
         </div>
         <Popover>
@@ -178,10 +178,12 @@ export default function EnhancedSegmentCreatePage() {
         </ResizablePanelGroup>
 
         <div className="mt-4 flex justify-end">
-          <Button type="submit" className="text-xs">
+       <Link href={'/'}>
+       <Button type="submit" className="text-xs">
             <Zap className="h-4 w-4 mr-1" />
             Submit
           </Button>
+       </Link>  
         </div>
       </form>
     </div>
