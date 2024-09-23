@@ -1,5 +1,7 @@
 // types/types.ts
 
+import { ReactNode } from "react"
+
 export interface Thumbnail {
     url: string
     width: number
