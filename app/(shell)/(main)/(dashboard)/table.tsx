@@ -251,15 +251,15 @@ const ProductListHomepage: React.FC = () => {
   
     // Check against relevant fields
     return (
-      fields.Name.toLowerCase().includes(term) ||
-      fields.Notes.toLowerCase().includes(term) ||
-      fields["Body type"].toLowerCase().includes(term) ||
-      fields["Vehicle details 1"].toLowerCase().includes(term) ||
-      fields["Exterior Color"].toLowerCase().includes(term) ||
-      fields.Engine.toLowerCase().includes(term) ||
-      fields["Vehicle details 2"].toLowerCase().includes(term) ||
-      fields.Drivetrain.toLowerCase().includes(term) ||
-      vehicle.preview.toLowerCase().includes(term) // Check preview if necessary
+      fields.Name?.toLowerCase().includes(term) ||
+      fields.Notes?.toLowerCase().includes(term) ||
+      fields["Body type"]?.toLowerCase().includes(term) ||
+      fields["Vehicle details 1"]?.toLowerCase().includes(term) ||
+      fields["Exterior Color"]?.toLowerCase().includes(term) ||
+      fields.Engine.toLowerCase()?.includes(term) ||
+      fields["Vehicle details 2"]?.toLowerCase().includes(term) ||
+      fields.Drivetrain.toLowerCase()?.includes(term) ||
+      vehicle.preview.toLowerCase()?.includes(term) // Check preview if necessary
     );
   });
   
@@ -298,6 +298,7 @@ const ProductListHomepage: React.FC = () => {
     <div className="container mx-auto p-4 space-y-4 text-sm">
       <Header />
       <SearchBar setSearchTerm={setSearchTerm} /> {/* Pass the state updater function */}
+      <Button onClick={() => setSearchField("name")}>Search by Name</Button>
       <ResizablePanelGroup className='space-x-2' direction="horizontal">
         <ResizablePanel defaultSize={80}>
           <Card>
@@ -325,3 +326,4 @@ const ProductListHomepage: React.FC = () => {
 };
 
 export default ProductListHomepage;
+
