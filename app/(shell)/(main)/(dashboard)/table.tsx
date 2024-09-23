@@ -20,36 +20,36 @@ interface SearchTermIndicatorProps {
     searchField: string;
     vehicles: VehicleRecord[];
   }
-  
   const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField, vehicles }) => {
     const isTermInField = (vehicle: VehicleRecord) => {
-      const term = searchTerm.toLowerCase();
-      const { fields } = vehicle;
-      return (
-        (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
-        (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
-        (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-        (searchField === "vehicleDetails1" && fields["Vehicle details 1"]?.toLowerCase().includes(term)) ||
-        (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
-        (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
-        (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
-        (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
-      );
+        const term = searchTerm.toLowerCase();
+        const { fields } = vehicle;
+
+        return (
+            (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
+            (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
+            (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
+            (searchField === "vehicleDetails1" && fields["Vehicle details 1"]?.toLowerCase().includes(term)) ||
+            (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
+            (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
+            (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
+            (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
+        );
     };
-  
+
     const matchingVehicles = vehicles.filter(isTermInField);
-  
+
     return (
-      <>
-        {searchTerm && (
-          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-            Searching {matchingVehicles.length} vehicle(s) by {searchField}: {searchTerm}
-          </span>
-        )}
-      </>
+        <>
+            {searchTerm && (
+                <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                    Searching {matchingVehicles.length} vehicle(s) by {searchField}: {searchTerm}
+                </span>
+            )}
+        </>
     );
-  };
-  
+};
+
 
 
 const LoadingIndicator: React.FC = () => (
@@ -98,7 +98,6 @@ interface SearchBarProps {
     setSearchField: (field: string) => void; // Added setter for search field
     vehicles: VehicleRecord[];
 }
-
 const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, searchField, setSearchField, vehicles }) => {
     return (
         <Card className="mb-2">
@@ -114,22 +113,22 @@ const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, search
                             <Search className="h-4 w-4" />
                         </Button>
                     </div>
-                    {/* Add buttons to change search fields 
-                       
-                       <div className="flex space-x-2">
+                    {/* 
+                     <div className="flex space-x-2">
                         <Button onClick={() => setSearchField("name")}>Search by Name</Button>
                         <Button onClick={() => setSearchField("notes")}>Search by Notes</Button>
                         <Button onClick={() => setSearchField("bodyType")}>Search by Body Type</Button>
+                        <Button onClick={() => setSearchField("exteriorColor")}>Search by Exterior Color</Button>
                     </div>
-                    
-                    */}
-                 
+                    Add buttons to change search fields */}
+                   
                     <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} vehicles={vehicles} />
                 </div>
             </CardContent>
         </Card>
     );
 };
+
 
 // Add this prop to the VehicleItemProps
 interface VehicleItemProps {
