@@ -8,7 +8,12 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { BarChart, Bell, Book, Box, Globe, LayoutDashboard, LogOut, Plus, Search, Settings, User } from 'lucide-react'
+import { BarChart, ChevronLeft, Bell, Book, Box, Globe, LayoutDashboard, LogOut, Plus, Search, Settings, User } from 'lucide-react'
+
+import api from "@/api";
+import { deleteVehiclebyId } from '@/actions/dashboard';
+import Link from 'next/link';
+
 
 const getStartedItems = [
   { title: 'Create New Product', description: 'Add a new product to your inventory', icon: Plus },
@@ -39,54 +44,39 @@ export default function UpdatedDashboard() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header className="border-b shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <LayoutDashboard className="h-6 w-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-800">E-commerce Dashboard</h1>
+      <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center space-x-2">
+     <Link href={'/test3'}>
+     <Button variant="ghost" size="sm" className="h-8">
+        <ChevronLeft className="h-4 w-4 mr-1" />
+        Back
+      </Button>
+     </Link>
+      <div className="text-muted-foreground">Dashboard / Product List</div>
+    </div>
+    <div className="flex items-center space-x-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className="h-8 text-xs">
+            <User className="h-4 w-4 mr-1" />
+            User
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-2">
+          <div className="flex items-center space-x-2">
+            <Avatar>
+              <AvatarImage src="/placeholder.svg?height=32&width=32" />
+              <AvatarFallback>JD</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium">John Doe</p>
+              <p className="text-xs text-muted-foreground">john@example.com</p>
+            </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Input 
-              type="search" 
-              placeholder="Search..." 
-              className="w-64 h-9 text-sm"
-            />
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Avatar>
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56" align="end">
-                <Command>
-                  <CommandInput placeholder="Search account options..." />
-                  <CommandList>
-                    <CommandEmpty>No results found.</CommandEmpty>
-                    <CommandGroup heading="Account">
-                      <CommandItem>
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </CommandItem>
-                      <CommandItem>
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </CommandItem>
-                      <CommandItem>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
-                      </CommandItem>
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  </div>
       </header>
 
       <main className="flex-grow container mx-auto px-4 py-8 space-y-8">
