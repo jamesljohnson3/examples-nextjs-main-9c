@@ -37,7 +37,6 @@ export default function ProductListHomepage() {
 
   const handleDeleteProduct = async (productId: string) => {
     try {
-      await api.delete(productId); // Assuming `api.delete` is the correct method to delete a product
       setProducts((prevProducts) => prevProducts.filter(product => product.id !== productId));
       setSelectedProduct(null); // Deselect the product after deletion
     } catch (error) {

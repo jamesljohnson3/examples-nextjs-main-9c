@@ -175,6 +175,10 @@ export interface Thumbnail {
     id: string;
     createdTime: string;
     fields: {
+      Image: string | undefined
+      Description: ReactNode
+      Category: ReactNode
+      Price: any
       Attachments: Attachment[];
       Drivetrain: string;
       Notes: string;
