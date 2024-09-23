@@ -1,5 +1,6 @@
 
 "use client"
+// ... other imports
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Search, User } from 'lucide-react';
 import api from "@/api";
@@ -97,6 +97,9 @@ export default function ProductListHomepage() {
                           <div>
                             <h3 className="font-semibold">{vehicle.fields.Name}</h3>
                             <p className="text-xs text-muted-foreground">{vehicle.fields.Notes}</p>
+                            <div className="text-base text-gray-800 text-center mt-1">
+                              {vehicle.fields["Vehicle details 1"] || 0}
+                            </div>
                           </div>
                           <Badge>{vehicle.fields["Body type"]}</Badge>
                         </div>
@@ -106,7 +109,7 @@ export default function ProductListHomepage() {
                               <a href={vehicle.fields.Notes} target="_blank" rel="noopener noreferrer">
                                 <span className="text-xs text-blue-500 underline">This is the link to the live website</span>
                               </a>
-                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
+                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-48 h-48 object-cover rounded mb-2" />
                             </>
                           )}
                           <Button size="sm">Delete Vehicle</Button>
