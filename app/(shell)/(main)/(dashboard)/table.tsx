@@ -107,9 +107,9 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
             <Badge>{vehicle.fields["Body type"]}</Badge>
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-bold">${vehicle.fields["Vehicle details 1"] || 0}</span>
+            <span className="font-bold">{vehicle.fields["Vehicle details 1"] || 0}</span>
             <div className="flex space-x-2">
-              <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Product</Button>
+              <Button size="sm" onClick={() => onDelete(extractProductId(vehicle.fields.Notes))}>Delete Product</Button>
               <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
                 <Button size="sm">Edit Product</Button>
               </a>
@@ -122,14 +122,14 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
                 <h2 className="font-semibold mb-1">Live Product Preview</h2>
                 <div className="bg-muted p-2 rounded space-y-1">
                   <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
-                  <div className="text-xs">
-                    <span className="font-semibold">ID:</span> {vehicle.id}
-                  </div>
+                  
+                  
+
                   <div className="text-xs">
                     <span className="font-semibold">Name:</span> {vehicle.fields.Name}
                   </div>
                   <div className="text-xs">
-                    <span className="font-semibold">Price:</span> ${vehicle.fields["Vehicle details 1"] || 0}
+                    <span className="font-semibold">Price:</span> {vehicle.fields["Vehicle details 1"] || 0}
                   </div>
                   <div className="text-xs">
                     <span className="font-semibold">Category:</span> {vehicle.fields["Body type"]}
@@ -261,7 +261,7 @@ const ProductListHomepage: React.FC = () => {
     <div className="container mx-auto p-4 space-y-4 text-sm">
       <Header />
       <SearchBar setSearchTerm={setSearchTerm} /> {/* Pass the state updater function */}
-      <ResizablePanelGroup direction="horizontal">
+      <ResizablePanelGroup className='space-x-2' direction="horizontal">
         <ResizablePanel defaultSize={80}>
           <Card>
             <CardHeader>
