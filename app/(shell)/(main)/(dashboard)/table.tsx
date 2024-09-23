@@ -112,7 +112,7 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
           <div className="flex justify-between items-center">
             <span className="font-bold">{vehicle.fields["Vehicle details 1"] || 0}</span>
             <div className="flex space-x-2">
-              <Button size="sm" onClick={() => onDelete(extractProductId(vehicle.fields.Notes))}>Delete Product</Button>
+              <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Product</Button>
               <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
                 <Button size="sm">Edit Product</Button>
               </a>
