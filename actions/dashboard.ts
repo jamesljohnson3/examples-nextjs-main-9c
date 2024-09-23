@@ -1,4 +1,4 @@
-import 'server-only';
+"use server"
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
