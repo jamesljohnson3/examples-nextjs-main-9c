@@ -84,6 +84,9 @@ interface VehicleItemProps {
 }
 
 const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, selectedVehicle }) => {
+    
+
+
   const extractProductId = (url: string) => {
     const parts = new URL(url).pathname.split('/');
     return parts[parts.length - 1].replace('.html', '');
@@ -222,11 +225,45 @@ const ProductListHomepage: React.FC = () => {
     const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
-    const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchField, setSearchField] = useState<string>("name"); // Default search field
+  const useDebounce = (value: string, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
   
-    const filteredVehicles = vehicles.filter(vehicle => 
-      vehicle.fields.Name.toLowerCase().includes(searchTerm.toLowerCase())
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+  
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+  
+    return debouncedValue;
+  };
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
+  const filteredVehicles = vehicles.filter(vehicle => {
+    const term = debouncedSearchTerm.toLowerCase();
+    const { fields } = vehicle;
+  
+    // Check against relevant fields
+    return (
+      fields.Name.toLowerCase().includes(term) ||
+      fields.Notes.toLowerCase().includes(term) ||
+      fields["Body type"].toLowerCase().includes(term) ||
+      fields["Vehicle details 1"].toLowerCase().includes(term) ||
+      fields["Exterior Color"].toLowerCase().includes(term) ||
+      fields.Engine.toLowerCase().includes(term) ||
+      fields["Vehicle details 2"].toLowerCase().includes(term) ||
+      fields.Drivetrain.toLowerCase().includes(term) ||
+      vehicle.preview.toLowerCase().includes(term) // Check preview if necessary
     );
+  });
+  
+
     const handleVehicleSelect = (vehicle: VehicleRecord) => {
       setSelectedVehicle(prev => prev?.id === vehicle.id ? null : vehicle); // Toggle selection
     };
