@@ -145,7 +145,7 @@ export default function ProductListHomepage() {
                                   <span className="font-semibold">Description:</span> {selectedProduct.fields.Description}
                                 </div>
                                 <div className="text-xs">
-                                  <span className="font-semibold">Price:</span> ${selectedProduct.fields.Price.toFixed(2)}
+
                                 </div>
                                 <div className="text-xs">
                                   <span className="font-semibold">Category:</span> {selectedProduct.fields.Category}
