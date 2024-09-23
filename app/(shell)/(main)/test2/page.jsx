@@ -55,9 +55,7 @@ export default function EnhancedProductCreatePage() {
     inStock: true,
     images: []
   })
-  const [nlpSensitivity, setNlpSensitivity] = useState(50)
-  const [aiCreativity, setAiCreativity] = useState(50)
-  const [aiProgress, setAIProgress] = useState(0)
+  
   const [aiSuggestions, setAiSuggestions] = useState([])
 
   const handleInputChange = (e) => {
@@ -102,24 +100,7 @@ export default function EnhancedProductCreatePage() {
     })
   }
 
-  const handleRefinement = () => {
-    setAIProgress(0)
-    const interval = setInterval(() => {
-      setAIProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          // Simulate AI refinement
-          setAiSuggestions([
-            "Consider adding more detailed product specifications",
-            "Highlight the unique selling points in the description",
-            "Add customer testimonials to boost credibility"
-          ])
-          return 100
-        }
-        return prev + 10
-      })
-    }, 200)
-  }
+  
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -185,10 +166,7 @@ export default function EnhancedProductCreatePage() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                  <AccordionItem value="sample-gallery">
-                    <AccordionTrigger className="text-xs font-semibold">Sample Product Gallery</AccordionTrigger>
-                    <AccordionContent>
-                      <ScrollArea className="h-72 w-full rounded-md border">
+                <ScrollArea className="h-72 w-full rounded-md border">
                         <div className="p-4 grid grid-cols-2 gap-4">
                           {sampleProducts.map((sampleProduct) => (
                             <Card key={sampleProduct.id} className="overflow-hidden">
@@ -208,8 +186,6 @@ export default function EnhancedProductCreatePage() {
                           ))}
                         </div>
                       </ScrollArea>
-                    </AccordionContent>
-                  </AccordionItem>
 
                   <AccordionItem value="basic-info">
                     <AccordionTrigger className="text-xs font-semibold">Basic Information</AccordionTrigger>
@@ -299,52 +275,9 @@ export default function EnhancedProductCreatePage() {
                     </AccordionContent>
                   </AccordionItem>
 
-                  <AccordionItem value="ai-config">
-                    <AccordionTrigger className="text-xs font-semibold">AI Configuration</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center">
-                            <Label className="text-xs">NLP Sensitivity</Label>
-                            <Settings2Icon className="h-3 w-3 text-muted-foreground" />
-                          </div>
-                          <Slider
-                            value={[nlpSensitivity]}
-                            onValueChange={(value) => setNlpSensitivity(value[0])}
-                            max={100}
-                            step={1}
-                            className="h-3"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center">
-                            <Label className="text-xs">AI Creativity</Label>
-                            <BrainCircuitIcon className="h-3 w-3 text-muted-foreground" />
-                          </div>
-                          <Slider
-                            value={[aiCreativity]}
-                            onValueChange={(value) => setAiCreativity(value[0])}
-                            max={100}
-                            step={1}
-                            className="h-3"
-                          />
-                        </div>
-                        <Button onClick={handleRefinement} className="w-full h-7 text-xs">
-                          {aiProgress > 0 && aiProgress < 100 ? (
-                            <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
-                          ) : (
-                            <Zap className="mr-2 h-3 w-3" />
-                          )}
-                          Generate AI Refinement
-                        </Button>
-                        {aiProgress > 0 && (
-                          <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${aiProgress}%` }}></div>
-                          </div>
-                        )}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
+                  
+                  
+
                 </Accordion>
               </CardContent>
             </Card>
