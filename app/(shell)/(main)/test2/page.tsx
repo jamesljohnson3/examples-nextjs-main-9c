@@ -56,9 +56,15 @@ export default function EnhancedSegmentCreatePage() {
 
   const handleCloneVehicle = (vehicle: VehicleRecord) => {
     setProduct({
-      name: vehicle.name,
-    })
-  }
+        name: vehicle.fields.Name,
+        description: '',  // Assume default or fetch from somewhere
+        price: vehicle.fields["Vehicle details 1"] || 0, // Adjust according to API
+        category: '', // Set category as needed
+        inStock: true, // Assume default
+        images: [vehicle.fields.Attachments[0]?.thumbnails.small.url || ''], // Assuming the vehicle has an image
+    });
+}
+
   
 
 
