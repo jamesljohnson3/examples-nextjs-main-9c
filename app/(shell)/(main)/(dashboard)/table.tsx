@@ -21,32 +21,33 @@ interface SearchTermIndicatorProps {
     vehicles: VehicleRecord[];
   }
   const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField, vehicles }) => {
-
-    // Normalize the search term to only include numbers (useful for price searches)
+    
+    // Function to normalize search term for exact matches (especially for numeric fields)
     const normalizeSearchTerm = (term: string) => term.replace(/[^0-9.-]+/g, '');
 
-    const isTermInField = (vehicle: VehicleRecord) => {
-        const term = searchTerm.toLowerCase();
-        const normalizedTerm = normalizeSearchTerm(term); // Normalize the search term
+    const isExactTermInField = (vehicle: VehicleRecord) => {
+        const term = searchTerm.toLowerCase(); // Lowercase search term for string comparison
+        const normalizedTerm = normalizeSearchTerm(term); // Normalize search term for price fields
         const { fields } = vehicle;
-
-        // Normalize the vehicle price field (Vehicle details 1) to only include numbers
+        
+        // Normalize vehicle price field (e.g., "Vehicle details 1") for comparison
         const priceNormalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
 
-        // Comparison logic
+        // Exact matching logic for different fields
         return (
-            (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
-            (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
-            (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-            (searchField === "price" && priceNormalized === normalizedTerm) ||  // Price exact match comparison
-            (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
-            (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
-            (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
-            (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
+            (searchField === "name" && fields.Name?.toLowerCase() === term) || // Exact match for name
+            (searchField === "notes" && fields.Notes?.toLowerCase() === term) || // Exact match for notes
+            (searchField === "bodyType" && fields["Body type"]?.toLowerCase() === term) || // Exact match for body type
+            (searchField === "price" && priceNormalized === normalizedTerm) || // Exact match for price
+            (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase() === term) || // Exact match for exterior color
+            (searchField === "engine" && fields.Engine?.toLowerCase() === term) || // Exact match for engine
+            (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase() === term) || // Exact match for vehicle details 2
+            (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase() === term) // Exact match for drivetrain
         );
     };
 
-    const matchingVehicles = vehicles.filter(isTermInField);
+    // Filter vehicles based on exact term in the specified field
+    const matchingVehicles = vehicles.filter(isExactTermInField);
 
     const searchFieldLabel = () => {
         switch (searchField) {
@@ -67,7 +68,7 @@ interface SearchTermIndicatorProps {
             case 'drivetrain':
                 return 'Drivetrain';
             default:
-                return searchField; // Fallback to searchField string
+                return searchField; // Fallback if an unknown field is provided
         }
     };
 
@@ -75,7 +76,7 @@ interface SearchTermIndicatorProps {
         <>
             {searchTerm && (
                 <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                    Finding {matchingVehicles.length} vehicle(s) by {searchFieldLabel()}: {searchTerm}
+                    Searching {matchingVehicles.length} vehicle(s) by {searchFieldLabel()}: {searchTerm}
                 </span>
             )}
         </>
@@ -122,15 +123,21 @@ const Header: React.FC = () => (
   </div>
 );
 
-
 interface SearchBarProps {
-    setSearchTerm: (term: string) => void;
-    searchTerm: string;
-    searchField: string;
-    setSearchField: (field: string) => void; // Added setter for search field
-    vehicles: VehicleRecord[];
+    setSearchTerm: (term: string) => void; // Function to set the search term
+    searchTerm: string; // The current search term as a string
+    searchField: string; // The current search field as a string
+    setSearchField: (field: string) => void; // Function to set the search field
+    filteredVehicles: VehicleRecord[]; // Correct type for filtered vehicles
 }
-const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, searchField, setSearchField, vehicles }) => {
+
+const SearchBar: React.FC<SearchBarProps> = ({
+    setSearchTerm,
+    searchTerm,
+    searchField,
+    setSearchField,
+    filteredVehicles,
+}) => {
     return (
         <Card className="mb-2">
             <CardContent className="p-2">
@@ -139,29 +146,26 @@ const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, search
                         <Input
                             placeholder="Type a command or search..."
                             className="flex-grow h-10 text-xs"
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)} // Update search term
                         />
                         <Button variant="outline" size="sm" className="h-10">
                             <Search className="h-4 w-4" />
                         </Button>
                     </div>
-                    {/* 
-                     <div className="flex space-x-2">
-                        <Button onClick={() => setSearchField("name")}>Search by Name</Button>
-                        <Button onClick={() => setSearchField("notes")}>Search by Notes</Button>
-                        <Button onClick={() => setSearchField("bodyType")}>Search by Body Type</Button>
-                        <Button onClick={() => setSearchField("exteriorColor")}>Search by Exterior Color</Button>
-                    </div>
-                    Add buttons to change search fields */}
-                   
-                    <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} vehicles={vehicles} />
+
+                  
+
+                    <SearchTermIndicator
+                        searchTerm={searchTerm}
+                        searchField={searchField}
+                        vehicles={filteredVehicles} // Pass the filtered vehicles
+                    />
                 </div>
             </CardContent>
         </Card>
     );
 };
-
-
 // Add this prop to the VehicleItemProps
 interface VehicleItemProps {
   vehicle: VehicleRecord;
@@ -313,7 +317,7 @@ const ProductListHomepage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchField, setSearchField] = useState<string>(""); // Default search field
+  const [searchField, setSearchField] = useState<string>("name"); // Default search field
   const useDebounce = (value: string, delay: number) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
   
@@ -333,40 +337,24 @@ const ProductListHomepage: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   
-
   const filteredVehicles = vehicles.filter(vehicle => {
     const term = debouncedSearchTerm.toLowerCase();
-    const normalizedTerm = term.replace(/[^0-9.-]+/g, ''); // Normalize search term
+    const normalizedTerm = term.replace(/[^0-9.-]+/g, ''); // Normalize search term for price
+
     const { fields } = vehicle;
 
-    // Normalize price field for price search
+    // Normalize the vehicle price field
     const priceNormalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
 
-    if (!searchField || searchField === "") {
-        // Default fallback behavior: search all relevant fields
-        return (
-            fields["Exterior Color"]?.toLowerCase().includes(term) ||
-            fields.Name?.toLowerCase().includes(term) ||
-            fields.Notes?.toLowerCase().includes(term) ||
-            fields["Body type"]?.toLowerCase().includes(term) ||
-            priceNormalized === normalizedTerm ||  // Match the price exactly
-            fields.Engine?.toLowerCase().includes(term) ||
-            fields["Vehicle details 2"]?.toLowerCase().includes(term) ||
-            fields.Drivetrain?.toLowerCase().includes(term) ||
-            vehicle.preview?.toLowerCase().includes(term)
-        );
-    }
-
-    // If searchField is specified, search only in that field
     return (
-        (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
-        (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
-        (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-        (searchField === "price" && priceNormalized === normalizedTerm) ||  // Match the price exactly
-        (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
-        (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
-        (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
-        (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
+        (searchField === "name" && fields.Name?.toLowerCase() === term) || // Exact match for name
+        (searchField === "notes" && fields.Notes?.toLowerCase() === term) || // Exact match for notes
+        (searchField === "bodyType" && fields["Body type"]?.toLowerCase() === term) || // Exact match for body type
+        (searchField === "price" && priceNormalized === normalizedTerm) || // Exact match for price
+        (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase() === term) || // Exact match for exterior color
+        (searchField === "engine" && fields.Engine?.toLowerCase() === term) || // Exact match for engine
+        (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase() === term) || // Exact match for vehicle details 2
+        (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase() === term) // Exact match for drivetrain
     );
 });
 
@@ -405,12 +393,13 @@ const ProductListHomepage: React.FC = () => {
     <div className=" mx-auto p-4 space-y-4 text-sm">
       <Header />
       <SearchBar
-                vehicles={vehicles}
-                setSearchTerm={setSearchTerm}
-                searchField={searchField}
-                setSearchField={setSearchField} // Pass down the setter
-                searchTerm={searchTerm}
-            />
+    setSearchTerm={setSearchTerm}
+    searchTerm={searchTerm}
+    searchField={searchField}
+    setSearchField={setSearchField} // Pass down the setter
+    filteredVehicles={filteredVehicles} // Pass the filtered vehicles
+/>
+
       <ResizablePanelGroup className='space-x-2' direction="horizontal">
         <ResizablePanel defaultSize={80}>
           <Card>
