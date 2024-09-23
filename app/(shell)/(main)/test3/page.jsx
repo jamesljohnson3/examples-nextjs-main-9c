@@ -41,7 +41,7 @@ export default function UpdatedDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="  w-full rounded-md mx-auto p-2 space-y-4 text-sm">
       <header className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
