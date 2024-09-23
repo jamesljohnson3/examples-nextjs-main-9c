@@ -21,21 +21,24 @@ interface SearchTermIndicatorProps {
     vehicles: VehicleRecord[];
   }
   
-  
   const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField, vehicles }) => {
-    
+
+    // Normalize the search term to only include numbers (useful for price searches)
+    const normalizeSearchTerm = (term: string) => term.replace(/[^0-9.-]+/g, '');
+
     const isTermInField = (vehicle: VehicleRecord) => {
         const term = searchTerm.toLowerCase();
-        const normalizedTerm = term.replace(/[^0-9.-]+/g, ''); // Normalize the search term
+        const normalizedTerm = normalizeSearchTerm(term); // Normalize the search term
         const { fields } = vehicle;
-    
+
+        // Normalize the vehicle price field (Vehicle details 1) to only include numbers
         const priceNormalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
-    
+
         return (
             (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
             (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
             (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-            (searchField === "price" && priceNormalized.includes(normalizedTerm)) || // Use normalized term
+            (searchField === "price" && priceNormalized.includes(normalizedTerm)) || // Compare normalized price with normalized search term
             (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
             (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
             (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
@@ -45,34 +48,11 @@ interface SearchTermIndicatorProps {
 
     const matchingVehicles = vehicles.filter(isTermInField);
 
-    const searchFieldLabel = () => {
-        switch (searchField) {
-            case 'price':
-                return 'Price';
-            case 'name':
-                return 'Name';
-            case 'notes':
-                return 'Notes';
-            case 'bodyType':
-                return 'Body Type';
-            case 'exteriorColor':
-                return 'Exterior Color';
-            case 'engine':
-                return 'Engine';
-            case 'vehicleDetails2':
-                return 'Vehicle Details 2';
-            case 'drivetrain':
-                return 'Drivetrain';
-            default:
-                return searchField; // Fallback to searchField string
-        }
-    };
-
     return (
         <>
             {searchTerm && (
                 <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                    Searching {matchingVehicles.length} vehicle(s) by {searchFieldLabel()}: {searchTerm}
+                    Searching {matchingVehicles.length} vehicle(s) by {searchField === "price" ? "Price" : searchField}: {searchTerm}
                 </span>
             )}
         </>
