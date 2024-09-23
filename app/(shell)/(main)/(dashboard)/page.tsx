@@ -126,7 +126,7 @@ export default function ProductListHomepage() {
                           <Badge>{product.fields.Category}</Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="font-bold">${product.fields.Price.toFixed(2)}</span>
+
                           <Button size="sm" onClick={() => handleDeleteProduct(product.id)}>Delete Product</Button>
                         </div>
                         {selectedProduct && selectedProduct.id === product.id && (
