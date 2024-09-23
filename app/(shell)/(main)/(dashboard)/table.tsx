@@ -20,7 +20,6 @@ interface SearchTermIndicatorProps {
     searchField: string;
     vehicles: VehicleRecord[];
   }
-  
   const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField, vehicles }) => {
 
     // Normalize the search term to only include numbers (useful for price searches)
@@ -34,11 +33,12 @@ interface SearchTermIndicatorProps {
         // Normalize the vehicle price field (Vehicle details 1) to only include numbers
         const priceNormalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
 
+        // Comparison logic
         return (
             (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
             (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
             (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-            (searchField === "price" && priceNormalized.includes(normalizedTerm)) || // Compare normalized price with normalized search term
+            (searchField === "price" && priceNormalized === normalizedTerm) ||  // Price exact match comparison
             (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
             (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
             (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
@@ -48,16 +48,40 @@ interface SearchTermIndicatorProps {
 
     const matchingVehicles = vehicles.filter(isTermInField);
 
+    const searchFieldLabel = () => {
+        switch (searchField) {
+            case 'price':
+                return 'Price';
+            case 'name':
+                return 'Name';
+            case 'notes':
+                return 'Notes';
+            case 'bodyType':
+                return 'Body Type';
+            case 'exteriorColor':
+                return 'Exterior Color';
+            case 'engine':
+                return 'Engine';
+            case 'vehicleDetails2':
+                return 'Vehicle Details 2';
+            case 'drivetrain':
+                return 'Drivetrain';
+            default:
+                return searchField; // Fallback to searchField string
+        }
+    };
+
     return (
         <>
             {searchTerm && (
                 <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                    Searching {matchingVehicles.length} vehicle(s) by {searchField === "price" ? "Price" : searchField}: {searchTerm}
+                    Finding {matchingVehicles.length} vehicle(s) by {searchFieldLabel()}: {searchTerm}
                 </span>
             )}
         </>
     );
 };
+
 
 
 const LoadingIndicator: React.FC = () => (
@@ -307,25 +331,27 @@ const ProductListHomepage: React.FC = () => {
   };
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  
   const filteredVehicles = vehicles.filter(vehicle => {
     const term = debouncedSearchTerm.toLowerCase();
+    const normalizedTerm = term.replace(/[^0-9.-]+/g, ''); // Normalize search term
     const { fields } = vehicle;
-  
-    // Check against relevant fields
+
+    // Normalize price field for price search
+    const priceNormalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
+
     return (
-      fields.Name?.toLowerCase().includes(term) ||
-      fields.Notes?.toLowerCase().includes(term) ||
-      fields["Body type"]?.toLowerCase().includes(term) ||
-      fields["Vehicle details 1"]?.toLowerCase().includes(term) ||
-      fields["Exterior Color"]?.toLowerCase().includes(term) ||
-      fields.Engine?.toLowerCase().includes(term) ||
-      fields["Vehicle details 2"]?.toLowerCase().includes(term) ||
-      fields.Drivetrain?.toLowerCase().includes(term) ||
-      vehicle.preview?.toLowerCase().includes(term) // Check preview if necessary
+        (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
+        (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
+        (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
+        (searchField === "price" && priceNormalized === normalizedTerm) ||  // Match the price exactly
+        (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
+        (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
+        (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
+        (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term)) ||
+        vehicle.preview?.toLowerCase().includes(term)
     );
-  });
-  
+});
+
 
     const handleVehicleSelect = (vehicle: VehicleRecord) => {
       setSelectedVehicle(prev => prev?.id === vehicle.id ? null : vehicle); // Toggle selection
