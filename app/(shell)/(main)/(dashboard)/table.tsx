@@ -24,24 +24,28 @@ interface SearchTermIndicatorProps {
   
   
   const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField, vehicles }) => {
+    
+    
+    
     const isTermInField = (vehicle: VehicleRecord) => {
         const term = searchTerm.toLowerCase();
+        const normalizedTerm = term.replace(/[^0-9.-]+/g, ''); // Normalize the search term
         const { fields } = vehicle;
-        
-        // Extract and normalize the price, removing non-numeric characters
+    
         const priceNormalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
-
+    
         return (
             (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
             (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
             (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-            (searchField === "price" && priceNormalized.includes(term)) || // Check normalized price
+            (searchField === "price" && priceNormalized.includes(normalizedTerm)) || // Use normalized term
             (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
             (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
             (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
             (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
         );
     };
+    
 
     const matchingVehicles = vehicles.filter(isTermInField);
 
