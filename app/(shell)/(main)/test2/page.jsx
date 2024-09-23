@@ -48,7 +48,7 @@ const sampleProducts = [
   },
 ]
 
-export default function EnhancedProductCreatePage() {
+export default function EnhancedSegmentCreatePage() {
   const [product, setProduct] = useState({
     name: '',
     description: '',
@@ -131,7 +131,7 @@ export default function EnhancedProductCreatePage() {
             Back to Products
           </Button>
           <div className="text-muted-foreground">
-            Dashboard / Create Product
+            Dashboard / Create Segment
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -158,14 +158,14 @@ export default function EnhancedProductCreatePage() {
         </div>
       </div>
       
-      <h1 className="text-lg font-bold text-center mb-2">Create New Product</h1>
+      <h1 className="text-lg font-bold text-center mb-2">Create New Segment</h1>
       
       <form onSubmit={handleSubmit}>
       <ResizablePanelGroup className='space-x-2' direction={"horizontal"}>
       <ResizablePanel defaultSize={60}>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Product Details</CardTitle>
+                <CardTitle className="text-sm">Segment Details</CardTitle>
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
