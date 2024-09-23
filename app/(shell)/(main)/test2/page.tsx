@@ -12,23 +12,25 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ChevronLeft, Copy, Zap, User } from 'lucide-react'
+import { ChevronLeft, Copy, Zap, User, Sparkles as SparklesIcon, Image as ImageIcon } from 'lucide-react'
 import useWindowSize from "@/hooks/use-window-size"
 import Link from 'next/link'
 import api from "@/api"
 import type { VehicleRecord } from '@/types/api'
+import { Badge } from "@/components/ui/badge"
 
 export default function EnhancedSegmentCreatePage() {
   const [product, setProduct] = useState({
     name: '',
-    description: '', // Add this property
-    price: '', // Add this property
-    category: '', // Add this property
-    inStock: true, // Add this property
+    description: '',
+    price: '',
+    category: '',
+    inStock: true,
+    images: [] as string[], // Ensure images is part of the product state
   })
 
-  const [vehicles, setVehicles] = useState<VehicleRecord[]>([])  // Store fetched vehicles
-  const [loading, setLoading] = useState(false)  // Loading state
+  const [vehicles, setVehicles] = useState<VehicleRecord[]>([])
+  const [loading, setLoading] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
   const { isMobile, isDesktop } = useWindowSize()
 
@@ -61,10 +63,11 @@ export default function EnhancedSegmentCreatePage() {
   const handleCloneVehicle = (vehicle: VehicleRecord) => {
     setProduct({
       name: vehicle.fields.Name,
-      description: vehicle.fields.Notes || '', // Assuming 'Notes' is similar to description
-      price: vehicle.fields["Vehicle details 1"] || '', // Adjust to your price field
-      category: vehicle.fields["Body type"] || '', // Adjust to your category field
-      inStock: true, // Set this to true or false based on your requirement
+      description: vehicle.fields.Notes || '',
+      price: vehicle.fields["Vehicle details 1"] || '',
+      category: vehicle.fields["Body type"] || '',
+      inStock: true,
+      images: vehicle.fields.Attachments.map(attachment => attachment.thumbnails.small.url) || [], // Assuming images are in Attachments
     })
   }
 
@@ -134,7 +137,7 @@ export default function EnhancedSegmentCreatePage() {
                         <Card key={vehicle.id} className="overflow-hidden">
                           <CardContent className="p-2">
                             <img 
-                              src={vehicle.fields.Attachments[0]?.thumbnails.small.url} 
+                              src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
                               alt={vehicle.fields.Name} 
                               className="w-full h-24 object-cover rounded mb-2" />
                                                            <h3 className="font-semibold text-xs mb-1">                                                           <span>{vehicle.fields.Name}</span>
@@ -195,6 +198,48 @@ export default function EnhancedSegmentCreatePage() {
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
+              </CardContent>
+            </Card>
+          </ResizablePanel>
+
+          <ResizablePanel className="hidden md:flex" defaultSize={20}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Product Preview & AI Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {product.images.length > 0 ? (
+                    <img src={product.images[0]} alt="Product preview" className="w-full h-40 object-cover rounded" />
+                  ) : (
+                    <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
+                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-sm">{product.name || 'Product Name'}</h3>
+                    <p className="text-xs text-muted-foreground">{product.description || 'Product description will appear here'}</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-sm">${product.price || '0.00'}</span>
+                    <Badge>{product.category || 'Category'}</Badge>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <span className="text-xs">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-xs">AI Suggestions</h4>
+                    <ul className="space-y-1">
+                      {aiSuggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-start space-x-2 text-xs">
+                          <SparklesIcon className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                          <span>{suggestion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </ResizablePanel>
