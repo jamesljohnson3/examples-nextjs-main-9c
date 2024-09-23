@@ -122,7 +122,7 @@ export default function ProductListHomepage() {
                           <Badge>{vehicle.fields["Body type"]}</Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="font-bold">$ </span>
+                          <span className="font-bold">${vehicle.fields["Vehicle details 1"] || 0}</span>
                           <div className="flex space-x-2">
                             <Button size="sm" onClick={() => handleDeleteVehicle(vehicle.id)}>Delete Product</Button>
                             <a href={`/product/${vehicle.id}`}>
@@ -146,7 +146,7 @@ export default function ProductListHomepage() {
                                   <span className="font-semibold">Description:</span>  
                                 </div>
                                 <div className="text-xs">
-                                  <span className="font-semibold">Price:</span> $ 
+                                  <span className="font-semibold">Price:</span> ${vehicle.fields["Vehicle details 1"] || 0}
                                 </div>
                                 <div className="text-xs">
                                   <span className="font-semibold">Category:</span> {vehicle.fields["Body type"]}
