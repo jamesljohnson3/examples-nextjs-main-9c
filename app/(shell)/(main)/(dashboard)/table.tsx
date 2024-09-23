@@ -24,18 +24,22 @@ interface SearchTermIndicatorProps {
     const isTermInField = (vehicle: VehicleRecord) => {
         const term = searchTerm.toLowerCase();
         const { fields } = vehicle;
-
+    
+        // Normalize vehicle details for price search
+        const vehicleDetails1Normalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
+    
         return (
             (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
             (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
             (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-            (searchField === "vehicleDetails1" && fields["Vehicle details 1"]?.toLowerCase().includes(term)) ||
+            (searchField === "vehicleDetails1" && vehicleDetails1Normalized.includes(term)) ||
             (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
             (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
             (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
             (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
         );
     };
+    
 
     const matchingVehicles = vehicles.filter(isTermInField);
 
