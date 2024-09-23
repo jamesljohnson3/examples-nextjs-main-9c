@@ -99,7 +99,7 @@ export default function ProductListHomepage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-semibold">{vehicle.fields.Name}</h3>
-                            <p className="text-xs text-muted-foreground">{vehicle.fields.Notes}</p>
+                            Product ID: {extractProductId(vehicle.fields.Notes)}
                             <div className="text-base text-gray-800 text-center mt-1">
                               {vehicle.fields["Vehicle details 1"] || 0}
                             </div>
@@ -109,12 +109,12 @@ export default function ProductListHomepage() {
                         <div className="flex justify-between items-center">
                           {selectedVehicle && selectedVehicle.id === vehicle.id && (
                             <>
+
                               <a href={vehicle.fields.Notes} target="_blank" rel="noopener noreferrer">
                                 <span className="text-xs text-blue-500 underline">This is the link to the live website</span>
                               </a>
-                              Product ID: {extractProductId(vehicle.fields.Notes)}
 
-                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
+                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-48 h-48 object-cover rounded mb-2" />
                             </>
                           )}
                           <Button size="sm">Delete Vehicle</Button>
