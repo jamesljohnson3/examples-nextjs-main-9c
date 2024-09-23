@@ -1,29 +1,27 @@
 "use client"
-import React, { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ChevronLeft, Copy, Zap, User, Sparkles as SparklesIcon, Image as ImageIcon } from 'lucide-react'
-import useWindowSize from "@/hooks/use-window-size"
-import Link from 'next/link'
-import api from "@/api"
-import type { VehicleRecord } from '@/types/api'
-import { Badge } from "@/components/ui/badge"
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChevronLeft, Copy, User, Sparkles as SparklesIcon, Image as ImageIcon } from 'lucide-react';
+import useWindowSize from "@/hooks/use-window-size";
+import Link from 'next/link';
+import api from "@/api";
+import type { VehicleRecord } from '@/types/api';
 
 // Define the type for your product
 interface Product {
   name: string;
   description: string;
-  price: string;
+  price: string; // Changed to string to reflect the formatted price
   category: string;
   inStock: boolean;
   images: string[];
@@ -33,17 +31,16 @@ interface Product {
         large: {
           url: string;
         };
-      };
+      }[];
     }[];
   };
 }
 
 export default function EnhancedSegmentCreatePage() {
-  // Use useState with an empty initial product object
   const [product, setProduct] = useState<Product>({
     name: '',
     description: '',
-    price: '',
+    price: '', // Initialized as empty string
     category: '',
     inStock: false,
     images: [],
@@ -52,37 +49,32 @@ export default function EnhancedSegmentCreatePage() {
     }
   });
 
-  const [vehicles, setVehicles] = useState<VehicleRecord[]>([])
-  const [loading, setLoading] = useState(false)
-// Update AI Suggestions state type
-const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[]>([]);
-  const { isMobile, isDesktop } = useWindowSize()
+  const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const { isMobile, isDesktop } = useWindowSize();
 
   // Fetch vehicles from the API
   useEffect(() => {
     const fetchVehicles = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const vehicleData = await api.list()
-        setVehicles(vehicleData)
+        const vehicleData = await api.list();
+        setVehicles(vehicleData);
       } catch (error) {
-        console.error('Error fetching vehicles:', error)
+        console.error('Error fetching vehicles:', error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchVehicles()
-  }, [])
+    fetchVehicles();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setProduct(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleCategoryChange = (value: string) => {
-    setProduct(prev => ({ ...prev, category: value }))
-  }
+    const { name, value } = e.target;
+    setProduct(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleCloneVehicle = (vehicle: VehicleRecord) => {
     setProduct({
@@ -99,18 +91,17 @@ const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Submitting product:', product)
+    e.preventDefault();
+    console.log('Submitting product:', product);
     // Submit the form data to your backend here
-  }
+  };
 
   // Simulate continuous AI suggestions update
   useEffect(() => {
     const interval = setInterval(() => {
       setAiSuggestions(prev => {
-        const newId = Date.now().toString(); // Create a unique ID
-        const newSuggestion = { id: newId, text: `New insight: ${newId}` }; // Structure with ID and text
-        return [...prev.slice(1), newSuggestion]; // Replace the oldest suggestion
+        const newSuggestion = `New insight: ${Date.now()}`;
+        return [...prev.slice(1), newSuggestion];
       });
     }, 10000);
     return () => clearInterval(interval);
@@ -160,39 +151,40 @@ const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                <ScrollArea className="h-72 w-full rounded-md border">
-  {loading ? (
-    <div className="flex items-center justify-center h-full">
-      <span>Loading vehicles...</span>
-    </div>
-  ) : (
-    <div className="p-4 grid grid-cols-2 gap-4">
-      {vehicles.map((vehicle) => (
-        <Card key={vehicle.id} className="overflow-hidden">
-          <CardContent className="p-2">
-            <img 
-              src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
-              alt={vehicle.fields.Name} 
-              className="w-full h-24 object-cover rounded mb-2" />
-            <h3 className="font-semibold text-xs mb-1">
-              <span>{vehicle.fields.Name}</span>
-            </h3>
-            <div className="text-xs font-bold flex items-center justify-between">
-              <span>Price:</span> 
-              <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
-              <div className="ml-auto flex items-center">
-                <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
-                  <Copy className="h-3 w-3 mr-1" />
-                  Clone
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )}
-</ScrollArea>
+                  <ScrollArea className="h-72 w-full rounded-md border">
+                    {loading ? (
+                      <div className="flex items-center justify-center h-full">
+                        <span>Loading vehicles...</span>
+                      </div>
+                    ) : (
+                      <div className="p-4 grid grid-cols-2 gap-4">
+                        {vehicles.map((vehicle) => (
+                          <Card key={vehicle.id} className="overflow-hidden">
+                            <CardContent className="p-2">
+                              <img 
+                                src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
+                                alt={vehicle.fields.Name} 
+                                className="w-full h-24 object-cover rounded mb-2" 
+                              />
+                              <h3 className="font-semibold text-xs mb-1">
+                                <span>{vehicle.fields.Name}</span>
+                              </h3>
+                              <div className="text-xs font-bold flex items-center justify-between">
+                                <span>Price:</span>
+                                <span>{vehicle.fields["Vehicle details 1"] || '0.00'}</span> {/* Display vehicle price */}
+                                <div className="ml-auto flex items-center">
+                                  <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
+                                    <Copy className="h-3 w-3 mr-1" />
+                                    Clone
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
 
                   <AccordionItem value="basic-info">
                     <AccordionTrigger className="text-xs font-semibold">Basic Information</AccordionTrigger>
@@ -202,9 +194,6 @@ const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[
                           <Label htmlFor="name" className="text-xs">Product Name</Label>
                           <Input id="name" name="name" value={product.name} onChange={handleInputChange} className="h-7 text-xs" />
                         </div>
-                      
-                      
-
                         <Button type="submit" className="w-full h-8">Submit</Button>
                       </div>
                     </AccordionContent>
@@ -221,45 +210,38 @@ const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                {product.images.length > 0 ? (
-  <a target="_blank" rel="noopener noreferrer" href={`${product.description}`}>
-    <img 
-      src={product.fields.Attachments[0]?.thumbnails.large.url} 
-      alt="Product preview" 
-      className="w-full h-40 object-cover rounded" 
-    />
-  </a>
-) : (
-  <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
-    <ImageIcon className="h-10 w-10 text-muted-foreground" />
-  </div>
-)}
+                  {product.images.length > 0 ? (
+                    <a target="_blank" rel="noopener noreferrer" href={product.description}>
+                      <img 
+                        src={product.fields.Attachments[0]?.thumbnails.large.url} 
+                        alt="Product preview" 
+                        className="w-full h-40 object-cover rounded" 
+                      />
+                    </a>
+                  ) : (
+                    <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
+                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                  )}
 
                   <div>
                     <h3 className="font-semibold text-sm">{product.name || 'Product Name'}</h3>
-
                   </div>
                   <div className="flex justify-between items-center">
-                  <span className="font-bold text-sm">{product.price || '0.00'}</span>
-                  <Badge>{product.category || 'Category'}</Badge>
+                    <span className="font-bold text-sm">{product.price || '0.00'}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                    <span className="text-xs">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+
+                  <div className="text-sm space-y-1">
+                    <h4 className="font-semibold">AI Insights:</h4>
+                    <ul>
+                      {aiSuggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-start space-x-2 text-xs">
+                          <SparklesIcon className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                          <a href={`/suggestion/id${Date.now() + index}`} className="text-blue-600 hover:underline">{suggestion}</a>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-<div className="space-y-2">
-  <h4 className="font-semibold text-xs">AI Suggestions</h4>
-  <ul className="space-y-1">
-    {aiSuggestions.map(({ id, text }, index) => (
-      <li key={index} className="flex items-start space-x-2 text-xs">
-        <SparklesIcon className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-        <a href={`/suggestion/${id}`} className="text-blue-500 hover:underline">
-          {text}
-        </a>
-      </li>
-    ))}
-  </ul>
-</div>
                 </div>
               </CardContent>
             </Card>
@@ -267,5 +249,5 @@ const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[
         </ResizablePanelGroup>
       </form>
     </div>
-  )
+  );
 }
