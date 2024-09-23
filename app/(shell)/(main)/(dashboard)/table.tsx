@@ -181,7 +181,7 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
               <CardContent className="p-2">
                 <h2 className="font-semibold mb-1">Live Product Preview</h2>
                 <div className="bg-muted p-2 rounded space-y-1">
-                  <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
+                  <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="h-96 h-96 object-cover rounded mb-2" />
                   
                   
 
