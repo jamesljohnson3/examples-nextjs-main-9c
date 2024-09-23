@@ -17,12 +17,16 @@ import { deleteVehiclebyId } from '@/actions/dashboard';
 export default function ProductListHomepage() {
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
+  const [loading, setLoading] = useState<boolean>(false); // Loading state
 
   useEffect(() => {
-    async function fetchVehicles() {
+    const fetchVehicles = async () => {
+      setLoading(true); // Set loading to true
       const vehicleData: VehicleRecord[] = await api.list();
       setVehicles(vehicleData);
-    }
+      setLoading(false); // Set loading to false after fetching
+    };
+
     fetchVehicles();
   }, []);
 
@@ -50,6 +54,10 @@ export default function ProductListHomepage() {
       deleteVehicles(vehicleId);
     }
   };
+
+  if (loading) {
+    return <div className="text-center">Loading vehicles...</div>; // Loading message
+  }
 
   return (
     <div className="container mx-auto p-4 space-y-4 text-sm">
@@ -118,7 +126,6 @@ export default function ProductListHomepage() {
                           <div>
                             <h3 className="font-semibold">{vehicle.fields.Name}</h3>
                             <p className="text-xs font-semibold">Product ID: {extractProductId(vehicle.fields.Notes)}</p>
-                            <p className="text-xs text-muted-foreground"> </p>
                           </div>
                           <Badge>{vehicle.fields["Body type"]}</Badge>
                         </div>
@@ -142,9 +149,6 @@ export default function ProductListHomepage() {
                                 </div>
                                 <div className="text-xs">
                                   <span className="font-semibold">Name:</span> {vehicle.fields.Name}
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Description:</span>  
                                 </div>
                                 <div className="text-xs">
                                   <span className="font-semibold">Price:</span> ${vehicle.fields["Vehicle details 1"] || 0}
@@ -182,7 +186,8 @@ export default function ProductListHomepage() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Avg. Price:</span>
                   <span className="font-bold">
-                   </span>
+                    {/* Placeholder for average price calculation */}
+                  </span>
                 </div>
               </div>
             </CardContent>
