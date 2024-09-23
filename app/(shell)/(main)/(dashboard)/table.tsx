@@ -377,7 +377,7 @@ const ProductListHomepage: React.FC = () => {
               </CardContent>
           </Card>
         </ResizablePanel>
-        <ResizablePanel defaultSize={20}>
+        <ResizablePanel className="hidden md:flex" defaultSize={20}>
           <QuickStats vehicles={vehicles} />
         </ResizablePanel>
       </ResizablePanelGroup>

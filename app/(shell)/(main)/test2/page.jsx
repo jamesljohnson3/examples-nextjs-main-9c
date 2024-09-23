@@ -15,6 +15,7 @@ import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ChevronLeft, User, ImageIcon, Upload, X, Plus, Copy, Zap, RefreshCw, SparklesIcon, Settings2Icon, BrainCircuitIcon } from 'lucide-react'
+import useWindowSize from "@/hooks/use-window-size";
 
 const sampleProducts = [
   {
@@ -57,6 +58,7 @@ export default function EnhancedProductCreatePage() {
   })
   
   const [aiSuggestions, setAiSuggestions] = useState([])
+  const { isMobile, isDesktop } = useWindowSize();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -158,8 +160,8 @@ export default function EnhancedProductCreatePage() {
       <h1 className="text-lg font-bold text-center mb-2">Create New Product</h1>
       
       <form onSubmit={handleSubmit}>
-        <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel defaultSize={60}>
+      <ResizablePanelGroup className='space-x-2' direction={isMobile ? "vertical" : "horizontal"}>
+      <ResizablePanel defaultSize={60}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Product Details</CardTitle>
@@ -282,7 +284,7 @@ export default function EnhancedProductCreatePage() {
               </CardContent>
             </Card>
           </ResizablePanel>
-          <ResizablePanel defaultSize={40}>
+          <ResizablePanel className="hidden md:flex" defaultSize={40}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Product Preview & AI Insights</CardTitle>
