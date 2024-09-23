@@ -1,6 +1,5 @@
 
 "use client"
-// ... other imports
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Search, User } from 'lucide-react';
 import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
+import { deleteVehiclebyId } from '@/actions/dashboard';
 
 export default function ProductListHomepage() {
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
@@ -29,10 +29,26 @@ export default function ProductListHomepage() {
   const handleVehicleSelect = (vehicle: VehicleRecord) => {
     setSelectedVehicle(vehicle);
   };
+
   const extractProductId = (url: string) => {
     const parts = new URL(url).pathname.split('/');
     return parts[parts.length - 1].replace('.html', '');
   };
+
+  const deleteVehicles = async (vehicleId: string) => {
+    try {
+      await deleteVehiclebyId(vehicleId); // Assuming `api.delete` is the correct method to delete a vehicle
+      setVehicles(prevVehicles => prevVehicles.filter(vehicle => vehicle.id !== vehicleId));
+      setSelectedVehicle(null); // Deselect the vehicle after deletion
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+    }
+  };
+
+  const handleDeleteVehicle = (vehicleId: string) => {
+    deleteVehicles(vehicleId);
+  };
+
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
       <div className="flex items-center justify-between mb-2">
@@ -99,25 +115,20 @@ export default function ProductListHomepage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-semibold">{vehicle.fields.Name}</h3>
-                            Product ID: {extractProductId(vehicle.fields.Notes)}
-                            <div className="text-base text-gray-800 text-center mt-1">
-                              {vehicle.fields["Vehicle details 1"] || 0}
-                            </div>
+                            <h3 className="font-semibold">Product ID: {extractProductId(vehicle.fields.Notes)}</h3>
                           </div>
                           <Badge>{vehicle.fields["Body type"]}</Badge>
                         </div>
                         <div className="flex justify-between items-center">
                           {selectedVehicle && selectedVehicle.id === vehicle.id && (
                             <>
-
                               <a href={vehicle.fields.Notes} target="_blank" rel="noopener noreferrer">
                                 <span className="text-xs text-blue-500 underline">This is the link to the live website</span>
                               </a>
-
                               <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-48 h-48 object-cover rounded mb-2" />
                             </>
                           )}
-                          <Button size="sm">Delete Vehicle</Button>
+                          <Button size="sm" onClick={() => handleDeleteVehicle(vehicle.id)}>Delete Vehicle</Button>
                         </div>
                       </div>
                     </AccordionContent>
@@ -145,7 +156,8 @@ export default function ProductListHomepage() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Avg. Price:</span>
                   <span className="font-bold">
-                   </span>
+                    {/* Placeholder for average price calculation */}
+                  </span>
                 </div>
               </div>
             </CardContent>
