@@ -79,23 +79,32 @@ const Header: React.FC = () => (
     </div>
   </div>
 );
+
+
+
 interface SearchBarProps {
     setSearchTerm: (term: string) => void;
+    searchTerm: string; // New prop for the search term
+    searchField: string; // New prop for the search field
   }
   
-  const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm }) => {
+  const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, searchField }) => {
     return (
       <Card className="mb-2">
         <CardContent className="p-2">
-          <div className="flex space-x-2 mb-2">
-            <Input
-              placeholder="Type a command or search..."
-              className="flex-grow h-10 text-xs"
-              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-            />
-            <Button variant="outline" size="sm" className="h-10">
-              <Search className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-col space-y-2">
+            <div className="flex space-x-2 mb-2">
+              <Input
+                placeholder="Type a command or search..."
+                className="flex-grow h-10 text-xs"
+                onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+              />
+              <Button variant="outline" size="sm" className="h-10">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+            {/* Add the SearchTermIndicator here */}
+            <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} />
           </div>
         </CardContent>
       </Card>
@@ -325,8 +334,8 @@ const ProductListHomepage: React.FC = () => {
   return (
     <div className=" mx-auto p-4 space-y-4 text-sm">
       <Header />
-      <SearchBar setSearchTerm={setSearchTerm} /> 
-          <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} />
+      <SearchBar setSearchTerm={setSearchTerm} searchField={searchField} searchTerm={searchTerm}/> 
+
 
       <Button onClick={() => setSearchField("name")}>Search by Name</Button>
       <ResizablePanelGroup className='space-x-2' direction="horizontal">
