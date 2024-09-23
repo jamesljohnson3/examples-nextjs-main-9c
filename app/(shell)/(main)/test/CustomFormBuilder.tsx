@@ -1189,7 +1189,7 @@ const handleSave = async () => {
   };
 
   return (
-    <div className=" mx-auto p-2 space-y-2 text-xs">
+    <div className="  w-full rounded-md mx-auto p-2 space-y-4 text-sm">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
           <Link href={"/"}>
@@ -1215,7 +1215,7 @@ const handleSave = async () => {
         <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className="w-full h-12"
+        className="w-full h-14"
       >
         <TabsList className="grid w-full grid-cols-3 h-8">
           <TabsTrigger value="form" className="text-xs">

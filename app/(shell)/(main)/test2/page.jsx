@@ -161,7 +161,7 @@ export default function EnhancedProductCreatePage() {
       <h1 className="text-lg font-bold text-center mb-2">Create New Product</h1>
       
       <form onSubmit={handleSubmit}>
-      <ResizablePanelGroup className='space-x-2' direction={isMobile ? "vertical" : "horizontal"}>
+      <ResizablePanelGroup className='space-x-2' direction={"horizontal"}>
       <ResizablePanel defaultSize={60}>
             <Card>
               <CardHeader>
