@@ -37,7 +37,7 @@ export default function ProductListHomepage() {
 
   const deleteVehicles = async (vehicleId: string) => {
     try {
-      await deleteVehiclebyId(vehicleId); // Assuming `api.delete` is the correct method to delete a vehicle
+      await deleteVehiclebyId(vehicleId);
       setVehicles(prevVehicles => prevVehicles.filter(vehicle => vehicle.id !== vehicleId));
       setSelectedVehicle(null); // Deselect the vehicle after deletion
     } catch (error) {
@@ -46,18 +46,20 @@ export default function ProductListHomepage() {
   };
 
   const handleDeleteVehicle = (vehicleId: string) => {
-    deleteVehicles(vehicleId);
+    if (window.confirm("Are you sure you want to delete this vehicle?")) {
+      deleteVehicles(vehicleId);
+    }
   };
 
   return (
-    <div className="container mx-auto p-2 space-y-2 text-xs">
-      <div className="flex items-center justify-between mb-2">
+    <div className="container mx-auto p-4 space-y-4 text-sm">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="h-6">
-            <ChevronLeft className="h-3 w-3 mr-1" />
+          <Button variant="ghost" size="sm" className="h-8">
+            <ChevronLeft className="h-4 w-4 mr-1" />
             Back
           </Button>
-          <div className="text-muted-foreground">Dashboard / Vehicle List</div>
+          <div className="text-muted-foreground">Dashboard / Product List</div>
         </div>
         <div className="flex items-center space-x-2">
           <Popover>
@@ -70,7 +72,7 @@ export default function ProductListHomepage() {
             <PopoverContent className="w-48 p-2">
               <div className="flex items-center space-x-2">
                 <Avatar>
-                  <AvatarImage src="/path/to/avatar.jpg" />
+                  <AvatarImage src="/placeholder.svg?height=32&width=32" />
                   <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div>
@@ -86,8 +88,8 @@ export default function ProductListHomepage() {
       <Card className="mb-2">
         <CardContent className="p-2">
           <div className="flex space-x-2 mb-2">
-            <Input placeholder="Type a command or search..." className="flex-grow h-8 text-xs" />
-            <Button variant="outline" size="sm" className="h-8">
+            <Input placeholder="Type a command or search..." className="flex-grow h-10 text-xs" />
+            <Button variant="outline" size="sm" className="h-10">
               <Search className="h-4 w-4" />
             </Button>
           </div>
@@ -98,7 +100,7 @@ export default function ProductListHomepage() {
         <ResizablePanel defaultSize={80}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Vehicle List</CardTitle>
+              <CardTitle className="text-sm">Product List</CardTitle>
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
@@ -106,7 +108,7 @@ export default function ProductListHomepage() {
                   <AccordionItem key={vehicle.id} value={vehicle.id}>
                     <AccordionTrigger onClick={() => handleVehicleSelect(vehicle)} className="text-xs">
                       <div className="flex items-center space-x-2">
-                        <img src={vehicle.fields.Attachments[0]?.thumbnails.small.url} alt={vehicle.fields.Name} className="w-8 h-8 object-cover rounded" />
+                        <img src={vehicle.fields.Attachments[0]?.thumbnails.small.url} alt={vehicle.fields.Name} className="w-10 h-10 object-cover rounded" />
                         <span>{vehicle.fields.Name}</span>
                       </div>
                     </AccordionTrigger>
@@ -115,21 +117,44 @@ export default function ProductListHomepage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-semibold">{vehicle.fields.Name}</h3>
-                            <h3 className="font-semibold">Product ID: {extractProductId(vehicle.fields.Notes)}</h3>
+                            <p className="text-xs text-muted-foreground"> </p>
                           </div>
                           <Badge>{vehicle.fields["Body type"]}</Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                          {selectedVehicle && selectedVehicle.id === vehicle.id && (
-                            <>
-                              <a href={vehicle.fields.Notes} target="_blank" rel="noopener noreferrer">
-                                <span className="text-xs text-blue-500 underline">This is the link to the live website</span>
-                              </a>
-                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-48 h-48 object-cover rounded mb-2" />
-                            </>
-                          )}
-                          <Button size="sm" onClick={() => handleDeleteVehicle(vehicle.id)}>Delete Vehicle</Button>
+                          <span className="font-bold">$ </span>
+                          <div className="flex space-x-2">
+                            <Button size="sm" onClick={() => handleDeleteVehicle(vehicle.id)}>Delete Product</Button>
+                            <a href={`/product/${vehicle.id}`}>
+                              <Button size="sm">Edit Product</Button>
+                            </a>
+                          </div>
                         </div>
+                        {selectedVehicle && selectedVehicle.id === vehicle.id && (
+                          <Card className="mt-2">
+                            <CardContent className="p-2">
+                              <h2 className="font-semibold mb-1">Live Product Preview</h2>
+                              <div className="bg-muted p-2 rounded space-y-1">
+                                <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
+                                <div className="text-xs">
+                                  <span className="font-semibold">ID:</span> {vehicle.id}
+                                </div>
+                                <div className="text-xs">
+                                  <span className="font-semibold">Name:</span> {vehicle.fields.Name}
+                                </div>
+                                <div className="text-xs">
+                                  <span className="font-semibold">Description:</span>  
+                                </div>
+                                <div className="text-xs">
+                                  <span className="font-semibold">Price:</span> $ 
+                                </div>
+                                <div className="text-xs">
+                                  <span className="font-semibold">Category:</span> {vehicle.fields["Body type"]}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -146,7 +171,7 @@ export default function ProductListHomepage() {
             <CardContent>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs">Total Vehicles:</span>
+                  <span className="text-xs">Total Products:</span>
                   <span className="font-bold">{vehicles.length}</span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -156,8 +181,7 @@ export default function ProductListHomepage() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Avg. Price:</span>
                   <span className="font-bold">
-                    {/* Placeholder for average price calculation */}
-                  </span>
+                   </span>
                 </div>
               </div>
             </CardContent>
