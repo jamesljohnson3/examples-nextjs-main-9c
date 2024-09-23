@@ -54,7 +54,8 @@ export default function EnhancedSegmentCreatePage() {
 
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([])
   const [loading, setLoading] = useState(false)
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+// Update AI Suggestions state type
+const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[]>([]);
   const { isMobile, isDesktop } = useWindowSize()
 
   // Fetch vehicles from the API
@@ -110,12 +111,13 @@ export default function EnhancedSegmentCreatePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setAiSuggestions(prev => {
-        const newSuggestion = `New insight: ${Date.now()}`
-        return [...prev.slice(1), newSuggestion]
-      })
-    }, 10000)
-    return () => clearInterval(interval)
-  }, [])
+        const newId = Date.now().toString(); // Create a unique ID
+        const newSuggestion = { id: newId, text: `New insight: ${newId}` }; // Structure with ID and text
+        return [...prev.slice(1), newSuggestion]; // Replace the oldest suggestion
+      });
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
@@ -161,33 +163,39 @@ export default function EnhancedSegmentCreatePage() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                  <ScrollArea className="h-72 w-full rounded-md border">
-                    <div className="p-4 grid grid-cols-2 gap-4">
-                      {vehicles.map((vehicle) => (
-                        <Card key={vehicle.id} className="overflow-hidden">
-                          <CardContent className="p-2">
-                            <img 
-                              src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
-                              alt={vehicle.fields.Name} 
-                              className="w-full h-24 object-cover rounded mb-2" />
-                                                           <h3 className="font-semibold text-xs mb-1">                                                           <span>{vehicle.fields.Name}</span>
-                                                           </h3>
-                                                           <div className="text-xs font-bold flex items-center justify-between">
-  <span>Price:</span> 
-  <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
-  <div className="ml-auto flex items-center">
-    <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
-      <Copy className="h-3 w-3 mr-1" />
-      Clone
-    </Button>
-  </div>
-</div>
-
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                <ScrollArea className="h-72 w-full rounded-md border">
+  {loading ? (
+    <div className="flex items-center justify-center h-full">
+      <span>Loading vehicles...</span>
+    </div>
+  ) : (
+    <div className="p-4 grid grid-cols-2 gap-4">
+      {vehicles.map((vehicle) => (
+        <Card key={vehicle.id} className="overflow-hidden">
+          <CardContent className="p-2">
+            <img 
+              src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
+              alt={vehicle.fields.Name} 
+              className="w-full h-24 object-cover rounded mb-2" />
+            <h3 className="font-semibold text-xs mb-1">
+              <span>{vehicle.fields.Name}</span>
+            </h3>
+            <div className="text-xs font-bold flex items-center justify-between">
+              <span>Price:</span> 
+              <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
+              <div className="ml-auto flex items-center">
+                <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
+                  <Copy className="h-3 w-3 mr-1" />
+                  Clone
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )}
+</ScrollArea>
 
                   <AccordionItem value="basic-info">
                     <AccordionTrigger className="text-xs font-semibold">Basic Information</AccordionTrigger>
@@ -242,17 +250,19 @@ export default function EnhancedSegmentCreatePage() {
                     <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
                     <span className="text-xs">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
                   </div>
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-xs">AI Suggestions</h4>
-                    <ul className="space-y-1">
-                      {aiSuggestions.map((suggestion, index) => (
-                        <li key={index} className="flex items-start space-x-2 text-xs">
-                          <SparklesIcon className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                          <span>{suggestion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+<div className="space-y-2">
+  <h4 className="font-semibold text-xs">AI Suggestions</h4>
+  <ul className="space-y-1">
+    {aiSuggestions.map(({ id, text }, index) => (
+      <li key={index} className="flex items-start space-x-2 text-xs">
+        <SparklesIcon className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+        <a href={`/suggestion/${id}`} className="text-blue-500 hover:underline">
+          {text}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
                 </div>
               </CardContent>
             </Card>
