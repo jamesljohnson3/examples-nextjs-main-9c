@@ -313,7 +313,7 @@ const ProductListHomepage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchField, setSearchField] = useState<string>("name"); // Default search field
+  const [searchField, setSearchField] = useState<string>(""); // Default search field
   const useDebounce = (value: string, delay: number) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
   
@@ -331,6 +331,9 @@ const ProductListHomepage: React.FC = () => {
   };
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  
+  
+
   const filteredVehicles = vehicles.filter(vehicle => {
     const term = debouncedSearchTerm.toLowerCase();
     const normalizedTerm = term.replace(/[^0-9.-]+/g, ''); // Normalize search term
@@ -339,6 +342,22 @@ const ProductListHomepage: React.FC = () => {
     // Normalize price field for price search
     const priceNormalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
 
+    if (!searchField || searchField === "") {
+        // Default fallback behavior: search all relevant fields
+        return (
+            fields["Exterior Color"]?.toLowerCase().includes(term) ||
+            fields.Name?.toLowerCase().includes(term) ||
+            fields.Notes?.toLowerCase().includes(term) ||
+            fields["Body type"]?.toLowerCase().includes(term) ||
+            priceNormalized === normalizedTerm ||  // Match the price exactly
+            fields.Engine?.toLowerCase().includes(term) ||
+            fields["Vehicle details 2"]?.toLowerCase().includes(term) ||
+            fields.Drivetrain?.toLowerCase().includes(term) ||
+            vehicle.preview?.toLowerCase().includes(term)
+        );
+    }
+
+    // If searchField is specified, search only in that field
     return (
         (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
         (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
@@ -347,8 +366,7 @@ const ProductListHomepage: React.FC = () => {
         (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
         (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
         (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
-        (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term)) ||
-        vehicle.preview?.toLowerCase().includes(term)
+        (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
     );
 });
 
