@@ -124,10 +124,11 @@ export default function EnhancedSegmentCreatePage() {
 
       <form onSubmit={handleSubmit}>
         <ResizablePanelGroup className="space-x-2" direction="horizontal">
-          <ResizablePanel defaultSize={80}>
+          <ResizablePanel defaultSize={70}>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Segment Details</CardTitle>
+                <CardTitle className="text-sm">Add an existing product</CardTitle>
+                <a href='/test4'> or Create new product</a>
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
@@ -145,10 +146,14 @@ export default function EnhancedSegmentCreatePage() {
                             <div className="text-xs font-boldflex items-center justify-between">
                               <span >Price:</span> 
                               <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
+                              <div className='absolute right-0'>
+
                               <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
                                 <Copy className="h-3 w-3 mr-1" />
                                 Clone
                               </Button>
+                              </div>
+                             
                             </div>
                           </CardContent>
                         </Card>
@@ -202,7 +207,7 @@ export default function EnhancedSegmentCreatePage() {
             </Card>
           </ResizablePanel>
 
-          <ResizablePanel className="hidden md:flex" defaultSize={20}>
+          <ResizablePanel className="hidden md:flex" defaultSize={30}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Product Preview & AI Insights</CardTitle>
@@ -210,7 +215,7 @@ export default function EnhancedSegmentCreatePage() {
               <CardContent>
                 <div className="space-y-4">
                   {product.images.length > 0 ? (
-                    <img src={product.images[0]} alt="Product preview" className="w-full h-40 object-cover rounded" />
+                    <a target="_blank" href={`${product.description}`}><img src={product.images[0]} alt="Product preview" className="w-full h-40 object-cover rounded" /></a>
                   ) : (
                     <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
                       <ImageIcon className="h-10 w-10 text-muted-foreground" />
@@ -218,7 +223,7 @@ export default function EnhancedSegmentCreatePage() {
                   )}
                   <div>
                     <h3 className="font-semibold text-sm">{product.name || 'Product Name'}</h3>
-                    <p className="text-xs text-muted-foreground">{product.description || 'Product description will appear here'}</p>
+
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-sm">${product.price || '0.00'}</span>
