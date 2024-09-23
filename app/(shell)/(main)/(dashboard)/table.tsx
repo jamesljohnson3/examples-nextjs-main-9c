@@ -91,37 +91,45 @@ const Header: React.FC = () => (
 );
 
 
-
 interface SearchBarProps {
     setSearchTerm: (term: string) => void;
     searchTerm: string;
     searchField: string;
-    vehicles: VehicleRecord[]; // New prop for vehicles
-  }
-  
-  const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, searchField, vehicles }) => {
+    setSearchField: (field: string) => void; // Added setter for search field
+    vehicles: VehicleRecord[];
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, searchField, setSearchField, vehicles }) => {
     return (
-      <Card className="mb-2">
-        <CardContent className="p-2">
-          <div className="flex flex-col space-y-2">
-            <div className="flex space-x-2 mb-2">
-              <Input
-                placeholder="Type a command or search..."
-                className="flex-grow h-10 text-xs"
-                onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-              />
-              <Button variant="outline" size="sm" className="h-10">
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-            {/* Add the SearchTermIndicator here */}
-            <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} vehicles={vehicles} />
-          </div>
-        </CardContent>
-      </Card>
+        <Card className="mb-2">
+            <CardContent className="p-2">
+                <div className="flex flex-col space-y-2">
+                    <div className="flex space-x-2 mb-2">
+                        <Input
+                            placeholder="Type a command or search..."
+                            className="flex-grow h-10 text-xs"
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <Button variant="outline" size="sm" className="h-10">
+                            <Search className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    {/* Add buttons to change search fields 
+                       
+                       <div className="flex space-x-2">
+                        <Button onClick={() => setSearchField("name")}>Search by Name</Button>
+                        <Button onClick={() => setSearchField("notes")}>Search by Notes</Button>
+                        <Button onClick={() => setSearchField("bodyType")}>Search by Body Type</Button>
+                    </div>
+                    
+                    */}
+                 
+                    <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} vehicles={vehicles} />
+                </div>
+            </CardContent>
+        </Card>
     );
-  };
-  
+};
 
 // Add this prop to the VehicleItemProps
 interface VehicleItemProps {
@@ -345,8 +353,13 @@ const ProductListHomepage: React.FC = () => {
   return (
     <div className=" mx-auto p-4 space-y-4 text-sm">
       <Header />
-      <SearchBar vehicles={vehicles} setSearchTerm={setSearchTerm} searchField={searchField} searchTerm={searchTerm}/> 
-
+      <SearchBar
+                vehicles={vehicles}
+                setSearchTerm={setSearchTerm}
+                searchField={searchField}
+                setSearchField={setSearchField} // Pass down the setter
+                searchTerm={searchTerm}
+            />
 
       <Button onClick={() => setSearchField("name")}>Search by Name</Button>
       <ResizablePanelGroup className='space-x-2' direction="horizontal">
