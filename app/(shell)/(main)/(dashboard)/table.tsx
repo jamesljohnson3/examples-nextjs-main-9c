@@ -359,8 +359,6 @@ const ProductListHomepage: React.FC = () => {
                 setSearchField={setSearchField} // Pass down the setter
                 searchTerm={searchTerm}
             />
-
-      <Button onClick={() => setSearchField("name")}>Search by Name</Button>
       <ResizablePanelGroup className='space-x-2' direction="horizontal">
         <ResizablePanel defaultSize={80}>
           <Card>
