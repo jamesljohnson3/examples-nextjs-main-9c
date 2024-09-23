@@ -10,7 +10,7 @@ import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Search, User } from 'lucide-react';
+import { BarChart3Icon, ChevronLeft, Globe, MessageSquare, Search, User } from 'lucide-react';
 import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 import { deleteVehiclebyId } from '@/actions/dashboard';
@@ -53,7 +53,8 @@ interface SearchTermIndicatorProps {
         <>
             {searchTerm && (
                 <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                    Searching {matchingVehicles.length} vehicle(s) for {searchTerm}: by {searchField === "price" ? "Price" : searchField}:
+                    Searching {matchingVehicles.length} vehicle(s) for {searchTerm} 
+                  {/*by {searchField === "price" ? "Price" : searchField}: */} 
                 </span>
             )}
         </>
@@ -279,6 +280,8 @@ const QuickStats: React.FC<QuickStatsProps> = ({ vehicles }) => {
               <span className="font-bold">${avgPrice}</span>
             </div>
           </div>
+
+          
         </CardContent>
       </Card>
     );
@@ -388,6 +391,20 @@ const ProductListHomepage: React.FC = () => {
         </ResizablePanel>
         <ResizablePanel className="hidden md:flex" defaultSize={20}>
           <QuickStats vehicles={vehicles} />
+
+
+          <Card className="col-span-3 bg-white backdrop-blur-lg border-0">
+            <CardContent className="p-2">
+              <nav className="space-y-1">
+                {['Advanced Options', 'Create Product' ].map((item) => (
+                  <Button key={item} variant="ghost" className="w-full justify-start text-xs py-1 px-2">
+
+                    {item}
+                  </Button>
+                ))}
+              </nav>
+            </CardContent>
+          </Card>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
