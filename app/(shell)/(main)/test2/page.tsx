@@ -136,11 +136,11 @@ export default function EnhancedSegmentCreatePage() {
                             <img 
                               src={vehicle.fields.Attachments[0]?.thumbnails.small.url} 
                               alt={vehicle.fields.Name} 
-                              className="w-10 h-10 object-cover rounded mb-2" 
-                            />
-                            <span>{vehicle.fields.Name}</span>
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold">Price:</span> 
+                              className="w-full h-24 object-cover rounded mb-2" />
+                                                           <h3 className="font-semibold text-xs mb-1">                                                           <span>{vehicle.fields.Name}</span>
+                                                           </h3>
+                            <div className="text-xs font-boldflex items-center justify-between">
+                              <span >Price:</span> 
                               <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
                               <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
                                 <Copy className="h-3 w-3 mr-1" />

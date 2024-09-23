@@ -399,7 +399,7 @@ const ProductListHomepage: React.FC = () => {
           <Card className="col-span-3 bg-white backdrop-blur-lg border-0">
             <CardContent className="p-2">
               <nav className="space-y-1">
-                {['Advanced Options', 'Create Product' ].map((item) => (
+                {['Add Listing', 'Create Product','Advanced Options','Inventory Settings'  ].map((item) => (
                  <Link key={item} href={'/test2'} ><Button variant="ghost" className="w-full justify-start text-xs py-1 px-2">
 
                  {item}
