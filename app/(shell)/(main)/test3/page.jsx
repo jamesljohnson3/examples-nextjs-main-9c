@@ -16,10 +16,8 @@ import Link from 'next/link';
 
 
 const getStartedItems = [
-  { title: 'Create New Product', description: 'Add a new product to your inventory', icon: Plus },
-  { title: 'View Analytics', description: 'Check your store\'s performance', icon: BarChart },
-  { title: 'Manage Orders', description: 'Process and ship customer orders', icon: Box },
-  { title: 'Update Settings', description: 'Configure your store preferences', icon: Settings },
+  { href:'/test2', title: 'Create New Product', description: 'Add a new product to your inventory', icon: Plus },
+  { href:'/admin/settings', title: 'Update Settings', description: 'Configure your store preferences', icon: Settings },
 ]
 
 const previewProducts = [
@@ -42,17 +40,14 @@ const documentationSections = [
 
 export default function UpdatedDashboard() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <header className="border-b shadow-sm">
+    <div className="min-h-screen bg-white flex flex-col ">
+      <header className="p-4">
       <div className="flex items-center justify-between mb-4">
     <div className="flex items-center space-x-2">
-     <Link href={'/test3'}>
-     <Button variant="ghost" size="sm" className="h-8">
-        <ChevronLeft className="h-4 w-4 mr-1" />
-        Back
-      </Button>
+     <Link href={'/'}>
+     <div className="text-muted-foreground">Dashboard / Product List</div>
+
      </Link>
-      <div className="text-muted-foreground">Dashboard / Product List</div>
     </div>
     <div className="flex items-center space-x-2">
       <Popover>
@@ -115,11 +110,14 @@ export default function UpdatedDashboard() {
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {getStartedItems.map((item, index) => (
-                <Button key={index} variant="outline" className="h-auto flex flex-col items-start space-y-2 p-4 shadow-sm hover:shadow-md transition-shadow">
+              <Link key={index} href={item.href} >
+              <Button  variant="outline" className="h-auto flex flex-col items-start space-y-2 p-4 shadow-sm hover:shadow-md transition-shadow">
                   <item.icon className="h-6 w-6 text-blue-500" />
                   <div className="text-sm font-semibold text-gray-700">{item.title}</div>
                   <div className="text-xs text-gray-500">{item.description}</div>
+                  
                 </Button>
+              </Link>  
               ))}
             </CardContent>
           </Card>
@@ -147,10 +145,14 @@ export default function UpdatedDashboard() {
               </div>
             </CardContent>
             <CardFooter>
+            <Link href={'/'}>
+
               <Button variant="outline" className="w-full">
                 View All Products
               </Button>
+              </Link>
             </CardFooter>
+            
           </Card>
         </section>
 

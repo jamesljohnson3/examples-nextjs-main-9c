@@ -76,7 +76,7 @@ const Header: React.FC = () => (
         Back
       </Button>
      </Link>
-      <div className="text-muted-foreground">Dashboard / Product List</div>
+
     </div>
     <div className="flex items-center space-x-2">
       <Popover>
