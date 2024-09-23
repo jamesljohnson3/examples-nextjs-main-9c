@@ -14,6 +14,34 @@ import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 import { deleteVehiclebyId } from '@/actions/dashboard';
 
+
+
+interface SearchTermIndicatorProps {
+  searchTerm: string;
+  searchField: string;
+}
+
+const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField }) => {
+  const badges: Record<string, { label: string; color: string; textColor: string }> = {
+    name: { label: 'Name', color: 'bg-blue-50', textColor: 'text-blue-700' },
+    notes: { label: 'Notes', color: 'bg-green-50', textColor: 'text-green-700' },
+    bodyType: { label: 'Body Type', color: 'bg-yellow-50', textColor: 'text-yellow-800' },
+    // Add other fields as necessary
+  };
+
+  return (
+    <>
+      {searchTerm && badges[searchField] && (
+        <span className={`inline-flex items-center rounded-md ${badges[searchField].color} px-2 py-1 text-xs font-medium ${badges[searchField].textColor} ring-1 ring-inset`}>
+          {badges[searchField].label}: {searchTerm}
+        </span>
+      )}
+    </>
+  );
+};
+
+
+
 const LoadingIndicator: React.FC = () => (
   <div className="text-center">Loading vehicles...</div>
 );
@@ -297,7 +325,9 @@ const ProductListHomepage: React.FC = () => {
   return (
     <div className=" mx-auto p-4 space-y-4 text-sm">
       <Header />
-      <SearchBar setSearchTerm={setSearchTerm} /> {/* Pass the state updater function */}
+      <SearchBar setSearchTerm={setSearchTerm} /> 
+          <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} />
+
       <Button onClick={() => setSearchField("name")}>Search by Name</Button>
       <ResizablePanelGroup className='space-x-2' direction="horizontal">
         <ResizablePanel defaultSize={80}>
