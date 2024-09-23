@@ -46,10 +46,6 @@ const api = {
         "Vehicle details 2": '', // Add your logic to populate this field
         Created: '', // Add your logic to populate this field
         preview: preview || undefined,
-        Image: undefined,
-        Description: undefined,
-        Category: undefined,
-        Price: undefined
       };
   
       return { id, createdTime: '', preview: '', name: '', fields };

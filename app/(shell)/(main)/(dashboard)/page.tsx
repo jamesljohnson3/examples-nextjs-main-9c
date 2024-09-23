@@ -29,7 +29,10 @@ export default function ProductListHomepage() {
   const handleVehicleSelect = (vehicle: VehicleRecord) => {
     setSelectedVehicle(vehicle);
   };
-
+  const extractProductId = (url: string) => {
+    const parts = new URL(url).pathname.split('/');
+    return parts[parts.length - 1].replace('.html', '');
+  };
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
       <div className="flex items-center justify-between mb-2">
@@ -109,7 +112,9 @@ export default function ProductListHomepage() {
                               <a href={vehicle.fields.Notes} target="_blank" rel="noopener noreferrer">
                                 <span className="text-xs text-blue-500 underline">This is the link to the live website</span>
                               </a>
-                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-48 h-48 object-cover rounded mb-2" />
+                              Product ID: {extractProductId(vehicle.fields.Notes)}
+
+                              <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
                             </>
                           )}
                           <Button size="sm">Delete Vehicle</Button>
@@ -140,8 +145,7 @@ export default function ProductListHomepage() {
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Avg. Price:</span>
                   <span className="font-bold">
-
-                  </span>
+                   </span>
                 </div>
               </div>
             </CardContent>
