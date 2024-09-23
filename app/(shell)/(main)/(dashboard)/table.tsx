@@ -70,10 +70,12 @@ const LoadingIndicator: React.FC = () => (
 const Header: React.FC = () => (
   <div className="flex items-center justify-between mb-4">
     <div className="flex items-center space-x-2">
-      <Button variant="ghost" size="sm" className="h-8">
+     <Link href={'/test3'}>
+     <Button variant="ghost" size="sm" className="h-8">
         <ChevronLeft className="h-4 w-4 mr-1" />
         Back
       </Button>
+     </Link>
       <div className="text-muted-foreground">Dashboard / Product List</div>
     </div>
     <div className="flex items-center space-x-2">
