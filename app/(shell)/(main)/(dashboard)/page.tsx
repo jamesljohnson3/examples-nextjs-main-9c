@@ -1,51 +1,53 @@
 
 "use client"
-
-import React, { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, Search, User, ImageIcon } from 'lucide-react'
-
-const sampleProducts = [
-  {
-    id: 'PROD-12345',
-    name: 'Wireless Earbuds',
-    description: 'High-quality wireless earbuds with noise cancellation',
-    price: 99.99,
-    category: 'Electronics',
-    image: '/placeholder.svg?height=100&width=100&text=Earbuds'
-  },
-  {
-    id: 'PROD-67890',
-    name: 'Smart Watch',
-    description: 'Feature-packed smartwatch with health tracking',
-    price: 199.99,
-    category: 'Electronics',
-    image: '/placeholder.svg?height=100&width=100&text=Watch'
-  },
-  {
-    id: 'PROD-11111',
-    name: 'Ergonomic Chair',
-    description: 'Comfortable office chair for long working hours',
-    price: 299.99,
-    category: 'Furniture',
-    image: '/placeholder.svg?height=100&width=100&text=Chair'
-  },
-]
+import React, { useEffect, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, Search, User } from 'lucide-react';
+import api from "@/api";
+import type { VehicleRecord } from '@/types/api';
 
 export default function ProductListHomepage() {
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [products, setProducts] = useState<VehicleRecord[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<VehicleRecord | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleProductSelect = (product) => {
-    setSelectedProduct(product)
-  }
+  // Fetch the vehicle records (products)
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const vehicles = await api.list();
+        setProducts(vehicles);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    }
+    fetchProducts();
+  }, []);
+
+  const handleProductSelect = (product: VehicleRecord) => {
+    setSelectedProduct(product);
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await api.delete(productId); // Assuming `api.delete` is the correct method to delete a product
+      setProducts((prevProducts) => prevProducts.filter(product => product.id !== productId));
+      setSelectedProduct(null); // Deselect the product after deletion
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+
+  const filteredProducts = products.filter(product => 
+    product.fields.Name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
@@ -83,18 +85,19 @@ export default function ProductListHomepage() {
         </div>
       </div>
       
-
-      
       <Card className="mb-2">
         <CardContent className="p-2">
           <div className="flex space-x-2 mb-2">
-            <Input placeholder="Type a command or search..." className="flex-grow h-8 text-xs" />
+            <Input 
+              placeholder="Type a command or search..." 
+              className="flex-grow h-8 text-xs" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
             <Button variant="outline" size="sm" className="h-8">
               <Search className="h-4 w-4" />
             </Button>
           </div>
-          
-          
         </CardContent>
       </Card>
 
@@ -106,55 +109,55 @@ export default function ProductListHomepage() {
             </CardHeader>
             <CardContent>
               <Accordion type="single" collapsible className="w-full">
-                {sampleProducts.map((product) => (
+                {filteredProducts.map((product) => (
                   <AccordionItem key={product.id} value={product.id}>
                     <AccordionTrigger onClick={() => handleProductSelect(product)} className="text-xs">
                       <div className="flex items-center space-x-2">
-                        <img src={product.image} alt={product.name} className="w-8 h-8 object-cover rounded" />
-                        <span>{product.name}</span>
+                        <img src={product.fields.Image} alt={product.fields.Name} className="w-8 h-8 object-cover rounded" />
+                        <span>{product.fields.Name}</span>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="p-2 space-y-2">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h3 className="font-semibold">{product.name}</h3>
-                            <p className="text-xs text-muted-foreground">{product.description}</p>
+                            <h3 className="font-semibold">{product.fields.Name}</h3>
+                            <p className="text-xs text-muted-foreground">{product.fields.Description}</p>
                           </div>
-                          <Badge>{product.category}</Badge>
+                          <Badge>{product.fields.Category}</Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="font-bold">${product.price.toFixed(2)}</span>
-                          <Button size="sm">Delete Product</Button>
-
+                          <span className="font-bold">${product.fields.Price.toFixed(2)}</span>
+                          <Button size="sm" onClick={() => handleDeleteProduct(product.id)}>Delete Product</Button>
                         </div>
                         {selectedProduct && selectedProduct.id === product.id && (
                           <Card className="mt-2">
                             <CardContent className="p-2">
                               <h2 className="font-semibold mb-1">Live Product Preview</h2>
                               <div className="bg-muted p-2 rounded space-y-1">
-                                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-24 object-cover rounded mb-2" />
+                                <img src={selectedProduct.fields.Image} alt={selectedProduct.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
                                 <div className="text-xs">
                                   <span className="font-semibold">ID:</span> {selectedProduct.id}
                                 </div>
                                 <div className="text-xs">
-                                  <span className="font-semibold">Name:</span> {selectedProduct.name}
+                                  <span className="font-semibold">Name:</span> {selectedProduct.fields.Name}
                                 </div>
                                 <div className="text-xs">
-                                  <span className="font-semibold">Description:</span> {selectedProduct.description}
+                                  <span className="font-semibold">Description:</span> {selectedProduct.fields.Description}
                                 </div>
                                 <div className="text-xs">
-                                  <span className="font-semibold">Price:</span> ${selectedProduct.price.toFixed(2)}
+                                  <span className="font-semibold">Price:</span> ${selectedProduct.fields.Price.toFixed(2)}
                                 </div>
                                 <div className="text-xs">
-                                  <span className="font-semibold">Category:</span> {selectedProduct.category}
+                                  <span className="font-semibold">Category:</span> {selectedProduct.fields.Category}
                                 </div>
                               </div>
                             </CardContent>
                           </Card>
                         )}
-                                                <a href="/product/cm14mvs2o000fue6yh6hb13yn"><Button size="sm">Edit Product</Button></a>  
-
+                        <a href={`/product/edit/${product.id}`}>
+                          <Button size="sm">Edit Product</Button>
+                        </a>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -163,6 +166,7 @@ export default function ProductListHomepage() {
             </CardContent>
           </Card>
         </ResizablePanel>
+
         <ResizablePanel defaultSize={20}>
           <Card>
             <CardHeader>
@@ -172,16 +176,16 @@ export default function ProductListHomepage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Total Products:</span>
-                  <span className="font-bold">{sampleProducts.length}</span>
+                  <span className="font-bold">{filteredProducts.length}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Categories:</span>
-                  <span className="font-bold">{new Set(sampleProducts.map(p => p.category)).size}</span>
+                  <span className="font-bold">{new Set(filteredProducts.map(p => p.fields.Category)).size}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs">Avg. Price:</span>
                   <span className="font-bold">
-                    ${(sampleProducts.reduce((sum, p) => sum + p.price, 0) / sampleProducts.length).toFixed(2)}
+                    ${(filteredProducts.reduce((sum, p) => sum + p.fields.Price, 0) / filteredProducts.length).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -190,5 +194,5 @@ export default function ProductListHomepage() {
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
-  )
+  );
 }
