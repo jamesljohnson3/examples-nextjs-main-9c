@@ -1,49 +1,142 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, Search, User, ImageIcon } from 'lucide-react'
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ChevronLeft, User, ImageIcon, Upload, X, Plus, Copy, Zap, RefreshCw, SparklesIcon, Settings2Icon, BrainCircuitIcon } from 'lucide-react'
 
 const sampleProducts = [
   {
-    id: 'PROD-12345',
+    id: 1,
     name: 'Wireless Earbuds',
     description: 'High-quality wireless earbuds with noise cancellation',
-    price: 99.99,
-    category: 'Electronics',
+    price: '99.99',
+    category: 'electronics',
+    inStock: true,
     image: '/placeholder.svg?height=100&width=100&text=Earbuds'
   },
   {
-    id: 'PROD-67890',
+    id: 2,
     name: 'Smart Watch',
     description: 'Feature-packed smartwatch with health tracking',
-    price: 199.99,
-    category: 'Electronics',
+    price: '199.99',
+    category: 'electronics',
+    inStock: true,
     image: '/placeholder.svg?height=100&width=100&text=Watch'
   },
   {
-    id: 'PROD-11111',
+    id: 3,
     name: 'Ergonomic Chair',
     description: 'Comfortable office chair for long working hours',
-    price: 299.99,
-    category: 'Furniture',
+    price: '299.99',
+    category: 'furniture',
+    inStock: false,
     image: '/placeholder.svg?height=100&width=100&text=Chair'
   },
 ]
 
-export default function ProductListHomepage() {
-  const [selectedProduct, setSelectedProduct] = useState(null)
+export default function EnhancedProductCreatePage() {
+  const [product, setProduct] = useState({
+    name: '',
+    description: '',
+    price: '',
+    category: '',
+    inStock: true,
+    images: []
+  })
+  const [nlpSensitivity, setNlpSensitivity] = useState(50)
+  const [aiCreativity, setAiCreativity] = useState(50)
+  const [aiProgress, setAIProgress] = useState(0)
+  const [aiSuggestions, setAiSuggestions] = useState([])
 
-  const handleProductSelect = (product) => {
-    setSelectedProduct(product)
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setProduct(prev => ({ ...prev, [name]: value }))
   }
+
+  const handleCategoryChange = (value) => {
+    setProduct(prev => ({ ...prev, category: value }))
+  }
+
+  const handleStockToggle = () => {
+    setProduct(prev => ({ ...prev, inStock: !prev.inStock }))
+  }
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setProduct(prev => ({
+          ...prev,
+          images: [...prev.images, reader.result]
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = (index) => {
+    setProduct(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleCloneProduct = (sampleProduct) => {
+    setProduct({
+      ...sampleProduct,
+      id: undefined,
+      images: [sampleProduct.image]
+    })
+  }
+
+  const handleRefinement = () => {
+    setAIProgress(0)
+    const interval = setInterval(() => {
+      setAIProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          // Simulate AI refinement
+          setAiSuggestions([
+            "Consider adding more detailed product specifications",
+            "Highlight the unique selling points in the description",
+            "Add customer testimonials to boost credibility"
+          ])
+          return 100
+        }
+        return prev + 10
+      })
+    }, 200)
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log('Submitting product:', product)
+    // Here you would typically send the data to your backend
+  }
+
+  useEffect(() => {
+    // Simulate AI continuously analyzing and updating suggestions
+    const interval = setInterval(() => {
+      setAiSuggestions(prev => {
+        const newSuggestion = `New insight: ${Date.now()}`
+        return [...prev.slice(1), newSuggestion]
+      })
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
@@ -51,10 +144,10 @@ export default function ProductListHomepage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" className="h-6">
             <ChevronLeft className="h-3 w-3 mr-1" />
-            Back
+            Back to Products
           </Button>
           <div className="text-muted-foreground">
-            Dashboard / Product List
+            Dashboard / Create Product
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -81,112 +174,230 @@ export default function ProductListHomepage() {
         </div>
       </div>
       
-
+      <h1 className="text-lg font-bold text-center mb-2">Create New Product</h1>
       
-      <Card className="mb-2">
-        <CardContent className="p-2">
-          <div className="flex space-x-2 mb-2">
-            <Input placeholder="Type a command or search..." className="flex-grow h-8 text-xs" />
-            <Button variant="outline" size="sm" className="h-8">
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          
-        </CardContent>
-      </Card>
-
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={80}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Product List</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {sampleProducts.map((product) => (
-                  <AccordionItem key={product.id} value={product.id}>
-                    <AccordionTrigger onClick={() => handleProductSelect(product)} className="text-xs">
-                      <div className="flex items-center space-x-2">
-                        <img src={product.image} alt={product.name} className="w-8 h-8 object-cover rounded" />
-                        <span>{product.name}</span>
-                      </div>
-                    </AccordionTrigger>
+      <form onSubmit={handleSubmit}>
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel defaultSize={60}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Product Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                  <AccordionItem value="sample-gallery">
+                    <AccordionTrigger className="text-xs font-semibold">Sample Product Gallery</AccordionTrigger>
                     <AccordionContent>
-                      <div className="p-2 space-y-2">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-semibold">{product.name}</h3>
-                            <p className="text-xs text-muted-foreground">{product.description}</p>
-                          </div>
-                          <Badge>{product.category}</Badge>
+                      <ScrollArea className="h-72 w-full rounded-md border">
+                        <div className="p-4 grid grid-cols-2 gap-4">
+                          {sampleProducts.map((sampleProduct) => (
+                            <Card key={sampleProduct.id} className="overflow-hidden">
+                              <CardContent className="p-2">
+                                <img src={sampleProduct.image} alt={sampleProduct.name} className="w-full h-24 object-cover rounded mb-2" />
+                                <h3 className="font-semibold text-xs mb-1">{sampleProduct.name}</h3>
+                                <p className="text-[10px] text-muted-foreground mb-2">{sampleProduct.description}</p>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs font-bold">${sampleProduct.price}</span>
+                                  <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneProduct(sampleProduct)}>
+                                    <Copy className="h-3 w-3 mr-1" />
+                                    Clone
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold">${product.price.toFixed(2)}</span>
-                          <Button size="sm">Delete Product</Button>
+                      </ScrollArea>
+                    </AccordionContent>
+                  </AccordionItem>
 
+                  <AccordionItem value="basic-info">
+                    <AccordionTrigger className="text-xs font-semibold">Basic Information</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-2">
+                        <div>
+                          <Label htmlFor="name" className="text-xs">Product Name</Label>
+                          <Input 
+                            id="name" 
+                            name="name" 
+                            value={product.name} 
+                            onChange={handleInputChange} 
+                            className="h-7 text-xs"
+                          />
                         </div>
-                        {selectedProduct && selectedProduct.id === product.id && (
-                          <Card className="mt-2">
-                            <CardContent className="p-2">
-                              <h2 className="font-semibold mb-1">Live Product Preview</h2>
-                              <div className="bg-muted p-2 rounded space-y-1">
-                                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-24 object-cover rounded mb-2" />
-                                <div className="text-xs">
-                                  <span className="font-semibold">ID:</span> {selectedProduct.id}
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Name:</span> {selectedProduct.name}
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Description:</span> {selectedProduct.description}
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Price:</span> ${selectedProduct.price.toFixed(2)}
-                                </div>
-                                <div className="text-xs">
-                                  <span className="font-semibold">Category:</span> {selectedProduct.category}
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                                                <a href="/product/cm14mvs2o000fue6yh6hb13yn"><Button size="sm">Edit Product</Button></a>  
-
+                        <div>
+                          <Label htmlFor="description" className="text-xs">Description</Label>
+                          <Textarea 
+                            id="description" 
+                            name="description" 
+                            value={product.description} 
+                            onChange={handleInputChange} 
+                            className="h-20 text-xs"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="price" className="text-xs">Price</Label>
+                          <Input 
+                            id="price" 
+                            name="price" 
+                            type="number" 
+                            value={product.price} 
+                            onChange={handleInputChange} 
+                            className="h-7 text-xs"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="category" className="text-xs">Category</Label>
+                          <Select value={product.category} onValueChange={handleCategoryChange}>
+                            <SelectTrigger className="h-7 text-xs">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="electronics">Electronics</SelectItem>
+                              <SelectItem value="clothing">Clothing</SelectItem>
+                              <SelectItem value="books">Books</SelectItem>
+                              <SelectItem value="furniture">Furniture</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch 
+                            id="inStock" 
+                            checked={product.inStock} 
+                            onCheckedChange={handleStockToggle}
+                          />
+                          <Label htmlFor="inStock" className="text-xs">In Stock</Label>
+                        </div>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
-        </ResizablePanel>
-        <ResizablePanel defaultSize={20}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs">Total Products:</span>
-                  <span className="font-bold">{sampleProducts.length}</span>
+
+                  <AccordionItem value="images">
+                    <AccordionTrigger className="text-xs font-semibold">Product Images</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                          {product.images.map((img, index) => (
+                            <div key={index} className="relative">
+                              <img src={img} alt={`Product ${index + 1}`} className="w-16 h-16 object-cover rounded" />
+                              <Button 
+                                size="sm" 
+                                variant="destructive" 
+                                className="absolute top-0 right-0 h-4 w-4 p-0" 
+                                onClick={() => removeImage(index)}
+                              >
+                                <X className="h-2 w-2" />
+                              </Button>
+                            </div>
+                          ))}
+                          <label className="w-16 h-16 flex items-center justify-center bg-muted rounded cursor-pointer">
+                            <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+                            <Plus className="h-6 w-6 text-muted-foreground" />
+                          </label>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="ai-config">
+                    <AccordionTrigger className="text-xs font-semibold">AI Configuration</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <Label className="text-xs">NLP Sensitivity</Label>
+                            <Settings2Icon className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                          <Slider
+                            value={[nlpSensitivity]}
+                            onValueChange={(value) => setNlpSensitivity(value[0])}
+                            max={100}
+                            step={1}
+                            className="h-3"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <Label className="text-xs">AI Creativity</Label>
+                            <BrainCircuitIcon className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                          <Slider
+                            value={[aiCreativity]}
+                            onValueChange={(value) => setAiCreativity(value[0])}
+                            max={100}
+                            step={1}
+                            className="h-3"
+                          />
+                        </div>
+                        <Button onClick={handleRefinement} className="w-full h-7 text-xs">
+                          {aiProgress > 0 && aiProgress < 100 ? (
+                            <RefreshCw className="mr-2 h-3 w-3 animate-spin" />
+                          ) : (
+                            <Zap className="mr-2 h-3 w-3" />
+                          )}
+                          Generate AI Refinement
+                        </Button>
+                        {aiProgress > 0 && (
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${aiProgress}%` }}></div>
+                          </div>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </ResizablePanel>
+          <ResizablePanel defaultSize={40}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Product Preview & AI Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {product.images.length > 0 ? (
+                    <img src={product.images[0]} alt="Product preview" className="w-full h-40 object-cover rounded" />
+                  ) : (
+                    <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
+                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-semibold text-sm">{product.name || 'Product Name'}</h3>
+                    <p className="text-xs text-muted-foreground">{product.description || 'Product description will appear here'}</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-sm">${product.price || '0.00'}</span>
+                    <Badge>{product.category || 'Category'}</Badge>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <span className="text-xs">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-xs">AI Suggestions</h4>
+                    <ul className="space-y-1">
+                      {aiSuggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-start space-x-2 text-xs">
+                          <SparklesIcon className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                          <span>{suggestion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs">Categories:</span>
-                  <span className="font-bold">{new Set(sampleProducts.map(p => p.category)).size}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs">Avg. Price:</span>
-                  <span className="font-bold">
-                    ${(sampleProducts.reduce((sum, p) => sum + p.price, 0) / sampleProducts.length).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+              </CardContent>
+            </Card>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+        <div className="mt-4 flex justify-end">
+          <Button type="submit" size="sm" className="h-7 text-xs">
+            <Upload className="h-3 w-3 mr-1" />
+            Create Product
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }
