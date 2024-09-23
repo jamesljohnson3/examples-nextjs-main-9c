@@ -24,22 +24,19 @@ interface SearchTermIndicatorProps {
     const isTermInField = (vehicle: VehicleRecord) => {
         const term = searchTerm.toLowerCase();
         const { fields } = vehicle;
-    
-        // Normalize vehicle details for price search
         const vehicleDetails1Normalized = fields["Vehicle details 1"]?.replace(/[^0-9.-]+/g, '') || '';
-    
+
         return (
             (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
             (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
             (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
-            (searchField === "vehicleDetails1" && vehicleDetails1Normalized.includes(term)) ||
+            (searchField === "price" && vehicleDetails1Normalized.includes(term)) || // Change this line
             (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
             (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
             (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
             (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
         );
     };
-    
 
     const matchingVehicles = vehicles.filter(isTermInField);
 
@@ -47,12 +44,13 @@ interface SearchTermIndicatorProps {
         <>
             {searchTerm && (
                 <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-                    Searching {matchingVehicles.length} vehicle(s) by {searchField}: {searchTerm}
+                    Searching {matchingVehicles.length} vehicle(s) by {searchField === "price" ? "Price" : searchField}: {searchTerm}
                 </span>
             )}
         </>
     );
 };
+
 
 
 
