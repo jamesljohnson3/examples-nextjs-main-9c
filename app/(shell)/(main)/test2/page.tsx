@@ -143,18 +143,17 @@ export default function EnhancedSegmentCreatePage() {
                               className="w-full h-24 object-cover rounded mb-2" />
                                                            <h3 className="font-semibold text-xs mb-1">                                                           <span>{vehicle.fields.Name}</span>
                                                            </h3>
-                            <div className="text-xs font-boldflex items-center justify-between">
-                              <span >Price:</span> 
-                              <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
-                              <div className='absolute right-0'>
+                                                           <div className="text-xs font-bold flex items-center justify-between">
+  <span>Price:</span> 
+  <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
+  <div className="ml-auto flex items-center">
+    <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
+      <Copy className="h-3 w-3 mr-1" />
+      Clone
+    </Button>
+  </div>
+</div>
 
-                              <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
-                                <Copy className="h-3 w-3 mr-1" />
-                                Clone
-                              </Button>
-                              </div>
-                             
-                            </div>
                           </CardContent>
                         </Card>
                       ))}
@@ -169,35 +168,9 @@ export default function EnhancedSegmentCreatePage() {
                           <Label htmlFor="name" className="text-xs">Product Name</Label>
                           <Input id="name" name="name" value={product.name} onChange={handleInputChange} className="h-7 text-xs" />
                         </div>
-                        <div>
-                          <Label htmlFor="description" className="text-xs">Description</Label>
-                          <Textarea id="description" name="description" value={product.description} onChange={handleInputChange} className="h-20 text-xs" />
-                        </div>
-                        <div>
-                          <Label htmlFor="price" className="text-xs">Price</Label>
-                          <Input id="price" name="price" type="number" value={product.price} onChange={handleInputChange} className="h-7 text-xs" />
-                        </div>
-                        <div>
-                          <Label htmlFor="category" className="text-xs">Category</Label>
-                          <Select value={product.category} onValueChange={handleCategoryChange}>
-                            <SelectTrigger className="h-7 text-xs">
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="electronics">Electronics</SelectItem>
-                              <SelectItem value="clothing">Clothing</SelectItem>
-                              <SelectItem value="books">Books</SelectItem>
-                              <SelectItem value="furniture">Furniture</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Switch 
-                            checked={product.inStock} 
-                            onCheckedChange={(checked) => setProduct(prev => ({ ...prev, inStock: checked }))} 
-                          />
-                          <Label htmlFor="inStock" className="text-xs">In Stock</Label>
-                        </div>
+                      
+                      
+
                         <Button type="submit" className="w-full h-8">Submit</Button>
                       </div>
                     </AccordionContent>
@@ -215,7 +188,7 @@ export default function EnhancedSegmentCreatePage() {
               <CardContent>
                 <div className="space-y-4">
                   {product.images.length > 0 ? (
-                    <a target="_blank" href={`${product.description}`}><img src={product.images[0]} alt="Product preview" className="w-full h-40 object-cover rounded" /></a>
+                    <a target="_blank" href={`${product.description}`}><img src={product.fields.Attachments[0]?.thumbnails.large.url} alt="Product preview" className="w-full h-40 object-cover rounded" /></a>
                   ) : (
                     <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
                       <ImageIcon className="h-10 w-10 text-muted-foreground" />
@@ -226,7 +199,7 @@ export default function EnhancedSegmentCreatePage() {
 
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-sm">${product.price || '0.00'}</span>
+                    <span className="font-bold text-sm">{product.price || '0.00'}</span>
                     <Badge>{product.category || 'Category'}</Badge>
                   </div>
                   <div className="flex items-center space-x-2">
