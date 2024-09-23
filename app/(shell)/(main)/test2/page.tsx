@@ -85,18 +85,15 @@ const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[
   }
 
   const handleCloneVehicle = (vehicle: VehicleRecord) => {
-    // Mapping the relevant vehicle fields to the product structure
     setProduct({
-      name: vehicle.fields.Name, // Mapping the Name field
-      description: vehicle.fields.Notes || '', // Mapping Notes as the description
-      price: '', // Price field doesn't exist in VehicleRecord, setting as empty
-      category: vehicle.fields["Body type"], // Mapping the body type as the category
-      inStock: true, // Assuming the vehicle is in stock; adjust as needed
-      images: vehicle.fields.Attachments.map(
-        (attachment) => attachment.thumbnails.large.url
-      ), // Mapping the large attachment images
+      name: vehicle.fields.Name,
+      description: vehicle.fields.Notes || '',
+      price: vehicle.fields["Vehicle details 1"] || '0.00', // Correctly maps vehicle price
+      category: vehicle.fields["Body type"],
+      inStock: true,
+      images: vehicle.fields.Attachments.map(attachment => attachment.thumbnails.large.url),
       fields: {
-        Attachments: vehicle.fields.Attachments // Directly copying the Attachments
+        Attachments: vehicle.fields.Attachments
       }
     });
   };
@@ -243,8 +240,8 @@ const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[
 
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-sm">{product.price || '0.00'}</span>
-                    <Badge>{product.category || 'Category'}</Badge>
+                  <span className="font-bold text-sm">{product.price || '0.00'}</span>
+                  <Badge>{product.category || 'Category'}</Badge>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
