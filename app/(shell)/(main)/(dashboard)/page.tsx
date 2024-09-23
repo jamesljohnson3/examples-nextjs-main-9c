@@ -1,4 +1,4 @@
-
+"use server"
 import React, { Suspense } from "react";
 
 import  ShowVehicles from "./table"
