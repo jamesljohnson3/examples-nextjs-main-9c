@@ -51,20 +51,29 @@ const Header: React.FC = () => (
     </div>
   </div>
 );
-
-const SearchBar: React.FC = () => (
-  <Card className="mb-2">
-    <CardContent className="p-2">
-      <div className="flex space-x-2 mb-2">
-        <Input placeholder="Type a command or search..." className="flex-grow h-10 text-xs" />
-        <Button variant="outline" size="sm" className="h-10">
-          <Search className="h-4 w-4" />
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-);
-
+interface SearchBarProps {
+    setSearchTerm: (term: string) => void;
+  }
+  
+  const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm }) => {
+    return (
+      <Card className="mb-2">
+        <CardContent className="p-2">
+          <div className="flex space-x-2 mb-2">
+            <Input
+              placeholder="Type a command or search..."
+              className="flex-grow h-10 text-xs"
+              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+            />
+            <Button variant="outline" size="sm" className="h-10">
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+  
 
 // Add this prop to the VehicleItemProps
 interface VehicleItemProps {
@@ -212,9 +221,12 @@ const QuickStats: React.FC<QuickStatsProps> = ({ vehicles }) => {
 const ProductListHomepage: React.FC = () => {
     const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null); // Add selectedVehicle state
+    const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>("");
   
-  
+    const filteredVehicles = vehicles.filter(vehicle => 
+      vehicle.fields.Name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     const handleVehicleSelect = (vehicle: VehicleRecord) => {
       setSelectedVehicle(prev => prev?.id === vehicle.id ? null : vehicle); // Toggle selection
     };
@@ -248,7 +260,7 @@ const ProductListHomepage: React.FC = () => {
   return (
     <div className="container mx-auto p-4 space-y-4 text-sm">
       <Header />
-      <SearchBar />
+      <SearchBar setSearchTerm={setSearchTerm} /> {/* Pass the state updater function */}
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={80}>
           <Card>
@@ -257,11 +269,11 @@ const ProductListHomepage: React.FC = () => {
             </CardHeader>
             <CardContent>
             <VehicleList
-                vehicles={vehicles}
+                vehicles={filteredVehicles} // Use filtered vehicles
                 onDelete={handleDeleteVehicle}
                 onSelect={handleVehicleSelect}
                 loading={loading}
-                selectedVehicle={selectedVehicle} // Pass selectedVehicle prop
+                selectedVehicle={selectedVehicle}
               />
               
               </CardContent>
