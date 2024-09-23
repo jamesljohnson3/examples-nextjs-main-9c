@@ -14,6 +14,7 @@ import { BarChart3Icon, ChevronLeft, Globe, MessageSquare, Search, User } from '
 import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 import { deleteVehiclebyId } from '@/actions/dashboard';
+import Link from 'next/link';
 
 
 interface SearchTermIndicatorProps {
@@ -397,10 +398,10 @@ const ProductListHomepage: React.FC = () => {
             <CardContent className="p-2">
               <nav className="space-y-1">
                 {['Advanced Options', 'Create Product' ].map((item) => (
-                  <Button key={item} variant="ghost" className="w-full justify-start text-xs py-1 px-2">
+                 <Link key={item} href={'/test2'} ><Button variant="ghost" className="w-full justify-start text-xs py-1 px-2">
 
-                    {item}
-                  </Button>
+                 {item}
+               </Button></Link> 
                 ))}
               </nav>
             </CardContent>

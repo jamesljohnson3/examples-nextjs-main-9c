@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ChevronLeft, User, ImageIcon, Upload, X, Plus, Copy, Zap, RefreshCw, SparklesIcon, Settings2Icon, BrainCircuitIcon } from 'lucide-react'
 import useWindowSize from "@/hooks/use-window-size";
+import Link from 'next/link';
 
 const sampleProducts = [
   {
@@ -327,10 +328,13 @@ export default function EnhancedProductCreatePage() {
           </ResizablePanel>
         </ResizablePanelGroup>
         <div className="mt-4 flex justify-end">
+          <Link href={"/test"}>
           <Button type="submit" size="sm" className="h-7 text-xs">
             <Upload className="h-3 w-3 mr-1" />
             Create Product
           </Button>
+          </Link>
+          
         </div>
       </form>
     </div>

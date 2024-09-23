@@ -62,6 +62,7 @@ import { v4 as uuidv4 } from 'uuid';
  import '@uppy/drag-drop/dist/style.css';
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import axios from 'axios';
+import Link from 'next/link';
 
 
  const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
@@ -1191,10 +1192,13 @@ const handleSave = async () => {
     <div className=" mx-auto p-2 space-y-2 text-xs">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
+          <Link href={"/"}>
           <Button variant="ghost" size="sm" className="h-6">
             <ChevronLeft className="h-3 w-3 mr-1" />
             Back
           </Button>
+          </Link>
+         
           <div className="text-muted-foreground">
             Products /BREADCRUMBS
           </div>
