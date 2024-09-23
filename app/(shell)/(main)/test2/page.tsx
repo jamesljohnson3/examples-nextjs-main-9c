@@ -19,15 +19,38 @@ import api from "@/api"
 import type { VehicleRecord } from '@/types/api'
 import { Badge } from "@/components/ui/badge"
 
+// Define the type for your product
+interface Product {
+  name: string;
+  description: string;
+  price: string;
+  category: string;
+  inStock: boolean;
+  images: string[];
+  fields: {
+    Attachments: {
+      thumbnails: {
+        large: {
+          url: string;
+        };
+      };
+    }[];
+  };
+}
+
 export default function EnhancedSegmentCreatePage() {
-  const [product, setProduct] = useState({
+  // Use useState with an empty initial product object
+  const [product, setProduct] = useState<Product>({
     name: '',
     description: '',
     price: '',
     category: '',
-    inStock: true,
-    images: [] as string[], // Ensure images is part of the product state
-  })
+    inStock: false,
+    images: [],
+    fields: {
+      Attachments: []
+    }
+  });
 
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([])
   const [loading, setLoading] = useState(false)
@@ -61,15 +84,21 @@ export default function EnhancedSegmentCreatePage() {
   }
 
   const handleCloneVehicle = (vehicle: VehicleRecord) => {
+    // Mapping the relevant vehicle fields to the product structure
     setProduct({
-      name: vehicle.fields.Name,
-      description: vehicle.fields.Notes || '',
-      price: vehicle.fields["Vehicle details 1"] || '',
-      category: vehicle.fields["Body type"] || '',
-      inStock: true,
-      images: vehicle.fields.Attachments.map(attachment => attachment.thumbnails.small.url) || [], // Assuming images are in Attachments
-    })
-  }
+      name: vehicle.fields.Name, // Mapping the Name field
+      description: vehicle.fields.Notes || '', // Mapping Notes as the description
+      price: '', // Price field doesn't exist in VehicleRecord, setting as empty
+      category: vehicle.fields["Body type"], // Mapping the body type as the category
+      inStock: true, // Assuming the vehicle is in stock; adjust as needed
+      images: vehicle.fields.Attachments.map(
+        (attachment) => attachment.thumbnails.large.url
+      ), // Mapping the large attachment images
+      fields: {
+        Attachments: vehicle.fields.Attachments // Directly copying the Attachments
+      }
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -187,13 +216,20 @@ export default function EnhancedSegmentCreatePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {product.images.length > 0 ? (
-                    <a target="_blank" href={`${product.description}`}><img src={product.fields.Attachments[0]?.thumbnails.large.url} alt="Product preview" className="w-full h-40 object-cover rounded" /></a>
-                  ) : (
-                    <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
-                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                  )}
+                {product.images.length > 0 ? (
+  <a target="_blank" rel="noopener noreferrer" href={`${product.description}`}>
+    <img 
+      src={product.fields.Attachments[0]?.thumbnails.large.url} 
+      alt="Product preview" 
+      className="w-full h-40 object-cover rounded" 
+    />
+  </a>
+) : (
+  <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
+    <ImageIcon className="h-10 w-10 text-muted-foreground" />
+  </div>
+)}
+
                   <div>
                     <h3 className="font-semibold text-sm">{product.name || 'Product Name'}</h3>
 
