@@ -117,6 +117,7 @@ export default function ProductListHomepage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-semibold">{vehicle.fields.Name}</h3>
+                            <p className="text-xs font-semibold">Product ID: {extractProductId(vehicle.fields.Notes)}</p>
                             <p className="text-xs text-muted-foreground"> </p>
                           </div>
                           <Badge>{vehicle.fields["Body type"]}</Badge>
@@ -125,7 +126,7 @@ export default function ProductListHomepage() {
                           <span className="font-bold">${vehicle.fields["Vehicle details 1"] || 0}</span>
                           <div className="flex space-x-2">
                             <Button size="sm" onClick={() => handleDeleteVehicle(vehicle.id)}>Delete Product</Button>
-                            <a href={`/product/${vehicle.id}`}>
+                            <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
                               <Button size="sm">Edit Product</Button>
                             </a>
                           </div>

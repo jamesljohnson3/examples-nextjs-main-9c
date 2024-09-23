@@ -1,6 +1,6 @@
 import type { AirtableApiResponse, VehicleRecord } from '@/types/api';
 
-const apiBaseUrl = process.env.AIRTABLE_API_BASE_URL || 'https://api.airtable.com/v0/appWP7hhHaQEEsFgt/table%201';
+const apiBaseUrl = process.env.AIRTABLE_API_BASE_URL || 'https://api.airtable.com/v0/appWP7hhHaQEEsFgt/website';
 const apiKey = process.env.AIRTABLE_API_KEY || 'pattFc8Nai9AFjhyr.ee7053e223767b630e24d52ba0829d2fdb896fc40778c5f3a0f63bdc1771e2c9';
 
 const api = {
