@@ -15,31 +15,41 @@ import type { VehicleRecord } from '@/types/api';
 import { deleteVehiclebyId } from '@/actions/dashboard';
 
 
-
 interface SearchTermIndicatorProps {
-  searchTerm: string;
-  searchField: string;
-}
-
-const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField }) => {
-  const badges: Record<string, { label: string; color: string; textColor: string }> = {
-    name: { label: 'Name', color: 'bg-blue-50', textColor: 'text-blue-700' },
-    notes: { label: 'Notes', color: 'bg-green-50', textColor: 'text-green-700' },
-    bodyType: { label: 'Body Type', color: 'bg-yellow-50', textColor: 'text-yellow-800' },
-    // Add other fields as necessary
+    searchTerm: string;
+    searchField: string;
+    vehicles: VehicleRecord[];
+  }
+  
+  const SearchTermIndicator: React.FC<SearchTermIndicatorProps> = ({ searchTerm, searchField, vehicles }) => {
+    const isTermInField = (vehicle: VehicleRecord) => {
+      const term = searchTerm.toLowerCase();
+      const { fields } = vehicle;
+      return (
+        (searchField === "name" && fields.Name?.toLowerCase().includes(term)) ||
+        (searchField === "notes" && fields.Notes?.toLowerCase().includes(term)) ||
+        (searchField === "bodyType" && fields["Body type"]?.toLowerCase().includes(term)) ||
+        (searchField === "vehicleDetails1" && fields["Vehicle details 1"]?.toLowerCase().includes(term)) ||
+        (searchField === "exteriorColor" && fields["Exterior Color"]?.toLowerCase().includes(term)) ||
+        (searchField === "engine" && fields.Engine?.toLowerCase().includes(term)) ||
+        (searchField === "vehicleDetails2" && fields["Vehicle details 2"]?.toLowerCase().includes(term)) ||
+        (searchField === "drivetrain" && fields.Drivetrain?.toLowerCase().includes(term))
+      );
+    };
+  
+    const matchingVehicles = vehicles.filter(isTermInField);
+  
+    return (
+      <>
+        {searchTerm && (
+          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+            Searching {matchingVehicles.length} vehicle(s) by {searchField}: {searchTerm}
+          </span>
+        )}
+      </>
+    );
   };
-
-  return (
-    <>
-      {searchTerm && badges[searchField] && (
-        <span className={`inline-flex items-center rounded-md ${badges[searchField].color} px-2 py-1 text-xs font-medium ${badges[searchField].textColor} ring-1 ring-inset`}>
-          {badges[searchField].label}: {searchTerm}
-        </span>
-      )}
-    </>
-  );
-};
-
+  
 
 
 const LoadingIndicator: React.FC = () => (
@@ -84,11 +94,12 @@ const Header: React.FC = () => (
 
 interface SearchBarProps {
     setSearchTerm: (term: string) => void;
-    searchTerm: string; // New prop for the search term
-    searchField: string; // New prop for the search field
+    searchTerm: string;
+    searchField: string;
+    vehicles: VehicleRecord[]; // New prop for vehicles
   }
   
-  const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, searchField }) => {
+  const SearchBar: React.FC<SearchBarProps> = ({ setSearchTerm, searchTerm, searchField, vehicles }) => {
     return (
       <Card className="mb-2">
         <CardContent className="p-2">
@@ -104,7 +115,7 @@ interface SearchBarProps {
               </Button>
             </div>
             {/* Add the SearchTermIndicator here */}
-            <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} />
+            <SearchTermIndicator searchTerm={searchTerm} searchField={searchField} vehicles={vehicles} />
           </div>
         </CardContent>
       </Card>
@@ -334,7 +345,7 @@ const ProductListHomepage: React.FC = () => {
   return (
     <div className=" mx-auto p-4 space-y-4 text-sm">
       <Header />
-      <SearchBar setSearchTerm={setSearchTerm} searchField={searchField} searchTerm={searchTerm}/> 
+      <SearchBar vehicles={vehicles} setSearchTerm={setSearchTerm} searchField={searchField} searchTerm={searchTerm}/> 
 
 
       <Button onClick={() => setSearchField("name")}>Search by Name</Button>
