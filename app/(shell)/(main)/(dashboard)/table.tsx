@@ -65,12 +65,16 @@ const SearchBar: React.FC = () => (
   </Card>
 );
 
+
+// Add this prop to the VehicleItemProps
 interface VehicleItemProps {
   vehicle: VehicleRecord;
   onDelete: (id: string) => void;
+  onSelect: (vehicle: VehicleRecord) => void;
+  selectedVehicle: VehicleRecord | null; // Add selectedVehicle prop
 }
 
-const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete }) => {
+const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, selectedVehicle }) => {
   const extractProductId = (url: string) => {
     const parts = new URL(url).pathname.split('/');
     return parts[parts.length - 1].replace('.html', '');
@@ -78,7 +82,7 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete }) => {
 
   return (
     <AccordionItem key={vehicle.id} value={vehicle.id}>
-      <AccordionTrigger className="text-xs">
+      <AccordionTrigger onClick={() => onSelect(vehicle)} className="text-xs">
         <div className="flex items-center space-x-2">
           <img src={vehicle.fields.Attachments[0]?.thumbnails.small.url} alt={vehicle.fields.Name} className="w-10 h-10 object-cover rounded" />
           <span>{vehicle.fields.Name}</span>
@@ -94,7 +98,7 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete }) => {
             <Badge>{vehicle.fields["Body type"]}</Badge>
           </div>
           <div className="flex justify-between items-center">
-            <span className="font-bold">{vehicle.fields["Vehicle details 1"] || 0}</span>
+            <span className="font-bold">${vehicle.fields["Vehicle details 1"] || 0}</span>
             <div className="flex space-x-2">
               <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Product</Button>
               <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
@@ -102,6 +106,29 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete }) => {
               </a>
             </div>
           </div>
+          {/* Conditional rendering based on selectedVehicle */}
+          {selectedVehicle && selectedVehicle.id === vehicle.id && (
+            <Card className="mt-2">
+              <CardContent className="p-2">
+                <h2 className="font-semibold mb-1">Live Product Preview</h2>
+                <div className="bg-muted p-2 rounded space-y-1">
+                  <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="w-full h-24 object-cover rounded mb-2" />
+                  <div className="text-xs">
+                    <span className="font-semibold">ID:</span> {vehicle.id}
+                  </div>
+                  <div className="text-xs">
+                    <span className="font-semibold">Name:</span> {vehicle.fields.Name}
+                  </div>
+                  <div className="text-xs">
+                    <span className="font-semibold">Price:</span> ${vehicle.fields["Vehicle details 1"] || 0}
+                  </div>
+                  <div className="text-xs">
+                    <span className="font-semibold">Category:</span> {vehicle.fields["Body type"]}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </AccordionContent>
     </AccordionItem>
@@ -109,35 +136,47 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete }) => {
 };
 
 interface VehicleListProps {
-  vehicles: VehicleRecord[];
-  onDelete: (id: string) => void;
-  loading: boolean;
-}
-
-const VehicleList: React.FC<VehicleListProps> = ({ vehicles, onDelete, loading }) => {
-  if (loading) {
-    return <LoadingIndicator />;
+    vehicles: VehicleRecord[];
+    onDelete: (id: string) => void;
+    onSelect: (vehicle: VehicleRecord) => void;
+    loading: boolean;
+    selectedVehicle: VehicleRecord | null; // Add selectedVehicle prop
   }
-
-  return (
-    <Accordion type="single" collapsible className="w-full">
-      {vehicles.map(vehicle => (
-        <VehicleItem key={vehicle.id} vehicle={vehicle} onDelete={onDelete} />
-      ))}
-    </Accordion>
-  );
-};
+  
+  const VehicleList: React.FC<VehicleListProps> = ({ vehicles, onDelete, onSelect, loading, selectedVehicle }) => {
+    if (loading) {
+      return <LoadingIndicator />;
+    }
+  
+    return (
+      <Accordion type="single" collapsible className="w-full">
+        {vehicles.map(vehicle => (
+          <VehicleItem
+            key={vehicle.id}
+            vehicle={vehicle}
+            onDelete={onDelete}
+            onSelect={onSelect}
+            selectedVehicle={selectedVehicle} // Pass selectedVehicle prop
+          />
+        ))}
+      </Accordion>
+    );
+  };
+  
 
 interface QuickStatsProps {
   vehicles: VehicleRecord[];
 }
+
 const QuickStats: React.FC<QuickStatsProps> = ({ vehicles }) => {
+    const total = vehicles.reduce((sum, v) => {
+      const priceStr = v.fields["Vehicle details 1"];
+      const price = Number(priceStr.replace(/[^0-9.-]+/g, '')); // Remove $ and other non-numeric characters
+      return sum + (isNaN(price) ? 0 : price);
+    }, 0);
+  
     const avgPrice = vehicles.length > 0
-      ? (vehicles.reduce((sum, v) => {
-          const priceStr = v.fields["Vehicle details 1"];
-          const price = Number(priceStr.replace(/[^0-9.-]+/g, '')); // Remove $ and other non-numeric characters
-          return sum + (isNaN(price) ? 0 : price);
-        }, 0) / vehicles.length).toFixed(2)
+      ? (total / vehicles.length).toFixed(2)
       : '0.00';
   
     return (
@@ -156,6 +195,10 @@ const QuickStats: React.FC<QuickStatsProps> = ({ vehicles }) => {
               <span className="font-bold">{new Set(vehicles.map(v => v.fields["Body type"])).size}</span>
             </div>
             <div className="flex justify-between items-center">
+              <span className="text-xs">Total Price:</span>
+              <span className="font-bold">${total.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center">
               <span className="text-xs">Avg. Price:</span>
               <span className="font-bold">${avgPrice}</span>
             </div>
@@ -167,9 +210,15 @@ const QuickStats: React.FC<QuickStatsProps> = ({ vehicles }) => {
   
 
 const ProductListHomepage: React.FC = () => {
-  const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
+    const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null); // Add selectedVehicle state
+  
+  
+    const handleVehicleSelect = (vehicle: VehicleRecord) => {
+      setSelectedVehicle(prev => prev?.id === vehicle.id ? null : vehicle); // Toggle selection
+    };
+  
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true);
@@ -207,8 +256,15 @@ const ProductListHomepage: React.FC = () => {
               <CardTitle className="text-sm">Product List</CardTitle>
             </CardHeader>
             <CardContent>
-              <VehicleList vehicles={vehicles} onDelete={handleDeleteVehicle} loading={loading} />
-            </CardContent>
+            <VehicleList
+                vehicles={vehicles}
+                onDelete={handleDeleteVehicle}
+                onSelect={handleVehicleSelect}
+                loading={loading}
+                selectedVehicle={selectedVehicle} // Pass selectedVehicle prop
+              />
+              
+              </CardContent>
           </Card>
         </ResizablePanel>
         <ResizablePanel defaultSize={20}>
