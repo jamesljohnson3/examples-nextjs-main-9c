@@ -226,26 +226,34 @@ export default function SimplifiedProductCreatePage() {
                 <AccordionContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {sampleProducts.map((sampleProduct) => (
-                      <Card key={sampleProduct.id} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <div className="relative group">
-                            <img src={sampleProduct.image} alt={sampleProduct.name} className="w-full h-32 object-cover rounded-md mb-2" />
-                            <h3 className="font-semibold text-sm mb-1">{sampleProduct.name}</h3>
-                            <p className="text-xs text-muted-foreground mb-2">{sampleProduct.description}</p>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm font-bold">${sampleProduct.price}</span>
-                              <Button 
-                                size="sm" 
-                                className="opacity-0 group-hover:opacity-100 transition-opacity" 
-                                onClick={() => handleCloneProduct(sampleProduct)}
-                              >
-                                <Copy className="h-4 w-4 mr-1" />
-                                Clone
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                    <Card 
+                    key={sampleProduct.id} 
+                    className="overflow-hidden cursor-pointer group"
+                    onClick={() => handleCloneProduct(sampleProduct)} // Clone product when the card is clicked
+                  >
+                    <CardContent className="p-4">
+                      <div className="relative">
+                        <img src={sampleProduct.image} alt={sampleProduct.name} className="w-full h-32 object-cover rounded-md mb-2" />
+                        <h3 className="font-semibold text-sm mb-1">{sampleProduct.name}</h3>
+                        <p className="text-xs text-muted-foreground mb-2">{sampleProduct.description}</p>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-bold">${sampleProduct.price}</span>
+                          <Button 
+                            size="sm" 
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent the card's onClick from firing when the button is clicked
+                              handleCloneProduct(sampleProduct);
+                            }}
+                          >
+                            <Copy className="h-4 w-4 mr-1" />
+                            Clone
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
                     ))}
                   </div>
                 </AccordionContent>
