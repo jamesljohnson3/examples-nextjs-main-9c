@@ -4,26 +4,24 @@ import { useQuery, useMutation } from '@apollo/client';
 import { 
   GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN 
 } from '@/app/(shell)/(main)/queries';
-import { DELETE_SEGMENT } from './mutations'; // Adjust import path as needed
+import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"; 
+import { ChevronLeft, Save, Settings2 } from 'lucide-react';
 
-import { 
-  Button, 
-  Input, 
-  Textarea, 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui";
-import { 
-  ChevronLeft, 
-  Save, 
-  Settings2, 
-  Bell, 
-  LogOut 
-} from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+import { Slider } from "@/components/ui/slider"
+import { ArrowLeft, BarChart, Bell, ChevronLeft, Edit, Eye, ImageIcon, LayoutDashboard, LogOut, Plus, RefreshCw, Search, Settings, Share2, ShoppingCart, Sparkles, Star, User, Zap } from 'lucide-react'
 
 // New component to display when there are no segments
 const NoSegmentsComponent = ({ productId }) => {
