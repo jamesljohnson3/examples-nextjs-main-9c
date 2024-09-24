@@ -35,9 +35,11 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
           productId,
           name,
           description,
-          segmentId, // Use selected segmentId
-          segmentName: segmentId === 'create-new' ? newSegmentName : existingSegments.find(segment => segment.id === segmentId)?.name,
+          segmentId,
+          slug,
+          segmentName,
           domainId,
+          post,
         },
       });
       console.log('Mutation result:', data);
