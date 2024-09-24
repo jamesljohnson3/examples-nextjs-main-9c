@@ -201,7 +201,7 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
           {selectedVehicle && selectedVehicle.id === vehicle.id && (
             <Card className="flex mt-2">
               <CardContent className="p-2">
-                <h2 className="font-semibold mb-1">Live Product Preview</h2>
+                <h2 className="font-semibold mb-1">Preview Listing</h2>
                 <div className="bg-muted p-2 rounded space-y-1">
                   <img src={vehicle.fields.Attachments[0]?.thumbnails.large.url} alt={vehicle.fields.Name} className="h-96 object-cover rounded mb-2" />
                   
@@ -219,7 +219,7 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
                 </div>
               </CardContent>
               <div className="flex mx-auto gap-4 flex-col items-center justify-center space-x-2">
-              <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Product</Button>
+              <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Listing</Button>
               <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
                 <Button size="sm">Edit Product</Button>
               </a>
