@@ -105,38 +105,10 @@ export default function SimplifiedProductCreatePage() {
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Product Details</CardTitle>
+            <CardTitle>Basic Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <Accordion type="single" collapsible className="w-full space-y-4">
-              <AccordionItem value="sample-gallery">
-                <AccordionTrigger>Sample Product Gallery</AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {sampleProducts.map((sampleProduct) => (
-                      <Card key={sampleProduct.id} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <img src={sampleProduct.image} alt={sampleProduct.name} className="w-full h-32 object-cover rounded-md mb-2" />
-                          <h3 className="font-semibold text-sm mb-1">{sampleProduct.name}</h3>
-                          <p className="text-xs text-muted-foreground mb-2">{sampleProduct.description}</p>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-bold">${sampleProduct.price}</span>
-                            <Button size="sm" onClick={() => handleCloneProduct(sampleProduct)}>
-                              <Copy className="h-4 w-4 mr-1" />
-                              Clone
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="basic-info">
-                <AccordionTrigger>Basic Information</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4">
+          <div className="space-y-4">
                     <div>
                       <Label htmlFor="name">Product Name</Label>
                       <Input 
@@ -188,12 +160,8 @@ export default function SimplifiedProductCreatePage() {
                       <Label htmlFor="inStock">In Stock</Label>
                     </div>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
+                  <h1 className="text-lg font-bold text-center mt-6">Product Image</h1>
 
-              <AccordionItem value="image">
-                <AccordionTrigger>Product Image</AccordionTrigger>
-                <AccordionContent>
                   <div className="space-y-4">
                     {product.image ? (
                       <div className="relative">
@@ -214,6 +182,32 @@ export default function SimplifiedProductCreatePage() {
                         <span className="text-sm text-muted-foreground">Click to upload image</span>
                       </label>
                     )}
+                  </div>
+            <Accordion type="single" collapsible className="w-full space-y-4">
+              
+
+
+
+              <AccordionItem value="sample-gallery">
+                <AccordionTrigger>Advanced Options</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {sampleProducts.map((sampleProduct) => (
+                      <Card key={sampleProduct.id} className="overflow-hidden">
+                        <CardContent className="p-4">
+                          <img src={sampleProduct.image} alt={sampleProduct.name} className="w-full h-32 object-cover rounded-md mb-2" />
+                          <h3 className="font-semibold text-sm mb-1">{sampleProduct.name}</h3>
+                          <p className="text-xs text-muted-foreground mb-2">{sampleProduct.description}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-bold">${sampleProduct.price}</span>
+                            <Button size="sm" onClick={() => handleCloneProduct(sampleProduct)}>
+                              <Copy className="h-4 w-4 mr-1" />
+                              Clone
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </AccordionContent>
               </AccordionItem>
