@@ -110,7 +110,8 @@ export default function UpdatedDashboard() {
             <CardContent className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
               {getStartedItems.map((item, index) => (
                 <Link key={index} href={item.href}>
-                  <Button variant="outline" className="h-auto flex flex-col items-start space-y-2 p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <Button variant="outline" className="w-full  h-auto flex flex-col items-start space-y-2 p-4 shadow-sm 
+                hover:shadow-md transition-shadow">
                     <item.icon className="h-6 w-6 text-blue-500" />
                     <div className="text-sm font-semibold text-gray-700">{item.title}</div>
                     <div className="text-xs text-gray-500">{item.description}</div>

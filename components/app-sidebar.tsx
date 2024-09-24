@@ -77,7 +77,7 @@ const data = {
       icon: Settings2,
       items: [
         {
-          title: "Inventory Page",
+          title: "Pages",
           url: "/",
         },
       ],

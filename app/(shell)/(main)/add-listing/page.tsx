@@ -158,7 +158,7 @@ export default function EnhancedSegmentCreatePage() {
   }, []);
 
   return (
-    <div className="container mx-auto p-2 space-y-2 text-xs">
+    <div className="container mx-auto space-y-2 text-xs">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
           <Link href={'/'}>
@@ -194,7 +194,7 @@ export default function EnhancedSegmentCreatePage() {
 
       <form onSubmit={handleSubmit}>
         <ResizablePanelGroup className="flex pl-8 items-center justify-center mx-auto space-x-2" direction="horizontal">
-          <ResizablePanel defaultSize={70}>
+          <ResizablePanel defaultSize={60}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Add an existing product</CardTitle>
@@ -209,13 +209,25 @@ export default function EnhancedSegmentCreatePage() {
                       </div>
                     ) : (
                       <div className="p-4 grid grid-cols-3 gap-4">
-                       {vehicles.map((vehicle) => (
-  <Card key={vehicle.id} className="overflow-hidden">
+                     {vehicles.map((vehicle) => (
+  <Card key={vehicle.id} className="overflow-hidden relative">
     <CardContent className="p-2">
-      <img 
-        src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
-        alt={vehicle.fields.Name} 
-        className="w-full h-36 object-cover rounded mb-2" />
+      <div className="relative">
+        <img 
+          src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
+          alt={vehicle.fields.Name} 
+          className="w-full h-36 object-cover rounded mb-2" 
+        />
+        
+        {/* Edit Button positioned over the image */}
+        <Link 
+          className="absolute bottom-2 right-2 bg-black text-white text-[10px] h-6 w-20 flex items-center justify-center transition duration-300 ease-in-out transform opacity-0 hover:opacity-100 hover:bg-gray-800"
+          href={`product/${extractProductId(vehicle.fields.Notes)}`}
+        >
+          Edit
+        </Link>
+      </div>
+
       <h3 className="font-semibold text-xs mb-1">
         <span>{vehicle.fields.Name}</span>
       </h3>
@@ -232,14 +244,6 @@ export default function EnhancedSegmentCreatePage() {
             <PlusSquare className="h-3 w-3 mr-1" />
             Add
           </Button>
-
-          {/* Edit Button */}
-          <Link 
-            className="bg-black text-white h-6 text-[10px] transition duration-300 ease-in-out transform hover:opacity-80 hover:shadow-lg ml-2" 
-            href={`product/${extractProductId(vehicle.fields.Notes)}`} // Use extractProductId to get the product ID
-          >
-            Edit
-          </Link>
         </div>
       </div>
     </CardContent>
@@ -299,7 +303,7 @@ export default function EnhancedSegmentCreatePage() {
 
           </ResizablePanel>
 
-          <ResizablePanel className="hidden md:flex" defaultSize={30}>
+          <ResizablePanel className="hidden md:flex" defaultSize={40}>
             <Card>
               <CardHeader>
               <CardTitle className="text-sm">Segment Preview & AI Insights</CardTitle>

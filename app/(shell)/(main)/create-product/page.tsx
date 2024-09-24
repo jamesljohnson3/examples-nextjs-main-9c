@@ -222,31 +222,12 @@ const newProductId = nanoid();
               
               
               
-              <div>
-                <Label htmlFor="price">Price</Label>
-                <Input 
-                  id="price" 
-                  name="price" 
-                  type="number" 
-                  value={product.price} 
-                  onChange={handleInputChange} 
-                />
-              </div>
              
-             
-
-              <div className="mb-4 flex items-center space-x-2">
-                <Switch 
-                  id="inStock" 
-                  checked={product.inStock} 
-                  onCheckedChange={handleStockToggle}
-                />
-                <Label htmlFor="inStock">Publish</Label>
-              </div>
+      
             </div>
 
 
-            <div className="space-y-4">
+            <div className="space-y-4 mb-2">
               {product.images.length > 0 ? (
                 <div className="relative">
                   <img src={product.images[0]} alt="Product" className="w-48 h-48 object-cover rounded-md" />
@@ -267,6 +248,16 @@ const newProductId = nanoid();
                 </label>
               )}
             </div>
+                   
+
+            <div className="mt-2 flex items-center space-x-2">
+                <Switch 
+                  id="inStock" 
+                  checked={product.inStock} 
+                  onCheckedChange={handleStockToggle}
+                />
+                <Label htmlFor="inStock">Publish</Label>
+              </div>
           </CardContent>
         </Card>
 
