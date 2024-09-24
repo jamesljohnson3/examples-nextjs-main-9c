@@ -408,7 +408,6 @@ const ProductListHomepage: React.FC = () => {
               </CardContent>
           </Card>
 
-    <Suspense fallback={<LoadingAnimation/>}><AdvancedOptions/></Suspense>
         </ResizablePanel>
         <ResizablePanel className="hidden md:flex flex-col space-y-4" defaultSize={20}>
           <QuickStats vehicles={vehicles} />
