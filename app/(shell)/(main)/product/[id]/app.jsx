@@ -49,24 +49,34 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
 
   useEffect(() => {
     // When product data is fetched, update the local state
-    if (productDataQuery && productDataQuery.product) {
-      const { id, name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata } = productDataQuery.product;
+    if (productDataQuery && productDataQuery.Product && productDataQuery.Product.length > 0) {
+      const product = productDataQuery.Product[0];
+      const { id, name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata } = product;
       setProductData({ id, name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata });
     }
   }, [productDataQuery]);
 
   const handleUpdate = async () => {
     try {
-      const { name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata } = productData;
-
+      const { 
+        name, 
+        description, 
+        price, 
+        quantity, 
+        category, 
+        primaryPhoto, 
+        imageGallery, 
+        ogImage 
+      } = productData;
+  
       // Execute the product and segment update mutation
       const updateSegmentResult = await updateProductAndInsertSegment({
         variables: {
           productId,
           name,
           description,
-          price,
-          quantity,
+          price: parseFloat(price), // Ensure price is float
+          quantity: parseInt(quantity), // Ensure quantity is int
           category,
           primaryPhoto,
           imageGallery,
@@ -78,7 +88,8 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
           post: '{"key": "value"}', // Update according to your requirements
         },
       });
-
+  
+   
       // Create a new product version
       const versionNumber = Math.floor(Date.now() / 1000);
       const uuid = uuidv4();
@@ -87,8 +98,8 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
         variables: {
           productId,
           versionNumber,
-          changes: 'Segment added', // Define the changes appropriately
-          data: productData, // Ensure the product data is passed to the version
+          changes: 'added seegment', // Describe changes made
+          data: productData, // Use the product data
           id: uuid,
         },
       });
@@ -98,6 +109,7 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
       console.error('Error executing mutation:', error);
     }
   };
+  
 
   const handleCreateSegment = async () => {
     // Logic to create a new segment
@@ -201,12 +213,11 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
         />
       </div>
 
-      <Button onClick={handleUpdate} disabled={updatingSegment || loadingProduct}>
-        {updatingSegment ? 'Updating...' : 'Update Product and Insert Segment'}
+      <Button onClick={handleUpdate} disabled={loadingProduct}>
+        {loadingProduct ? 'Updating...' : 'Update Product and Insert Segment'}
       </Button>
 
       {productError && <p>Error loading product: {productError.message}</p>}
-      {segmentError && <p>Error updating segment: {segmentError.message}</p>}
     </div>
   );
 };

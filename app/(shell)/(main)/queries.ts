@@ -78,6 +78,12 @@ export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
     $productId: String!,
     $name: String!,
     $description: String!,
+    $price: Float!,
+    $quantity: Int!,
+    $category: String!,
+    $primaryPhoto: String!,
+    $imageGallery: jsonb!,
+    $ogImage: String!,
     $segmentId: String!,
     $slug: String!,
     $segmentName: String!,
@@ -86,7 +92,16 @@ export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
   ) {
     update_Product(
       where: { id: { _eq: $productId } },
-      _set: { name: $name, description: $description }
+      _set: {
+        name: $name, 
+        description: $description,
+        price: $price,
+        quantity: $quantity,
+        category: $category,
+        primaryPhoto: $primaryPhoto,
+        imageGallery: $imageGallery,
+        ogImage: $ogImage
+      }
     ) {
       affected_rows
     }
@@ -106,6 +121,7 @@ export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
     }
   }
 `;
+
 
 // Mutation to add a new version for a design element
 export const ADD_DESIGN_ELEMENT_VERSION = gql`

@@ -495,7 +495,18 @@ const handleSave = async () => {
     return;
   }
 
-  const { id, name, description, price, quantity, category } = productData;
+  const { 
+    name, 
+    description, 
+    price, 
+    quantity, 
+    category, 
+    primaryPhoto, 
+    imageGallery, 
+    ogImage 
+  } = productData;
+  
+  
   const parsedPrice = parseFloat(price as unknown as string);
   const parsedQuantity = parseInt(quantity as unknown as string);
 
@@ -521,7 +532,7 @@ const handleSave = async () => {
         },
         primaryPhoto,
         ogImage,
-        imageGallery: imageGallery.map((img) => img?.url).filter(Boolean), // Filter out any falsy values (null or undefined)Save the updated image gallery order
+        imageGallery: imageGallery?.filter(Boolean), // If img is already a string (URL), just filter out falsy values
       },
     });
 
