@@ -1,65 +1,106 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { 
-  GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN,
-  UPDATE_PRODUCT_AND_INSERT_SEGMENT 
-} from '@/app/(shell)/(main)/queries';
+import { GET_PRODUCT, SAVE_PRODUCT,   UPDATE_PRODUCT_AND_INSERT_SEGMENT, GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, UPDATE_PRODUCT_VERSION, PUBLISH_SEGMENTS, UPDATE_SEGMENT, GET_PRODUCT_VERSIONS } from '@/app/(shell)/(main)/queries';
+import { v4 as uuidv4 } from 'uuid';
 import { DELETE_SEGMENT } from './mutations'; // Adjust import path as needed
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Component to update product and insert a new segment
 
+
+// Component to update product and insert a new segment
 const UpdateProductAndInsertSegment = ({ productId }) => {
-  const [updateProductAndInsertSegment, { data, loading, error }] = useMutation(UPDATE_PRODUCT_AND_INSERT_SEGMENT);
-  
-  // Static variable for existing segment (simulate fetch)
+  const { data: productDataQuery, loading: loadingProduct, error: productError } = useQuery(GET_PRODUCT, {
+    variables: { productId }
+  });
+
+  const [updateProductAndInsertSegment, { loading: updatingSegment, error: segmentError }] = useMutation(UPDATE_PRODUCT_AND_INSERT_SEGMENT);
+  const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
+
+  // Static variable for existing segments (simulate fetch)
   const existingSegments = [
     { id: 'unique-segment-id', name: 'Existing Segment 1' },
     { id: 'another-segment-id', name: 'Existing Segment 2' },
   ];
 
-  const [name, setName] = useState('Updated Product Name');
-  const [description, setDescription] = useState('Updated description');
   const [segmentId, setSegmentId] = useState('unique-segment-id'); // Static variable for now
   const [newSegmentName, setNewSegmentName] = useState(''); // For creating a new segment
   const [domainId, setDomainId] = useState('cm14mvs4l000jue6y5eo3ngku');
 
-  const [slug, setSlug] = useState('new-segment-slug');
+  // Product data state
+  const [productData, setProductData] = useState({
+    id: '',
+    name: '',
+    description: '',
+    price: '',
+    quantity: '',
+    category: '',
+    primaryPhoto: '',
+    imageGallery: [],
+    ogImage: '',
+    metadata: {},
+  });
 
-  const [post, setPost] = useState('{"key": "value"}');
+  useEffect(() => {
+    if (productDataQuery && productDataQuery.product) {
+      const { id, name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata } = productDataQuery.product;
+      setProductData({ id, name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata });
+    }
+  }, [productDataQuery]);
+
   const handleUpdate = async () => {
     try {
+      const { name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata } = productData;
+
       const { data } = await updateProductAndInsertSegment({
         variables: {
           productId,
           name,
           description,
+          price,
+          quantity,
+          category,
+          primaryPhoto,
+          imageGallery,
+          ogImage,
           segmentId,
-          slug,
+          slug: productData.slug || 'new-segment-slug', // Assuming slug is in product data or setting a default
           segmentName: segmentId === 'create-new' ? newSegmentName : existingSegments.find(segment => segment.id === segmentId)?.name,
           domainId,
-          post,
+          post: '{"key": "value"}', // Update according to your requirements
         },
       });
+
+      const versionNumber = Math.floor(Date.now() / 1000);
+      const uuid = uuidv4();
+
+      await updateProductVersion({
+        variables: {
+          productId,
+          versionNumber,
+          changes: 'Segment Added', // Define the changes appropriately
+          data: productData,
+          id: uuid,
+        },
+      });
+
       console.log('Mutation result:', data);
     } catch (error) {
       console.error('Error executing mutation:', error);
     }
   };
-const createNewSegment = () =>{}
+
   const handleCreateSegment = async () => {
     // Logic to create a new segment
-    // You may need to define a mutation for creating a new segment
     try {
-      // Define your mutation for creating a new segment
+      // Assume a mutation for creating a new segment is defined
       const { data } = await createNewSegment({
         variables: {
           name: newSegmentName,
-          description,
+          description: productData.description, // Using product description for the new segment
           domainId,
         },
       });
@@ -118,16 +159,48 @@ const createNewSegment = () =>{}
         <label htmlFor="description">Description:</label>
         <textarea 
           id="description" 
-          value={description} 
-          onChange={(e) => setDescription(e.target.value)} 
+          value={productData.description} 
+          onChange={(e) => setProductData(prev => ({ ...prev, description: e.target.value }))} 
         />
       </div>
 
-      <Button onClick={handleUpdate} disabled={loading}>
-        {loading ? 'Updating...' : 'Update Product and Insert Segment'}
+      {/* Add other input fields for price, quantity, category, etc. */}
+      <div>
+        <label htmlFor="price">Price:</label>
+        <input 
+          id="price" 
+          type="number" 
+          value={productData.price} 
+          onChange={(e) => setProductData(prev => ({ ...prev, price: e.target.value }))} 
+        />
+      </div>
+
+      <div>
+        <label htmlFor="quantity">Quantity:</label>
+        <input 
+          id="quantity" 
+          type="number" 
+          value={productData.quantity} 
+          onChange={(e) => setProductData(prev => ({ ...prev, quantity: e.target.value }))} 
+        />
+      </div>
+
+      <div>
+        <label htmlFor="category">Category:</label>
+        <input 
+          id="category" 
+          type="text" 
+          value={productData.category} 
+          onChange={(e) => setProductData(prev => ({ ...prev, category: e.target.value }))} 
+        />
+      </div>
+
+      <Button onClick={handleUpdate} disabled={updatingSegment || loadingProduct}>
+        {updatingSegment ? 'Updating...' : 'Update Product and Insert Segment'}
       </Button>
 
-      {error && <p>Error: {error.message}</p>}
+      {productError && <p>Error loading product: {productError.message}</p>}
+      {segmentError && <p>Error updating segment: {segmentError.message}</p>}
       {data && (
         <div>
           <p>Update Result: {data.update_Product.affected_rows} rows affected</p>
@@ -136,7 +209,6 @@ const createNewSegment = () =>{}
     </div>
   );
 };
-
 // New component to display when there are no segments
 const NoSegmentsComponent = ({ productId }) => {
   return (
