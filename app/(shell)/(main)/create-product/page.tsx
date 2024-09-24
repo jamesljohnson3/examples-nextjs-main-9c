@@ -159,20 +159,22 @@ export default function SimplifiedProductPage() {
     }
   };
 
-  return (
-    <div className="container mx-auto p-4 max-w-3xl">
-      <div className="flex items-center justify-between mb-4">
-        <Link href="/">
-          <Button variant="ghost" size="sm">
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Back to Inventory
-          </Button>
-        </Link> 
-        <Button variant="outline" size="sm">
-          <User className="h-4 w-4 mr-2" />
-          John Doe
-        </Button>
-      </div>
+  return (<div><div className="flex items-center justify-between mb-4">
+    <Link href="/">
+      <Button variant="ghost" size="sm">
+        <ChevronLeft className="h-4 w-4 mr-2" />
+        Back to Inventory
+      </Button>
+    </Link> 
+    <Button variant="outline" size="sm">
+      <User className="h-4 w-4 mr-2" />
+      John Doe
+    </Button>
+  </div>
+  
+
+  <div className="container mx-auto p-4 max-w-3xl">
+      
       
       <h1 className="text-2xl font-bold text-center mb-6">Create New Product</h1>
       
@@ -326,5 +328,7 @@ export default function SimplifiedProductPage() {
         </div>
       </form>
     </div>
+  </div>
+   
   );
 }

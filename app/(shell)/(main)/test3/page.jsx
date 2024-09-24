@@ -11,7 +11,7 @@ import Link from 'next/link';
 import api from "@/api";
 
 const getStartedItems = [
-  { href: '/test2', title: 'Add to Inventtory', description: 'Add a new product to your inventory', icon: Plus },
+  { href: '/add-listing', title: 'Add to Inventtory', description: 'Add a new listing to your inventory', icon: Plus },
   { href: '/admin/settings', title: 'Update Settings', description: 'Configure your store preferences', icon: Settings2 },
 ];
 

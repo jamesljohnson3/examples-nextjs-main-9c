@@ -416,14 +416,19 @@ const ProductListHomepage: React.FC = () => {
 
           <Card className="col-span-3 bg-white backdrop-blur-lg border">
             <CardContent className="p-2">
-              <nav className="space-y-1">
-                {['Add Listing', 'Create Product','Advanced Options','Inventory Settings'  ].map((item) => (
-                 <Link key={item} href={'/test2'} ><Button variant="ghost" className="w-full justify-start text-xs py-1 px-2">
+            <nav className="space-y-1">
+  {[
+    { label: 'Add Listing', link: '/add-listing' },
+    { label: 'Create Product', link: '/create-product' },
+  ].map(({ label, link }) => (
+    <Link key={label} href={link}>
+      <Button variant="ghost" className="w-full justify-start text-xs py-1 px-2">
+        {label}
+      </Button>
+    </Link>
+  ))}
+</nav>
 
-                 {item}
-               </Button></Link> 
-                ))}
-              </nav>
             </CardContent>
           </Card>
         </ResizablePanel>

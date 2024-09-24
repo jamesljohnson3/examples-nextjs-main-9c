@@ -194,7 +194,7 @@ export default function EnhancedSegmentCreatePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Add an existing product</CardTitle>
-                <a href='/test4'> or Create new product</a>
+                <a href='/create-product'> or Create new product</a>
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
