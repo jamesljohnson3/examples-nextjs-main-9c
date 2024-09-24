@@ -187,6 +187,7 @@ export default function EnhancedSegmentCreatePage() {
           </PopoverContent>
         </Popover>
       </div>
+      <div className='h-7'/>
 
       <form onSubmit={handleSubmit}>
         <ResizablePanelGroup className="flex pl-8 items-center justify-center mx-auto space-x-2" direction="horizontal">

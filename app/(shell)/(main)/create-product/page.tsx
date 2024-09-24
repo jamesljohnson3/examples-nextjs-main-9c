@@ -14,6 +14,11 @@ import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 import { nanoid } from 'nanoid'; // Import nanoid for unique ID generation
 
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+
+
 // Define the type for your product
 interface Product {
   id: string; // Add an ID property for the product
@@ -159,29 +164,49 @@ export default function SimplifiedProductPage() {
     }
   };
 
-  return (<div><div className="flex items-center justify-between mb-4">
-    <Link href="/">
-      <Button variant="ghost" size="sm">
-        <ChevronLeft className="h-4 w-4 mr-2" />
-        Back to Inventory
-      </Button>
-    </Link> 
-    <Button variant="outline" size="sm">
-      <User className="h-4 w-4 mr-2" />
-      John Doe
-    </Button>
-  </div>
-  
+  return (<div>
+    
+
 
   <div className="container mx-auto p-4 max-w-3xl">
       
-      
-      <h1 className="text-2xl font-bold text-center mb-6">Create New Product</h1>
-      
+   <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <Link href={'/'}>
+            <Button variant="ghost" size="sm" className="h-6">
+              <ChevronLeft className="h-3 w-3 mr-1" />
+              Back to Inventory
+            </Button>
+          </Link>
+          <div className="text-muted-foreground">Dashboard / Create Product</div>
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 text-xs">
+              <User className="h-4 w-4 mr-1" />
+              User
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-2">
+            <div className="flex items-center space-x-2">
+              <Avatar>
+                <AvatarImage src="/placeholder.svg?height=32&width=32" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-medium">John Doe</p>
+                <p className="text-xs text-muted-foreground">john@example.com</p>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className='h-7'/>
+
       <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+            <CardTitle>Create New Product</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
