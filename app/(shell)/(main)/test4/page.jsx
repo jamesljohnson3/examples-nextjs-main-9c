@@ -241,6 +241,7 @@ export default function SimplifiedProductCreatePage() {
                           <Button 
                             size="sm" 
                             className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent the card's onClick from firing when the button is clicked
                               handleCloneProduct(sampleProduct);
