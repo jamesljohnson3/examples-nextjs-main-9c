@@ -12,15 +12,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Component to update product and insert a new segment
+
 const UpdateProductAndInsertSegment = ({ productId }) => {
   const [updateProductAndInsertSegment, { data, loading, error }] = useMutation(UPDATE_PRODUCT_AND_INSERT_SEGMENT);
+  
+  // Static variable for existing segment (simulate fetch)
+  const existingSegments = [
+    { id: 'unique-segment-id', name: 'Existing Segment 1' },
+    { id: 'another-segment-id', name: 'Existing Segment 2' },
+  ];
+
   const [name, setName] = useState('Updated Product Name');
   const [description, setDescription] = useState('Updated description');
-  const [segmentId, setSegmentId] = useState('unique-segment-id');
-  const [slug, setSlug] = useState('new-segment-slug');
-  const [segmentName, setSegmentName] = useState('New Segment Name');
+  const [segmentId, setSegmentId] = useState('unique-segment-id'); // Static variable for now
+  const [newSegmentName, setNewSegmentName] = useState(''); // For creating a new segment
   const [domainId, setDomainId] = useState('cm14mvs4l000jue6y5eo3ngku');
-  const [post, setPost] = useState('{"key": "value"}');
 
   const handleUpdate = async () => {
     try {
@@ -29,11 +35,9 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
           productId,
           name,
           description,
-          segmentId,
-          slug,
-          segmentName,
+          segmentId, // Use selected segmentId
+          segmentName: segmentId === 'create-new' ? newSegmentName : existingSegments.find(segment => segment.id === segmentId)?.name,
           domainId,
-          post,
         },
       });
       console.log('Mutation result:', data);
@@ -41,18 +45,87 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
       console.error('Error executing mutation:', error);
     }
   };
+const createNewSegment = () =>{}
+  const handleCreateSegment = async () => {
+    // Logic to create a new segment
+    // You may need to define a mutation for creating a new segment
+    try {
+      // Define your mutation for creating a new segment
+      const { data } = await createNewSegment({
+        variables: {
+          name: newSegmentName,
+          description,
+          domainId,
+        },
+      });
+      console.log('New Segment Created:', data);
+      // Update the segmentId to the newly created segment's ID
+      setSegmentId(data.createSegment.id); 
+      // Reset new segment name
+      setNewSegmentName('');
+    } catch (error) {
+      console.error('Error creating segment:', error);
+    }
+  };
 
   return (
     <div>
       <h1>Update Product and Insert Segment</h1>
-      <button onClick={handleUpdate} disabled={loading}>
+
+      <div>
+        <label htmlFor="segment-select">Select Existing Segment or Create New:</label>
+        <select 
+          id="segment-select" 
+          value={segmentId} 
+          onChange={(e) => {
+            const selectedValue = e.target.value;
+            setSegmentId(selectedValue);
+
+            // Reset the new segment name if an existing segment is selected
+            if (selectedValue !== 'create-new') {
+              setNewSegmentName('');
+            }
+          }}
+        >
+          {existingSegments.map(segment => (
+            <option key={segment.id} value={segment.id}>
+              {segment.name}
+            </option>
+          ))}
+          <option value="create-new">Create New Segment</option>
+        </select>
+      </div>
+
+      {segmentId === "create-new" && (
+        <div>
+          <label htmlFor="new-segment-name">New Segment Name:</label>
+          <input 
+            id="new-segment-name" 
+            type="text" 
+            value={newSegmentName} 
+            onChange={(e) => setNewSegmentName(e.target.value)} 
+          />
+          <Button onClick={handleCreateSegment}>Create Segment</Button>
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="description">Description:</label>
+        <textarea 
+          id="description" 
+          value={description} 
+          onChange={(e) => setDescription(e.target.value)} 
+        />
+      </div>
+
+      <Button onClick={handleUpdate} disabled={loading}>
         {loading ? 'Updating...' : 'Update Product and Insert Segment'}
-      </button>
+      </Button>
+
       {error && <p>Error: {error.message}</p>}
       {data && (
         <div>
           <p>Update Result: {data.update_Product.affected_rows} rows affected</p>
-          <p>Inserted Segment ID: {data.insert_Segment_one.id}</p>
         </div>
       )}
     </div>
