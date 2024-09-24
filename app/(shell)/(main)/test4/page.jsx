@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { ChevronLeft, User, ImageIcon, Upload, X, Plus, Copy } from 'lucide-react'
+import { ChevronLeft, User, ImageIcon, Upload, X, Copy } from 'lucide-react'
 import Link from 'next/link';
 
 const sampleProducts = [
@@ -52,6 +52,7 @@ export default function SimplifiedProductCreatePage() {
   })
 
   const [isCloned, setIsCloned] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -97,11 +98,29 @@ export default function SimplifiedProductCreatePage() {
     setIsCloned(false); // Reset clone state
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Submitting product:', product)
-    // Here you would typically send the data to your backend
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true); // Show loading state
+
+    try {
+      console.log('Submitting product:', product);
+
+      // Simulate API call response
+      const response = {"id": "test"}
+
+      if (response && response.id) {
+        window.location.replace(`/product/${response.id}`); // Redirect to the product page
+      } else {
+        alert('Product submission failed. Please try again.'); // Handle submission error
+      }
+
+    } catch (error) {
+      console.error('Error submitting product:', error);
+      alert('There was an error submitting your product. Please try again.');
+    } finally {
+      setLoading(false); // Hide loading state after submission
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 max-w-3xl">
@@ -242,9 +261,13 @@ export default function SimplifiedProductCreatePage() {
               Start from Scratch
             </Button>
           ) : (
-            <Button type="submit">
-              <Upload className="h-4 w-4 mr-2" />
-              Create Product
+            <Button type="submit" disabled={loading}>
+              {loading ? "Submitting..." : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Create Product
+                </>
+              )}
             </Button>
           )}
         </div>

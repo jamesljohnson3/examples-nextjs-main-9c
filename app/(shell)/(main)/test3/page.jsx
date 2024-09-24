@@ -6,13 +6,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Globe, Plus, Book } from 'lucide-react'
+import { Globe, Plus, Book, Settings2 } from 'lucide-react'
 import Link from 'next/link';
 import api from "@/api";
 
 const getStartedItems = [
-  { href: '/test2', title: 'Create New Product', description: 'Add a new product to your inventory', icon: Plus },
-  { href: '/admin/settings', title: 'Update Settings', description: 'Configure your store preferences', icon: Plus },
+  { href: '/test2', title: 'Add to Inventtory', description: 'Add a new product to your inventory', icon: Plus },
+  { href: '/admin/settings', title: 'Update Settings', description: 'Configure your store preferences', icon: Settings2 },
 ];
 
 const documentationSections = [
