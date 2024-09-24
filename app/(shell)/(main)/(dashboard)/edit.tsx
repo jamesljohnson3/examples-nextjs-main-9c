@@ -24,7 +24,7 @@ const AdvancedOptions: React.FC = () => {
 
   return (
 
-<div className="gap-4">
+<div className="gap-4 space-y-2">
 
 <Card>
             <CardHeader>

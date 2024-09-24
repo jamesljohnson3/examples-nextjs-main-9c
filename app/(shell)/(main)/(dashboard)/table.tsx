@@ -390,7 +390,7 @@ const ProductListHomepage: React.FC = () => {
                 setSearchField={setSearchField} // Pass down the setter
                 searchTerm={searchTerm}
             />
-      <ResizablePanelGroup className='space-x-2 gap-4' direction="horizontal">
+      <ResizablePanelGroup className='space-x-2 space-y-2 gap-4' direction="horizontal">
         <ResizablePanel defaultSize={80}>
           <Card>
             <CardHeader>
@@ -408,6 +408,7 @@ const ProductListHomepage: React.FC = () => {
               </CardContent>
           </Card>
 
+    <Suspense fallback={<LoadingAnimation/>}><AdvancedOptions/></Suspense>
         </ResizablePanel>
         <ResizablePanel className="hidden md:flex flex-col space-y-4" defaultSize={20}>
           <QuickStats vehicles={vehicles} />

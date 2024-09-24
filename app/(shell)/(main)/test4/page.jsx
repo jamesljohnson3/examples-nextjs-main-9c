@@ -222,10 +222,16 @@ export default function SimplifiedProductCreatePage() {
         </Card>
 
         <div className="mt-6 flex justify-end">
-          <Button type="submit">
+        {setProduct ? ( <Button type="submit">
+            <Upload className="h-4 w-4 mr-2" />
+            Start from Scratch
+          </Button>) : ( <Button type="submit">
             <Upload className="h-4 w-4 mr-2" />
             Create Product
-          </Button>
+          </Button>)}
+
+       
+           
         </div>
       </form>
     </div>
