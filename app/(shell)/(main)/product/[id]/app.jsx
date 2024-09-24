@@ -20,6 +20,55 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Slider } from "@/components/ui/slider"
 import { ArrowLeft, BarChart, Bell, ChevronLeft, Edit, Eye, ImageIcon, LayoutDashboard, LogOut, Plus, RefreshCw, Search, Settings, Share2, ShoppingCart, Sparkles, Star, User, Zap } from 'lucide-react'
+import { UPDATE_PRODUCT_AND_INSERT_SEGMENT } from '@/app/(shell)/(main)/queries';
+
+const UpdateProductAndInsertSegment = () => {
+  const [updateProductAndInsertSegment, { data, loading, error }] = useMutation(UPDATE_PRODUCT_AND_INSERT_SEGMENT);
+  const [productId, setProductId] = useState('cm14mvs2o000fue6yh6hb13yn');
+  const [name, setName] = useState('Updated Product Name');
+  const [description, setDescription] = useState('Updated description');
+  const [segmentId, setSegmentId] = useState('unique-segment-id');
+  const [slug, setSlug] = useState('new-segment-slug');
+  const [segmentName, setSegmentName] = useState('New Segment Name');
+  const [domainId, setDomainId] = useState('cm14mvs4l000jue6y5eo3ngku');
+  const [post, setPost] = useState('{"key": "value"}');
+
+  const handleUpdate = async () => {
+    try {
+      const { data } = await updateProductAndInsertSegment({
+        variables: {
+          productId,
+          name,
+          description,
+          segmentId,
+          slug,
+          segmentName,
+          domainId,
+          post,
+        },
+      });
+      console.log('Mutation result:', data);
+    } catch (error) {
+      console.error('Error executing mutation:', error);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Update Product and Insert Segment</h1>
+      <button onClick={handleUpdate} disabled={loading}>
+        {loading ? 'Updating...' : 'Update Product and Insert Segment'}
+      </button>
+      {error && <p>Error: {error.message}</p>}
+      {data && (
+        <div>
+          <p>Update Result: {data.update_Product.affected_rows} rows affected</p>
+          <p>Inserted Segment ID: {data.insert_Segment_one.id}</p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // New component to display when there are no segments
 const NoSegmentsComponent = ({ productId }) => {
@@ -27,6 +76,7 @@ const NoSegmentsComponent = ({ productId }) => {
     <div className="flex flex-col items-center justify-center p-4 border rounded-md bg-muted">
       <h3 className="text-lg font-semibold">No Segments Available</h3>
       <p className="text-sm">Product ID: {productId}</p>
+      <UpdateProductAndInsertSegment/>
     </div>
   );
 };
