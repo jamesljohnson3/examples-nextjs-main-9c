@@ -204,14 +204,14 @@ export default function EnhancedSegmentCreatePage() {
                         <span>Loading vehicles...</span>
                       </div>
                     ) : (
-                      <div className="p-4 grid grid-cols-2 gap-4">
+                      <div className="p-4 grid grid-cols-3 gap-4">
                         {vehicles.map((vehicle) => (
                           <Card key={vehicle.id} className="overflow-hidden">
                             <CardContent className="p-2">
                               <img 
                                 src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
                                 alt={vehicle.fields.Name} 
-                                className="w-full h-48 object-cover rounded mb-2" />
+                                className="w-full h-36 object-cover rounded mb-2" />
                               <h3 className="font-semibold text-xs mb-1">
                                 <span>{vehicle.fields.Name}</span>
                               </h3>
