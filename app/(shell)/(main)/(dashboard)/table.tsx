@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,23 @@ import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 import { deleteVehiclebyId } from '@/actions/dashboard';
 import Link from 'next/link';
+import AdvancedOptions from './edit';
 
+
+const LoadingAnimation = () => (
+    <div className="p-4 max-w-md mx-auto h-full flex items-center justify-center">
+    <div className="animate-pulse flex flex-col items-center space-y-4">
+      <div className="rounded-full bg-gray-200 h-20 w-20"></div>
+      <div className="h-6 bg-gray-200 rounded"> </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="h-6 bg-gray-200 rounded col-span-3"></div>
+      </div>
+      <div className="h-6 bg-gray-200 rounded"></div>
+    </div>
+  </div>
+  
+  
+  );
 
 interface SearchTermIndicatorProps {
     searchTerm: string;
@@ -374,11 +390,11 @@ const ProductListHomepage: React.FC = () => {
                 setSearchField={setSearchField} // Pass down the setter
                 searchTerm={searchTerm}
             />
-      <ResizablePanelGroup className='space-x-2' direction="horizontal">
+      <ResizablePanelGroup className='space-x-2 gap-4' direction="horizontal">
         <ResizablePanel defaultSize={80}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Product List</CardTitle>
+              <CardTitle className="text-sm">Segments / Inventory</CardTitle>
             </CardHeader>
             <CardContent>
             <VehicleList
@@ -391,6 +407,8 @@ const ProductListHomepage: React.FC = () => {
               
               </CardContent>
           </Card>
+
+    <Suspense fallback={<LoadingAnimation/>}><AdvancedOptions/></Suspense>
         </ResizablePanel>
         <ResizablePanel className="hidden md:flex flex-col space-y-4" defaultSize={20}>
           <QuickStats vehicles={vehicles} />

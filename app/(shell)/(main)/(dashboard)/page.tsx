@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import AdvancedOptions from "./edit";
 import  ShowVehicles, { Header } from "./table"
 
 const LoadingAnimation = () => (
@@ -28,7 +27,6 @@ export default async function DashboardPage() {
   <ShowVehicles/></Suspense>        
   
 
-    <Suspense fallback={<LoadingAnimation/>}><AdvancedOptions/></Suspense>
        </div>
     );
   }
