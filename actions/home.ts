@@ -1,37 +1,24 @@
 import 'server-only';
 // File: actions/home.ts
 export async function getSegmentData({ userId }: { userId: string }) {
-  // Example of fetching user segment data from a database or external API
-  const segments = [
-    {
-      userId: userId,
-      segment: {
-        id: "segment123",
-        name: "Tech Enthusiasts",
-        product: {
-          name: "Smartphone X",
-          description: "Latest model with AI features",
-          price: 999.99,
-          quantity: 10,
-          category: "Electronics",
-          createdById: "user123",
-          organizationId: "org456",
-          imageGallery: [
-            "https://example.com/image1.jpg",
-            "https://example.com/image2.jpg"
-          ],
-          metadata: {
-            title: "Smartphone X",
-            description: "An advanced smartphone for tech lovers.",
-            keywords: "smartphone, AI, tech"
-          }
-        }
-      }
-    },
-    // Add more segments based on userId...
-  ];
+  try {
+    // Fetching user segment data from the external API
+    const response = await fetch(`https://vault.unlimitpotential.com/api/segments?userId=${userId}`);
 
-  return segments;
+    // Check if the response is successful
+    if (!response.ok) {
+      throw new Error(`Failed to fetch segment data: ${response.statusText}`);
+    }
+
+    // Parse the response data into JSON
+    const segments = await response.json();
+
+    // Return the fetched segments data
+    return segments;
+  } catch (error) {
+    console.error("Error fetching segment data:", error);
+    throw error; // Re-throw the error to handle it in the calling function
+  }
 }
 
 // Define the structure of a single Pornhub video
