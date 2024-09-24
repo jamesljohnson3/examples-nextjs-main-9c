@@ -201,4 +201,3 @@ const ProductSegmentPage = ({ params }) => {
 };
 
 export default ProductSegmentPage;
-
