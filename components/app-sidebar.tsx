@@ -62,35 +62,23 @@ const data = {
   
     {
       title: "Dashboard",
-      url: "/dashboard",
+      url: "/test3",
       icon: Home,
       items: [
         {
           title: "Inventory",
-          url: "/dashboard",
+          url: "/",
         },
       ],
     },
     {
-      title: "Settings",
+      title: "Edit Site",
       url: "/",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Inventory Page",
+          url: "/",
         },
       ],
     },

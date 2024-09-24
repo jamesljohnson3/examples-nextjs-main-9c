@@ -4,12 +4,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -102,7 +99,6 @@ export default function EnhancedSegmentCreatePage() {
     });
   };
 
-
   // Simulate continuous AI suggestions update
   useEffect(() => {
     const interval = setInterval(() => {
@@ -117,7 +113,7 @@ export default function EnhancedSegmentCreatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Basic validation for product name and price
     if (!product.name) {
       alert('Please fill in all required fields.');
@@ -127,18 +123,15 @@ export default function EnhancedSegmentCreatePage() {
     setLoading(true); // Show loading state
     try {
       console.log('Submitting product:', product);
-      // Submit the form data to your backend here
-      const response = {"id":"test"}
+      const response = await api.submitProduct(product); // Update this with your actual submission API call
 
-      // Check if the response is successful
       if (response && response.id) {
-        // Use window.location.replace to redirect to the product ID page
         window.location.replace(`/product/${response.id}`); // Redirect to the product page
       } else {
         alert('Product submission failed. Please try again.'); // Handle submission error
       }
-      
-      // Optionally clear the input fields after submission
+
+      // Clear the input fields after submission
       setProduct({
         name: '',
         description: '',
@@ -153,9 +146,10 @@ export default function EnhancedSegmentCreatePage() {
     } catch (error) {
       console.error('Error submitting product:', error);
       alert('There was an error submitting your product. Please try again.'); // User feedback
-    } 
+    } finally {
+      setLoading(false); // Hide loading state after submission
+    }
   };
-
 
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
@@ -201,7 +195,7 @@ export default function EnhancedSegmentCreatePage() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                  <ScrollArea className="bg-slate-50 h-96 w-full rounded-md ">
+                  <ScrollArea className="bg-slate-50 h-96 w-full rounded-md">
                     {loading ? (
                       <div className="flex items-center justify-center h-full">
                         <span>Loading vehicles...</span>
@@ -239,12 +233,11 @@ export default function EnhancedSegmentCreatePage() {
                     <AccordionTrigger className="text-xs font-semibold">Basic Information</AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-2">
-                      <div>
+                        <div>
                           <Label htmlFor="productName" className="text-xs">Product Name</Label>
                           <Input
-                            disabled
                             id="productName"
-                            name="productName"
+                            name="name" // Updated to match product state
                             value={product.name}
                             onChange={handleInputChange}
                             className="h-7 text-xs"
@@ -254,10 +247,9 @@ export default function EnhancedSegmentCreatePage() {
                         <div>
                           <Label htmlFor="segmentName" className="text-xs">Segment Name</Label>
                           <Input
-                            disabled
                             id="segmentName"
-                            name="segmentName"
-                            value={product.name}
+                            name="segmentName" // Updated to match product state
+                            value={product.category} // Assuming segment name should be linked to category
                             onChange={handleInputChange}
                             className="h-7 text-xs"
                           />
@@ -269,9 +261,7 @@ export default function EnhancedSegmentCreatePage() {
               </CardContent>
             </Card>
 
-
-
-            <Button type="submit" className="w-full h-8 mt-4">Submit</Button>
+            <Button type="submit" className="w-full h-8 mt-4" disabled={loading}>Submit</Button>
           </ResizablePanel>
 
           <ResizablePanel className="hidden md:flex" defaultSize={30}>
