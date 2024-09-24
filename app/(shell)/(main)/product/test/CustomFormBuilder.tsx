@@ -64,7 +64,7 @@ import { MagicWandIcon } from "@radix-ui/react-icons";
 import axios from 'axios';
 import Link from 'next/link';
 
-import { processUppyFile } from '@/utils/uppy-s3'; // Import your utility function
+import {  downloadFileFromUrl, uploadFileToS3  } from '@/utils/uppy-s3'; // Import your utility function
 import { ProcessResult, UploadedImage } from "@/types/api";
 
 
@@ -87,7 +87,11 @@ import { ProcessResult, UploadedImage } from "@/types/api";
    id: string;
    url: string;
  }
- 
+ // Define the type for the images in the gallery
+type ImageGalleryItem = {
+  id: string;
+  url: string;
+};
 interface FormElement {
   id: string;
   type: 'text' | 'textarea' | 'number' | 'select';
@@ -656,14 +660,16 @@ export default function EnhancedProductMoodboard() {
       setHasUnsavedImageGalleryChanges(true);
     }
   };
- // Save uploaded image from S3 Bucket (simulating database save here)
+
+// Save uploaded image from S3 Bucket (simulating database save here)
 const saveImageS3 = (uploadedUrl: string): void => {
   if (uploadedUrl) {
-    setImageGallery((prev) => {
-      const newGallery: UploadedImage[] = [...prev, { id: uuidv4(), url: uploadedUrl }];
+    setImageGallery((prev: ImageGalleryItem[]) => {
+      // Create a new gallery with the uploaded image
+      const newGallery: ImageGalleryItem[] = [...prev, { id: uuidv4(), url: uploadedUrl }];
       return removeDuplicates(newGallery); // Remove duplicates after adding
     });
-    setHasUnsavedImageGalleryChanges(true);
+    setHasUnsavedImageGalleryChanges(true); // Flag to indicate unsaved changes
   }
 };
 
@@ -718,55 +724,57 @@ const saveImageS3 = (uploadedUrl: string): void => {
         }
       }
     };
-  
-   // Handle Uppy events and completion
-   useEffect(() => {
-    uppyInstance.on('upload', () => {
-      setIsUploading(true);
-    });
+  // Handle Uppy events and completion
+useEffect(() => {
+  uppyInstance.on('upload', () => {
+    setIsUploading(true);
+  });
 
-    uppyInstance.on('upload-progress', (file, progress) => {
-      setUploadProgress(progress.percentage);
-    });
+  uppyInstance.on('upload-progress', (file, progress) => {
+    setUploadProgress(progress.percentage);
+  });
 
-    uppyInstance.on('upload-success', (file, response) => {
-      if (file) {
-        const uploadedUrl = response.body.url; // Ensure URL exists
-        if (uploadedUrl) {
-          setImageGallery((prev) => {
-            const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
-            return removeDuplicates(newGallery); // Ensure no duplicates are added
-          });
-          setUploadProgress(0);
-        }
+  uppyInstance.on('upload-success', (file, response) => {
+    if (file) {
+      const uploadedUrl = response.body.url; // Ensure URL exists
+      if (uploadedUrl) {
+        setImageGallery((prev) => {
+          const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
+          return removeDuplicates(newGallery); // Ensure no duplicates are added
+        });
+        setUploadProgress(0);
       }
-    });
-    
-    uppyInstance.on('complete', async (result) => {
-      const uploadedImages = result.successful;
-      
-      // Filter out any empty or invalid image objects
-      const validImages = uploadedImages.filter(file => file.uploadURL);
-     
-      for (const file of validImages) {
-    // Cast file to UppyFile
-    const uppyFile = file as UppyFile; // Use type assertion
+    }
+  });
 
-    const processResult: ProcessResult = await processUppyFile(uppyFile); // Process each uploaded file
-           if (processResult.success && processResult.message) {
-          await saveImageS3(processResult.message); // Save each image to S3 gallery
+  uppyInstance.on('complete', async (result) => {
+    const uploadedImages = result.successful;
+
+    // Filter out any empty or invalid image objects
+    const validImages = uploadedImages.filter(file => file.uploadURL);
+
+    for (const file of validImages) {
+      const downloadResult = await downloadFileFromUrl(file.uploadURL); // Download the file
+
+      if (downloadResult.success) {
+        const uploadResult = await uploadFileToS3(downloadResult.file); // Upload to S3
+        if (uploadResult.success) {
+          // Save the uploaded image URL to the gallery only once
+          saveImageS3(uploadResult.url); // Save the uploaded image URL
         } else {
-          console.error('Processing failed:', processResult.message);
+          console.error('Upload to S3 failed:', uploadResult.message);
         }
+      } else {
+        console.error('Download failed:', downloadResult.message);
       }
-      setIsUploading(false);
-    });
+    }
+    setIsUploading(false);
+  });
 
-
-    return () => {
-      uppyInstance.close(); // Cleanup Uppy instance on unmount
-    };
-  }, [uppyInstance]);
+  return () => {
+    uppyInstance.close(); // Cleanup Uppy instance on unmount
+  };
+}, [uppyInstance]);
   
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
