@@ -111,6 +111,8 @@ const parsedQuantity = parseInt(quantity, 10); // Ensure quantity is an integer
       });
 
       console.log('Update and segment insert result:', updateSegmentResult.data);
+        // Reload the window after the mutation completes successfully
+    window.location.reload();
     } catch (error) {
       console.error('Error executing mutation:', error);
     }
@@ -287,6 +289,9 @@ function ProductEditDashboard({ segment, setSegments }) {
   const handleDeleteSegment = async (segmentId) => {
     try {
       await deleteSegment({ variables: { segmentId } });
+
+          // Reload the window after the mutation completes successfully
+    window.location.reload();
     } catch (error) {
       console.error('Error executing delete mutation:', error);
     }
