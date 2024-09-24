@@ -32,7 +32,13 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
   const [segmentId, setSegmentId] = useState('unique-segment-id'); // Static variable for now
   const [newSegmentName, setNewSegmentName] = useState(''); // For creating a new segment
   const [domainId, setDomainId] = useState('cm14mvs4l000jue6y5eo3ngku');
+// Static variables
+const [price, setPrice] = useState('0'); // Initialize with a default value of '0' as string
+const [quantity, setQuantity] = useState('0'); // Initialize with a default value of '0' as string
 
+// Convert price and quantity to the correct types before sending them to the server
+const parsedPrice = parseFloat(price); // Ensure price is a float
+const parsedQuantity = parseInt(quantity, 10); // Ensure quantity is an integer 
   // Product data state
   const [productData, setProductData] = useState({
     id: '',
@@ -68,15 +74,15 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
         imageGallery, 
         ogImage 
       } = productData;
-  
+ 
       // Execute the product and segment update mutation
       const updateSegmentResult = await updateProductAndInsertSegment({
         variables: {
           productId,
           name,
           description,
-          price: parseFloat(price), // Ensure price is float
-          quantity: parseInt(quantity), // Ensure quantity is int
+          price:  parsedPrice, // Ensure price is float8
+          quantity:  parsedQuantity, // Ensure quantity is int
           category,
           primaryPhoto,
           imageGallery,
