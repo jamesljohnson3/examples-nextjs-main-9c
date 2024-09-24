@@ -178,18 +178,26 @@ function ProductEditDashboard({ segment, setSegments }) {
     setHasChanges(false); // Reset changes tracker after saving
   };
 
-  const handleDeleteSegment = async (segmentId) => {
-    const confirmation = window.confirm('Are you sure you want to delete this segment?');
-    if (!confirmation) return;
 
+  const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
+    onCompleted: () => {
+      alert('Segment deleted successfully!');
+    },
+    onError: (error) => {
+      console.error('Error deleting segment:', error);
+      alert('Error deleting segment.');
+    }
+  });
+  const handleDeleteSegment = async (segmentId) => {
     try {
-      // Assume deleteSegment mutation exists, this will delete the segment
       await deleteSegment({ variables: { segmentId } });
-      setSegments(prevSegments => prevSegments.filter(s => s.id !== segmentId));
     } catch (error) {
-      alert('Error deleting segment. Please try again later.');
+      console.error('Error executing delete mutation:', error);
     }
   };
+
+  if (deleteLoading) return <p>Deleting...</p>;
+  if (deleteError) return <p>Error deleting segment.</p>;
 
   return (
     <Card>
@@ -198,6 +206,16 @@ function ProductEditDashboard({ segment, setSegments }) {
         <CardDescription>Segment ID: {segment.id}</CardDescription>
       </CardHeader>
       <CardContent>
+      <Button 
+              variant="outline" 
+              onClick={() => handleDeleteSegment(segment.id)}
+              disabled={false} // replace with loading state if necessary
+            >
+              Delete Segment
+            </Button>
+            <Button variant="secondary">Edit Product</Button>
+            <Button variant="secondary">View Analytics</Button>
+            <Button variant="secondary">Share</Button>
         <div>
           <h3 className="text-lg font-semibold">Description</h3>
           <Textarea 
@@ -212,21 +230,13 @@ function ProductEditDashboard({ segment, setSegments }) {
       {hasChanges && ( // Only show the footer with Save and other buttons if there are changes
         <CardFooter className="flex justify-between items-center">
           <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={() => handleDeleteSegment(segment.id)}
-              disabled={false} // replace with loading state if necessary
-            >
-              Delete Segment
-            </Button>
-            <Button variant="primary" onClick={handleSave}>
-              Save
-            </Button>
+            Cancel Edit
           </div>
           <div className="flex space-x-2">
-            <Button variant="secondary">Edit Product</Button>
-            <Button variant="secondary">View Analytics</Button>
-            <Button variant="secondary">Share</Button>
+        
+            <Button variant="secondary" onClick={handleSave}>
+              Save
+            </Button>
           </div>
         </CardFooter>
       )}
