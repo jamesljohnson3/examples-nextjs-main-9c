@@ -4,29 +4,52 @@ import { useQuery, useMutation } from '@apollo/client';
 import { 
   GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN 
 } from '@/app/(shell)/(main)/queries';
-import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
+import { DELETE_SEGMENT } from './mutations'; // Adjust import path as needed
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, Save, Settings2 } from 'lucide-react';
+import { 
+  Button, 
+  Input, 
+  Textarea, 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui";
+import { 
+  ChevronLeft, 
+  Save, 
+  Settings2, 
+  Bell, 
+  LogOut 
+} from 'lucide-react';
+
+// New component to display when there are no segments
+const NoSegmentsComponent = ({ productId }) => {
+  return (
+    <div className="flex flex-col items-center justify-center p-4 border rounded-md bg-muted">
+      <h3 className="text-lg font-semibold">No Segments Available</h3>
+      <p className="text-sm">Product ID: {productId}</p>
+    </div>
+  );
+};
 
 // Ensure ProductEditDashboard accepts and uses the segment prop
-function ProductEditDashboard({ segment }) {
+function ProductEditDashboard({ segment, setSegments }) {
   const [product, setProduct] = useState({
-    name: '',
-    description: '',
-    price: '',
-    quantity: '',
-    category: ''
+    name: segment.name || '',
+    description: segment.description || '',
+    price: segment.price || '',
+    quantity: segment.quantity || '',
+    category: segment.category || ''
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProduct(prev => ({ ...prev, [name]: value }));
   };
+
   const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
     onCompleted: () => {
       alert('Segment deleted successfully!');
@@ -42,141 +65,62 @@ function ProductEditDashboard({ segment }) {
     if (!confirmation) return;
 
     try {
-        await deleteSegment({ variables: { segmentId } });
-        // Optionally update the local state to remove the deleted segment
-        setSegments(prevSegments => prevSegments.filter(segment => segment.id !== segmentId));
+      await deleteSegment({ variables: { segmentId } });
+      // Optionally update the local state to remove the deleted segment
+      setSegments(prevSegments => prevSegments.filter(s => s.id !== segmentId));
     } catch (error) {
-        console.error('Error executing delete mutation:', error);
-        alert('Error deleting segment. Please try again later.');
+      console.error('Error executing delete mutation:', error);
+      alert('Error deleting segment. Please try again later.');
     }
-};
-
-
-  if (deleteLoading) return <p>Deleting...</p>;
-  if (deleteError) return <p>Error deleting segment.</p>;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <div className="text-sm text-gray-500">Products / Electronics / {segment.id}</div>
-            <h1 className="text-2xl font-bold text-gray-900">{segment.name}</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-500">Version v2.1.3</div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">Online</span>
-            </div>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{segment.name}</CardTitle>
+        <CardDescription>Segment ID: {segment.id}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div>
+          <h3 className="text-lg font-semibold">Description</h3>
+          <Textarea 
+            name="description" 
+            value={product.description} 
+            onChange={handleInputChange} 
+            className="w-full"
+          />
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          <div className="flex-grow">
-            <Tabs defaultValue="form-builder">
-              <TabsList>
-                <TabsTrigger value="form-builder">Form Builder</TabsTrigger>
-                <TabsTrigger value="refine-ai">Refine with AI</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              </TabsList>
-              <TabsContent value="form-builder" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Product Details</CardTitle>
-                    <CardDescription>Edit your product information below.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form className="space-y-4">
-                      <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-                        <Input id="name" name="name" value={product.name} onChange={handleInputChange} />
-                      </div>
-                      <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-                        <Textarea id="description" name="description" value={product.description} onChange={handleInputChange} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price</label>
-                          <Input id="price" name="price" type="number" value={product.price} onChange={handleInputChange} />
-                        </div>
-                        <div>
-                          <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">Quantity</label>
-                          <Input id="quantity" name="quantity" type="number" value={product.quantity} onChange={handleInputChange} />
-                        </div>
-                      </div>
-                      <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-                        <Input id="category" name="category" value={product.category} onChange={handleInputChange} />
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-                
-                <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle>Primary Photo</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                      <img src="/placeholder.svg?height=200&width=200" alt="Product" className="mx-auto mb-4" />
-                      <Button>Set as primary product image</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-          
-          <div className="w-80">
-            <Card>
-              <CardHeader>
-                <CardTitle>Unsaved Changes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  <li>Updated product name</li>
-                  <li>Modified description</li>
-                </ul>
-              </CardContent>
-            </Card>
-            
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Version History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li>v2 - 9/15/2024, 10:22:50 PM: Updated product description</li>
-                  <li>v1 - 9/16/2024, 10:22:50 PM: Initial version</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+      </CardContent>
+      <CardFooter className="flex justify-between items-center">
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={() => handleDeleteSegment(segment.id)}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? 'Deleting...' : 'Delete Segment'}
+          </Button>
+          <Button variant="primary">
+            Save
+          </Button>
         </div>
-      </main>
-
-      <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Button variant="outline"><ChevronLeft className="mr-2 h-4 w-4" /> Go Back</Button>
-          <div>
-            <Button variant="outline" className="mr-2"><Settings2 className="mr-2 h-4 w-4" /> Advanced Options</Button>
-            <Button><Save className="mr-2 h-4 w-4" /> Save</Button>
-            <div key={segment.id}>
-            <h3>{segment.name}</h3>
-            <button onClick={() => handleDeleteSegment(segment.id)}>Delete Segment</button>
-          </div>
-          </div>
+        <div className="flex space-x-2">
+          <Button variant="secondary">
+            Edit Product
+          </Button>
+          <Button variant="secondary">
+            View Analytics
+          </Button>
+          <Button variant="secondary">
+            Share
+          </Button>
         </div>
-      </footer>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
 
-const ProductSegmentPage = ({params}) => {
+const ProductSegmentPage = ({ params }) => {
   const PRODUCT_ID = params.id;
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku'; // Replace with your domain ID or fetch dynamically
 
@@ -197,14 +141,18 @@ const ProductSegmentPage = ({params}) => {
   if (error) return <p>Error loading segments: {error.message}</p>;
 
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <div>
         {segments.length > 0 ? (
           segments.map((segment) => (
-            <ProductEditDashboard key={segment.id} segment={segment} />
+            <ProductEditDashboard 
+              key={segment.id} 
+              segment={segment} 
+              setSegments={setSegments} 
+            />
           ))
         ) : (
-         <>{PRODUCT_ID}</>
+          <NoSegmentsComponent productId={PRODUCT_ID} />
         )}
       </div>
     </div>
@@ -212,4 +160,3 @@ const ProductSegmentPage = ({params}) => {
 };
 
 export default ProductSegmentPage;
-
