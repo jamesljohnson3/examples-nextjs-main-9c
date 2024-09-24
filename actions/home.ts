@@ -1,4 +1,38 @@
 import 'server-only';
+// File: actions/home.ts
+export async function getSegmentData({ userId }: { userId: string }) {
+  // Example of fetching user segment data from a database or external API
+  const segments = [
+    {
+      userId: userId,
+      segment: {
+        id: "segment123",
+        name: "Tech Enthusiasts",
+        product: {
+          name: "Smartphone X",
+          description: "Latest model with AI features",
+          price: 999.99,
+          quantity: 10,
+          category: "Electronics",
+          createdById: "user123",
+          organizationId: "org456",
+          imageGallery: [
+            "https://example.com/image1.jpg",
+            "https://example.com/image2.jpg"
+          ],
+          metadata: {
+            title: "Smartphone X",
+            description: "An advanced smartphone for tech lovers.",
+            keywords: "smartphone, AI, tech"
+          }
+        }
+      }
+    },
+    // Add more segments based on userId...
+  ];
+
+  return segments;
+}
 
 // Define the structure of a single Pornhub video
 export interface PornhubVideo {
