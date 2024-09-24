@@ -12,12 +12,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 
 // Component to update product and insert a new segment
+
 const UpdateProductAndInsertSegment = ({ productId }) => {
+  // Fetch product data
   const { data: productDataQuery, loading: loadingProduct, error: productError } = useQuery(GET_PRODUCT, {
     variables: { productId }
   });
 
-  const [updateProductAndInsertSegment, { loading: updatingSegment, error: segmentError }] = useMutation(UPDATE_PRODUCT_AND_INSERT_SEGMENT);
+  // Mutations
+  const [updateProductAndInsertSegment] = useMutation(UPDATE_PRODUCT_AND_INSERT_SEGMENT);
   const [updateProductVersion] = useMutation(UPDATE_PRODUCT_VERSION);
 
   // Static variable for existing segments (simulate fetch)
@@ -45,6 +48,7 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
   });
 
   useEffect(() => {
+    // When product data is fetched, update the local state
     if (productDataQuery && productDataQuery.product) {
       const { id, name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata } = productDataQuery.product;
       setProductData({ id, name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata });
@@ -55,7 +59,8 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
     try {
       const { name, description, price, quantity, category, primaryPhoto, imageGallery, ogImage, metadata } = productData;
 
-      const { data } = await updateProductAndInsertSegment({
+      // Execute the product and segment update mutation
+      const updateSegmentResult = await updateProductAndInsertSegment({
         variables: {
           productId,
           name,
@@ -74,6 +79,7 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
         },
       });
 
+      // Create a new product version
       const versionNumber = Math.floor(Date.now() / 1000);
       const uuid = uuidv4();
 
@@ -81,13 +87,13 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
         variables: {
           productId,
           versionNumber,
-          changes: 'Segment Added', // Define the changes appropriately
-          data: productData,
+          changes: 'Segment added', // Define the changes appropriately
+          data: productData, // Ensure the product data is passed to the version
           id: uuid,
         },
       });
 
-      console.log('Mutation result:', data);
+      console.log('Update and segment insert result:', updateSegmentResult.data);
     } catch (error) {
       console.error('Error executing mutation:', error);
     }
@@ -201,14 +207,10 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
 
       {productError && <p>Error loading product: {productError.message}</p>}
       {segmentError && <p>Error updating segment: {segmentError.message}</p>}
-      {data && (
-        <div>
-          <p>Update Result: {data.update_Product.affected_rows} rows affected</p>
-        </div>
-      )}
     </div>
   );
 };
+
 // New component to display when there are no segments
 const NoSegmentsComponent = ({ productId }) => {
   return (
