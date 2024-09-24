@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ChevronLeft, User, ImageIcon, Upload, X, Plus, Copy } from 'lucide-react'
-
+import Link from 'next/link';
 const sampleProducts = [
   {
     id: 1,
@@ -81,19 +81,57 @@ export default function SimplifiedProductCreatePage() {
     })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Submitting product:', product)
-    // Here you would typically send the data to your backend
-  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation for product name and price
+    if (!product.name) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    setLoading(true); // Show loading state
+    try {
+      console.log('Submitting product:', product);
+      const response = {"id":"test"}
+
+      if (response && response.id) {
+        window.location.replace(`/product/${response.id}`); // Redirect to the product page
+      } else {
+        alert('Product submission failed. Please try again.'); // Handle submission error
+      }
+
+      // Clear the input fields after submission
+      setProduct({
+        name: '',
+        description: '',
+        price: '',
+        category: '',
+        inStock: false,
+        images: [],
+        fields: {
+          Attachments: []
+        }
+      });
+    } catch (error) {
+      console.error('Error submitting product:', error);
+      alert('There was an error submitting your product. Please try again.'); // User feedback
+    } finally {
+      setLoading(false); // Hide loading state after submission
+    }
+  };
+
 
   return (
     <div className="container mx-auto p-4 max-w-3xl">
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="sm">
+       <Link href="/">
+       <Button variant="ghost" size="sm">
           <ChevronLeft className="h-4 w-4 mr-2" />
-          Back to Products
+          Back to Inventory
         </Button>
+       </Link> 
         <Button variant="outline" size="sm">
           <User className="h-4 w-4 mr-2" />
           John Doe
@@ -200,7 +238,7 @@ export default function SimplifiedProductCreatePage() {
                           <p className="text-xs text-muted-foreground mb-2">{sampleProduct.description}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-sm font-bold">${sampleProduct.price}</span>
-                            <Button size="sm" onClick={() => handleCloneProduct(sampleProduct)}>
+                            <Button type="button" size="sm" onClick={() => handleCloneProduct(sampleProduct)}>
                               <Copy className="h-4 w-4 mr-1" />
                               Clone
                             </Button>
