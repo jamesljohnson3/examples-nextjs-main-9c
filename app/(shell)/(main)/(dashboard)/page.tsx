@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
-
-import  ShowVehicles from "./table"
+import AdvancedOptions from "./edit";
+import  ShowVehicles, { Header } from "./table"
 
 const LoadingAnimation = () => (
     <div className="p-4 max-w-md mx-auto h-full flex items-center justify-center">
@@ -22,11 +22,13 @@ export default async function DashboardPage() {
     // Render content specific to Next-Auth user only
     return (
       <div className="flex flex-col">
+              <Header />
+
           <Suspense fallback={<LoadingAnimation/>}>
   <ShowVehicles/></Suspense>        
   
 
-    
+    <Suspense fallback={<LoadingAnimation/>}><AdvancedOptions/></Suspense>
        </div>
     );
   }

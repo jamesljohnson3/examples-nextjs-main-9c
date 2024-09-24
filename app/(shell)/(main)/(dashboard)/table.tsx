@@ -67,7 +67,7 @@ const LoadingIndicator: React.FC = () => (
   <div className="text-center">Loading vehicles...</div>
 );
 
-const Header: React.FC = () => (
+export const Header: React.FC = () => (
   <div className="flex items-center justify-between mb-4">
     <div className="flex items-center space-x-2">
      <Link href={'/test3'}>
@@ -367,7 +367,6 @@ const ProductListHomepage: React.FC = () => {
 
   return (
     <div className=" w-full bg-white rounded-md mx-auto p-4 space-y-4 text-sm">
-      <Header />
       <SearchBar
                 vehicles={vehicles}
                 setSearchTerm={setSearchTerm}
