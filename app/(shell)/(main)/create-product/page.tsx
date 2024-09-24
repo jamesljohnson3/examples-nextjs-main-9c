@@ -264,18 +264,22 @@ export default function SimplifiedProductPage() {
 
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Vehicles</CardTitle>
+            <CardTitle>Advanced Options</CardTitle>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
                 <AccordionTrigger>Available Vehicles</AccordionTrigger>
                 <AccordionContent>
-                  <div className="grid grid-cols-1 gap-4 mt-4">
-                    {vehicles.map((vehicle) => (
-                      <Card key={vehicle.id} className="group">
-                        <CardContent className="p-4">
-                          <div className="flex flex-col">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {vehicles.map((vehicle) => (
+                      <Card key={vehicle.id}
+                      
+                      className="overflow-hidden cursor-pointer group"
+                      onClick={() => handleCloneVehicle(vehicle)} // Clone product when the card is clicked
+                    >
+                    <CardContent className="p-4">
+                    <div className="relative">
                             <img 
                               src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
                               alt={vehicle.fields.Name} 
@@ -284,7 +288,7 @@ export default function SimplifiedProductPage() {
                             <h3 className="font-semibold text-sm mb-1">{vehicle.fields.Name}</h3>
                             <p className="text-xs text-muted-foreground mb-2">{vehicle.fields.Notes}</p>
                             <div className="flex justify-between items-center">
-                              <span className="text-sm font-bold">${vehicle.fields["Vehicle details 1"]}</span>
+                              <span className="text-sm font-bold">{vehicle.fields["Vehicle details 1"]}</span>
                               <Button 
                                 size="sm" 
                                 className="opacity-0 group-hover:opacity-100 transition-opacity"
