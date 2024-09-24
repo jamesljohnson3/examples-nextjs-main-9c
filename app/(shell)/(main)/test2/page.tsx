@@ -1,17 +1,21 @@
 
 
 "use client"
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, Copy, User, Sparkles as SparklesIcon, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, Copy, Zap, User, Sparkles as SparklesIcon, Image as ImageIcon } from 'lucide-react';
 import useWindowSize from "@/hooks/use-window-size";
 import Link from 'next/link';
 import api from "@/api";
@@ -27,15 +31,13 @@ interface Product {
   inStock: boolean;
   images: string[];
   fields: {
-    Attachments: Attachment[];
-  };
-}
-
-interface Attachment {
-  thumbnails: {
-    large: {
-      url: string;
-    };
+    Attachments: {
+      thumbnails: {
+        large: {
+          url: string;
+        };
+      };
+    }[];
   };
 }
 
@@ -99,6 +101,12 @@ export default function EnhancedSegmentCreatePage() {
     });
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Submitting product:', product);
+    // Submit the form data to your backend here
+  };
+
   // Simulate continuous AI suggestions update
   useEffect(() => {
     const interval = setInterval(() => {
@@ -110,46 +118,6 @@ export default function EnhancedSegmentCreatePage() {
     }, 10000);
     return () => clearInterval(interval);
   }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Basic validation for product name and price
-    if (!product.name) {
-      alert('Please fill in all required fields.');
-      return;
-    }
-
-    setLoading(true); // Show loading state
-    try {
-      console.log('Submitting product:', product);
-      const response = {"id":"test"}
-
-      if (response && response.id) {
-        window.location.replace(`/product/${response.id}`); // Redirect to the product page
-      } else {
-        alert('Product submission failed. Please try again.'); // Handle submission error
-      }
-
-      // Clear the input fields after submission
-      setProduct({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        inStock: false,
-        images: [],
-        fields: {
-          Attachments: []
-        }
-      });
-    } catch (error) {
-      console.error('Error submitting product:', error);
-      alert('There was an error submitting your product. Please try again.'); // User feedback
-    } finally {
-      setLoading(false); // Hide loading state after submission
-    }
-  };
 
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
@@ -195,7 +163,7 @@ export default function EnhancedSegmentCreatePage() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                  <ScrollArea className="bg-slate-50 h-96 w-full rounded-md">
+                  <ScrollArea className="h-96 w-full rounded-md border">
                     {loading ? (
                       <div className="flex items-center justify-center h-full">
                         <span>Loading vehicles...</span>
@@ -205,15 +173,15 @@ export default function EnhancedSegmentCreatePage() {
                         {vehicles.map((vehicle) => (
                           <Card key={vehicle.id} className="overflow-hidden">
                             <CardContent className="p-2">
-                              <img 
-                                src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
-                                alt={vehicle.fields.Name} 
+                              <img
+                                src={vehicle.fields.Attachments[0]?.thumbnails.large.url}
+                                alt={vehicle.fields.Name}
                                 className="w-full h-48 object-cover rounded mb-2" />
                               <h3 className="font-semibold text-xs mb-1">
                                 <span>{vehicle.fields.Name}</span>
                               </h3>
                               <div className="text-xs font-bold flex items-center justify-between">
-                                <span>Price:</span> 
+                                <span>Price:</span>
                                 <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
                                 <div className="ml-auto flex items-center">
                                   <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
@@ -236,8 +204,9 @@ export default function EnhancedSegmentCreatePage() {
                         <div>
                           <Label htmlFor="productName" className="text-xs">Product Name</Label>
                           <Input
+                            disabled
                             id="productName"
-                            name="name" // Updated to match product state
+                            name="productName"
                             value={product.name}
                             onChange={handleInputChange}
                             className="h-7 text-xs"
@@ -247,44 +216,45 @@ export default function EnhancedSegmentCreatePage() {
                         <div>
                           <Label htmlFor="segmentName" className="text-xs">Segment Name</Label>
                           <Input
+                            disabled
                             id="segmentName"
-                            name="segmentName" // Updated to match product state
-                            value={product.category} // Assuming segment name should be linked to category
+                            name="segmentName"
+                            value={product.category}
                             onChange={handleInputChange}
                             className="h-7 text-xs"
                           />
                         </div>
+
+                        <Button type="submit" className="w-full h-8">Submit</Button>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               </CardContent>
             </Card>
-
-            <Button type="submit" className="w-full h-8 mt-4" disabled={loading}>Submit</Button>
           </ResizablePanel>
 
           <ResizablePanel className="hidden md:flex" defaultSize={30}>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Segment Preview & AI Insights</CardTitle>
+              <CardTitle className="text-sm">Segment Preview & AI Insights</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {product.images.length > 0 ? (
-                    <a target="_blank" rel="noopener noreferrer" href={product.description}>
-                      <img 
-                        src={product.images[0]} 
-                        alt="Product preview" 
-                        className="w-full h-40 object-cover rounded" 
+                    <a target="_blank" rel="noopener noreferrer" href={`${product.description}`}>
+                      <img
+                        src={product.fields.Attachments[0]?.thumbnails.large.url}
+                        alt="Product preview"
+                        className="w-full h-40 object-cover rounded"
                       />
                     </a>
                   ) : (
-                    <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
-                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                    <div className="w-full h-40 bg-gray-200 rounded flex items-center justify-center">
+                      <span>No images available</span>
                     </div>
                   )}
-                  <div>
+                <div>
                     <h3 className="font-semibold text-sm">{product.name || 'Product Name'}</h3>
                   </div>
                   <div className="flex justify-between items-center">
