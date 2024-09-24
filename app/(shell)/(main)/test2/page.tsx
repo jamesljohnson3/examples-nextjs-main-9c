@@ -115,7 +115,11 @@ export default function EnhancedSegmentCreatePage() {
       console.log('Submitting product:', product);
       const response = {"id":"test"}
 
-   
+      if (response && response.id) {
+        window.location.replace(`/product/${response.id}`); // Redirect to the product page
+      } else {
+        alert('Product submission failed. Please try again.'); // Handle submission error
+      }
 
       // Clear the input fields after submission
       setProduct({
@@ -194,7 +198,7 @@ export default function EnhancedSegmentCreatePage() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                <ScrollArea className="h-96 w-full rounded-md border">
+                <ScrollArea className="bg-slate-50 h-96 w-full rounded-md ">
                     {loading ? (
                       <div className="flex items-center justify-center h-full">
                         <span>Loading vehicles...</span>
@@ -204,18 +208,18 @@ export default function EnhancedSegmentCreatePage() {
                         {vehicles.map((vehicle) => (
                           <Card key={vehicle.id} className="overflow-hidden">
                             <CardContent className="p-2">
-                              <img
-                                src={vehicle.fields.Attachments[0]?.thumbnails.large.url}
-                                alt={vehicle.fields.Name}
+                              <img 
+                                src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
+                                alt={vehicle.fields.Name} 
                                 className="w-full h-48 object-cover rounded mb-2" />
                               <h3 className="font-semibold text-xs mb-1">
                                 <span>{vehicle.fields.Name}</span>
                               </h3>
                               <div className="text-xs font-bold flex items-center justify-between">
-                                <span>Price:</span>
+                                <span>Price:</span> 
                                 <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
                                 <div className="ml-auto flex items-center">
-                                  <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
+                                  <Button   type="button" size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
                                     <Copy className="h-3 w-3 mr-1" />
                                     Clone
                                   </Button>
