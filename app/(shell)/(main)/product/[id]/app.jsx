@@ -110,7 +110,7 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
     }
   };
   
-
+const createNewSegment = async () => {}
   const handleCreateSegment = async () => {
     // Logic to create a new segment
     try {
