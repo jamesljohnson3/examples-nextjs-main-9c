@@ -1,9 +1,10 @@
 import 'server-only';
+
 // File: actions/home.ts
-export async function getSegmentData({ userId }: { userId: string }) {
+export async function getSegmentData({ userId, segmentId }: { userId: string; segmentId: string }) {
   try {
     // Fetching user segment data from the external API
-    const response = await fetch(`https://vault.unlimitpotential.com/api/segments?userId=${userId}`);
+    const response = await fetch(`https://vault.unlimitpotential.com/api/segments?userId=${userId}&segmentId=${segmentId}`);
 
     // Check if the response is successful
     if (!response.ok) {
@@ -20,6 +21,7 @@ export async function getSegmentData({ userId }: { userId: string }) {
     throw error; // Re-throw the error to handle it in the calling function
   }
 }
+
 
 // Define the structure of a single Pornhub video
 export interface PornhubVideo {
