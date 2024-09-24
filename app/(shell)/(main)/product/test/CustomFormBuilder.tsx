@@ -200,7 +200,6 @@ function VersionControl({
       setProductData(latestVersion.data);
       setPrimaryPhoto(latestVersion.data.primaryPhoto || null);
       setOgImage(latestVersion.data.ogImage || null);
-      setImageGallery(latestVersion.data.imageGallery || []);
     }
   }, [data]); // Re-run when data updates
 
