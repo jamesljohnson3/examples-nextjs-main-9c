@@ -143,6 +143,7 @@ const createNewSegment = async () => {}
   return (
     <div>
       <h1>Update Product and Insert Segment</h1>
+      <h1>{productData?.name}</h1>
 
       <div>
         <label htmlFor="segment-select">Select Existing Segment or Create New:</label>
