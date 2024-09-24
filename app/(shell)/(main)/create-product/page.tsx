@@ -227,7 +227,7 @@ const newProductId = nanoid();
             </div>
 
 
-            <div className="space-y-4 mb-2">
+            <div className="space-y-4 mt-2 mb-2">
               {product.images.length > 0 ? (
                 <div className="relative">
                   <img src={product.images[0]} alt="Product" className="w-48 h-48 object-cover rounded-md" />

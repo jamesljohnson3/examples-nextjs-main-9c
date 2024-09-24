@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Save, Settings2 } from 'lucide-react';
-import Process from './process'
+
 // Ensure ProductEditDashboard accepts and uses the segment prop
 function ProductEditDashboard({ segment }) {
   const [product, setProduct] = useState({
@@ -197,8 +197,7 @@ const ProductSegmentPage = ({params}) => {
             <ProductEditDashboard key={segment.id} segment={segment} />
           ))
         ) : (
-         <Process/> 
-         
+         <>{PRODUCT_ID}</>
         )}
       </div>
     </div>

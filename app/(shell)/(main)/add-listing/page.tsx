@@ -194,7 +194,7 @@ export default function EnhancedSegmentCreatePage() {
 
       <form onSubmit={handleSubmit}>
         <ResizablePanelGroup className="flex pl-8 items-center justify-center mx-auto space-x-2" direction="horizontal">
-          <ResizablePanel defaultSize={60}>
+          <ResizablePanel defaultSize={70}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Add an existing product</CardTitle>
@@ -221,7 +221,7 @@ export default function EnhancedSegmentCreatePage() {
         
         {/* Edit Button positioned over the image */}
         <Link 
-          className="absolute bottom-2 right-2 bg-black text-white text-[10px] h-6 w-20 flex items-center justify-center transition duration-300 ease-in-out transform opacity-0 hover:opacity-100 hover:bg-gray-800"
+          className="absolute top-2 left-2 bg-black text-white text-[10px] h-6 w-20 flex items-center justify-center transition duration-300 ease-in-out transform opacity-0 hover:opacity-100 hover:bg-gray-800"
           href={`product/${extractProductId(vehicle.fields.Notes)}`}
         >
           Edit
@@ -303,7 +303,7 @@ export default function EnhancedSegmentCreatePage() {
 
           </ResizablePanel>
 
-          <ResizablePanel className="hidden md:flex" defaultSize={40}>
+          <ResizablePanel className="hidden md:flex" defaultSize={30}>
             <Card>
               <CardHeader>
               <CardTitle className="text-sm">Segment Preview & AI Insights</CardTitle>
