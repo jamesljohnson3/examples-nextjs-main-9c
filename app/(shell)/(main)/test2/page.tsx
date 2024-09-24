@@ -153,9 +153,7 @@ export default function EnhancedSegmentCreatePage() {
     } catch (error) {
       console.error('Error submitting product:', error);
       alert('There was an error submitting your product. Please try again.'); // User feedback
-    } finally {
-      setLoading(false); // Hide loading state
-    }
+    } 
   };
 
 
@@ -194,7 +192,6 @@ export default function EnhancedSegmentCreatePage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-      {loading && <div className="loading-spinner">Submitting...</div>}
         <ResizablePanelGroup className="flex pl-8 items-center justify-center mx-auto space-x-2" direction="horizontal">
           <ResizablePanel defaultSize={70}>
             <Card>
@@ -271,6 +268,9 @@ export default function EnhancedSegmentCreatePage() {
                 </Accordion>
               </CardContent>
             </Card>
+
+
+
             <Button type="submit" className="w-full h-8 mt-4">Submit</Button>
           </ResizablePanel>
 
