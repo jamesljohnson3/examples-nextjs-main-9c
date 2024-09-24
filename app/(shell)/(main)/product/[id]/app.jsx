@@ -48,7 +48,7 @@ const parsedQuantity = parseInt(quantity, 10); // Ensure quantity is an integer
     quantity: '',
     category: '',
     primaryPhoto: '',
-    imageGallery: [],
+    imageGallery: '',
     ogImage: '',
     metadata: {},
   });
