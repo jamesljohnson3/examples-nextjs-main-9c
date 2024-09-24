@@ -3,82 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Card Creation</title>
-    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css">
-
+    <title>User Segments</title>
     <style>
-        .container {
-            display: flex;
-            flex-wrap: wrap;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-        .card {
-            border: 1px solid #ccc;
-            margin: 10px;
+        .segment {
+            border: 1px solid #ddd;
             padding: 10px;
-            width: 200px;
+            margin: 10px 0;
+            border-radius: 5px;
         }
-        .card img {
-            max-width: 100%;
+        .product {
+            margin-top: 10px;
+        }
+        img {
+            max-width: 100px;
+            display: block;
+            margin-top: 5px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
         }
     </style>
 </head>
 <body>
-    <div class="container"></div>
-<a href="/sentry-example-page">Next page</a>
-    <template id="card-template">
-        <div class="card">
-            <a id="card-link" href="#">
-                <img id="logo-img" src="" alt="Logo">
-                <h2 id="card-title"></h2>
-                <p id="card-details"></p>
-                <img id="cover-img" src="" alt="Cover">
-            </a>
-            <div id="card-footer"></div>
-        </div>
-    </template>
- <!-- Install ION ICONS via CDN -->
- <script
- type="module"
- src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
-></script>
-<script
- nomodule
- src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
-></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const container = document.querySelector(".container");
-            const cardTemplate = document.getElementById("card-template");
 
-            fetch("/api/data5")
-                .then(response => response.json())
-                .then(posts => {
-                    container.innerHTML = "";
-                    posts.forEach(post => {
-                        const cardClone = cardTemplate.content.cloneNode(true);
-                        cardClone.getElementById("card-link").href = post.link;
-                        cardClone.getElementById("logo-img").src = post.logoImage;
-                        cardClone.getElementById("card-title").textContent = post.title;
-                        cardClone.getElementById("card-details").textContent = post.details;
-                        cardClone.getElementById("cover-img").src = post.coverImage;
-                        cardClone.getElementById("card-footer").innerHTML = `
-                            <ion-icon name="arrow-up"></ion-icon>
-                            <ion-icon name="chatbox-ellipses"></ion-icon>
-                            <ion-icon name="bookmark"></ion-icon>
-                            <button class="snipcart-add-item" 
-                                data-item-id="brand-kit" 
-                                data-item-price="79.99" 
-                                data-item-url="/paintings/brand-kit" 
-                                data-item-description="High-quality brand kit." 
-                                data-item-image="https://imagedelivery.net/bZDd7YtBQY8eStrpLECtzA/9257154d-953b-4dc8-3a2a-e6e90b8cec00/sqaure" 
-                                data-item-name="Brand-kit" 
-                                data-item-custom1-name="I agree to the terms and conditions" 
-                                data-item-custom1-type="checkbox"> Boost 
-                            </button>`;
-                        container.append(cardClone);
-                    });
-                });
+<h1>User Segments</h1>
+<div id="segments-container"></div>
+
+<script>
+    async function fetchUserSegments() {
+        const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // Your user ID
+        const apiUrl = `/api/data5`; // Corrected URL
+
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json(); // Assuming the response is in JSON format
+            renderSegments(data); // Render the segments using the received data
+        } catch (error) {
+            console.error('Error fetching user segments:', error);
+        }
+    }
+
+    function renderSegments(segments) {
+        const container = document.getElementById('segments-container');
+        container.innerHTML = ''; // Clear previous content
+
+        segments.forEach(segment => {
+            const segmentDiv = document.createElement('div');
+            segmentDiv.classList.add('segment');
+
+            segmentDiv.innerHTML = `
+                <h3>Segment Name: ${segment.segment.name}</h3>
+                <p><strong>User ID:</strong> ${segment.userId}</p>
+                <p><strong>Segment ID:</strong> ${segment.segment.id}</p>
+                <h4>Product Details:</h4>
+                <div class="product">
+                    <p><strong>Name:</strong> ${segment.segment.product.name}</p>
+                    <p><strong>Description:</strong> ${segment.segment.product.description}</p>
+                    <p><strong>Price:</strong> $${segment.segment.product.price}</p>
+                    <p><strong>Quantity:</strong> ${segment.segment.product.quantity}</p>
+                    <p><strong>Category:</strong> ${segment.segment.product.category}</p>
+                    <p><strong>Created By:</strong> ${segment.segment.product.createdById}</p>
+                    <p><strong>Organization ID:</strong> ${segment.segment.product.organizationId}</p>
+                    <h4>Image Gallery:</h4>
+                    <div>
+                        ${segment.segment.product.imageGallery.map(image => `<img src="${image}" alt="Product Image">`).join('')}
+                    </div>
+                    <p><strong>Metadata:</strong></p>
+                    <ul>
+                        <li><strong>Title:</strong> ${segment.segment.product.metadata.title}</li>
+                        <li><strong>Description:</strong> ${segment.segment.product.metadata.description}</li>
+                        <li><strong>Keywords:</strong> ${segment.segment.product.metadata.keywords || 'N/A'}</li>
+                    </ul>
+                </div>
+            `;
+
+            container.appendChild(segmentDiv);
         });
-    </script>
+    }
+
+    // Fetch user segments when the page loads
+    document.addEventListener('DOMContentLoaded', fetchUserSegments);
+</script>
+
 </body>
 </html>
