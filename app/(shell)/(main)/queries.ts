@@ -82,7 +82,7 @@ export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
     $quantity: Int!,
     $category: String!,
     $primaryPhoto: String!,
-    $imageGallery: jsonb!,
+    $imageGallery: String!,
     $ogImage: String!,
     $segmentId: String!,
     $slug: String!,
