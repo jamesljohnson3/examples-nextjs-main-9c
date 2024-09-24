@@ -101,11 +101,42 @@ export default function EnhancedSegmentCreatePage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting product:', product);
-    // Submit the form data to your backend here
+
+    // Basic validation for product name and price
+    if (!product.name) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    setLoading(true); // Show loading state
+    try {
+      console.log('Submitting product:', product);
+      const response = {"id":"test"}
+
+   
+
+      // Clear the input fields after submission
+      setProduct({
+        name: '',
+        description: '',
+        price: '',
+        category: '',
+        inStock: false,
+        images: [],
+        fields: {
+          Attachments: []
+        }
+      });
+    } catch (error) {
+      console.error('Error submitting product:', error);
+      alert('There was an error submitting your product. Please try again.'); // User feedback
+    } finally {
+      setLoading(false); // Hide loading state after submission
+    }
   };
+
 
   // Simulate continuous AI suggestions update
   useEffect(() => {
@@ -163,7 +194,7 @@ export default function EnhancedSegmentCreatePage() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full space-y-2">
-                  <ScrollArea className="h-96 w-full rounded-md border">
+                <ScrollArea className="h-96 w-full rounded-md border">
                     {loading ? (
                       <div className="flex items-center justify-center h-full">
                         <span>Loading vehicles...</span>
@@ -225,13 +256,16 @@ export default function EnhancedSegmentCreatePage() {
                           />
                         </div>
 
-                        <Button type="submit" className="w-full h-8">Submit</Button>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
               </CardContent>
+              <Button type="submit" className="w-full h-8">Submit</Button>
+
             </Card>
+
+
           </ResizablePanel>
 
           <ResizablePanel className="hidden md:flex" defaultSize={30}>
