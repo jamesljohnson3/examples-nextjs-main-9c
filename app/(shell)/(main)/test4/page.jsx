@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ChevronLeft, User, ImageIcon, Upload, X, Plus, Copy } from 'lucide-react'
 import Link from 'next/link';
+
 const sampleProducts = [
   {
     id: 1,
@@ -50,6 +51,8 @@ export default function SimplifiedProductCreatePage() {
     image: null
   })
 
+  const [isCloned, setIsCloned] = useState(false);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setProduct(prev => ({ ...prev, [name]: value }))
@@ -78,60 +81,37 @@ export default function SimplifiedProductCreatePage() {
     setProduct({
       ...sampleProduct,
       id: undefined // Remove the id as this is a new product
-    })
+    });
+    setIsCloned(true); // Mark as cloned
   }
 
+  const handleStartFromScratch = () => {
+    setProduct({
+      name: '',
+      description: '',
+      price: '',
+      category: '',
+      inStock: true,
+      image: null
+    });
+    setIsCloned(false); // Reset clone state
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Basic validation for product name and price
-    if (!product.name) {
-      alert('Please fill in all required fields.');
-      return;
-    }
-
-    setLoading(true); // Show loading state
-    try {
-      console.log('Submitting product:', product);
-      const response = {"id":"test"}
-
-      if (response && response.id) {
-        window.location.replace(`/product/${response.id}`); // Redirect to the product page
-      } else {
-        alert('Product submission failed. Please try again.'); // Handle submission error
-      }
-
-      // Clear the input fields after submission
-      setProduct({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        inStock: false,
-        images: [],
-        fields: {
-          Attachments: []
-        }
-      });
-    } catch (error) {
-      console.error('Error submitting product:', error);
-      alert('There was an error submitting your product. Please try again.'); // User feedback
-    } finally {
-      setLoading(false); // Hide loading state after submission
-    }
-  };
-
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log('Submitting product:', product)
+    // Here you would typically send the data to your backend
+  }
 
   return (
     <div className="container mx-auto p-4 max-w-3xl">
       <div className="flex items-center justify-between mb-4">
-       <Link href="/">
-       <Button variant="ghost" size="sm">
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Back to Inventory
-        </Button>
-       </Link> 
+        <Link href="/">
+          <Button variant="ghost" size="sm">
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Back to Inventory
+          </Button>
+        </Link> 
         <Button variant="outline" size="sm">
           <User className="h-4 w-4 mr-2" />
           John Doe
@@ -146,86 +126,82 @@ export default function SimplifiedProductCreatePage() {
             <CardTitle>Basic Information</CardTitle>
           </CardHeader>
           <CardContent>
-          <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">Product Name</Label>
-                      <Input 
-                        id="name" 
-                        name="name" 
-                        value={product.name} 
-                        onChange={handleInputChange} 
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea 
-                        id="description" 
-                        name="description" 
-                        value={product.description} 
-                        onChange={handleInputChange} 
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="price">Price</Label>
-                      <Input 
-                        id="price" 
-                        name="price" 
-                        type="number" 
-                        value={product.price} 
-                        onChange={handleInputChange} 
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Category</Label>
-                      <Select value={product.category} onValueChange={handleCategoryChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="electronics">Electronics</SelectItem>
-                          <SelectItem value="clothing">Clothing</SelectItem>
-                          <SelectItem value="books">Books</SelectItem>
-                          <SelectItem value="furniture">Furniture</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch 
-                        id="inStock" 
-                        checked={product.inStock} 
-                        onCheckedChange={handleStockToggle}
-                      />
-                      <Label htmlFor="inStock">In Stock</Label>
-                    </div>
-                  </div>
-                  <h1 className="text-lg font-bold text-center mt-6">Product Image</h1>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Product Name</Label>
+                <Input 
+                  id="name" 
+                  name="name" 
+                  value={product.name} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea 
+                  id="description" 
+                  name="description" 
+                  value={product.description} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="price">Price</Label>
+                <Input 
+                  id="price" 
+                  name="price" 
+                  type="number" 
+                  value={product.price} 
+                  onChange={handleInputChange} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select value={product.category} onValueChange={handleCategoryChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="electronics">Electronics</SelectItem>
+                    <SelectItem value="clothing">Clothing</SelectItem>
+                    <SelectItem value="books">Books</SelectItem>
+                    <SelectItem value="furniture">Furniture</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="inStock" 
+                  checked={product.inStock} 
+                  onCheckedChange={handleStockToggle}
+                />
+                <Label htmlFor="inStock">In Stock</Label>
+              </div>
+            </div>
+            <h1 className="text-lg font-bold text-center mt-6">Product Image</h1>
 
-                  <div className="space-y-4">
-                    {product.image ? (
-                      <div className="relative">
-                        <img src={product.image} alt="Product" className="w-full h-48 object-cover rounded-md" />
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
-                          className="absolute top-2 right-2" 
-                          onClick={() => setProduct(prev => ({ ...prev, image: null }))}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <label className="w-full h-48 flex flex-col items-center justify-center bg-muted rounded-md cursor-pointer">
-                        <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
-                        <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
-                        <span className="text-sm text-muted-foreground">Click to upload image</span>
-                      </label>
-                    )}
-                  </div>
+            <div className="space-y-4">
+              {product.image ? (
+                <div className="relative">
+                  <img src={product.image} alt="Product" className="w-full h-48 object-cover rounded-md" />
+                  <Button 
+                    size="sm" 
+                    variant="destructive" 
+                    className="absolute top-2 right-2" 
+                    onClick={() => setProduct(prev => ({ ...prev, image: null }))}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="w-full h-48 flex flex-col items-center justify-center bg-muted rounded-md cursor-pointer">
+                  <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+                  <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">Click to upload image</span>
+                </label>
+              )}
+            </div>
             <Accordion type="single" collapsible className="w-full space-y-4">
-              
-
-
-
               <AccordionItem value="sample-gallery">
                 <AccordionTrigger>Advanced Options</AccordionTrigger>
                 <AccordionContent>
@@ -233,15 +209,21 @@ export default function SimplifiedProductCreatePage() {
                     {sampleProducts.map((sampleProduct) => (
                       <Card key={sampleProduct.id} className="overflow-hidden">
                         <CardContent className="p-4">
-                          <img src={sampleProduct.image} alt={sampleProduct.name} className="w-full h-32 object-cover rounded-md mb-2" />
-                          <h3 className="font-semibold text-sm mb-1">{sampleProduct.name}</h3>
-                          <p className="text-xs text-muted-foreground mb-2">{sampleProduct.description}</p>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-bold">${sampleProduct.price}</span>
-                            <Button type="button" size="sm" onClick={() => handleCloneProduct(sampleProduct)}>
-                              <Copy className="h-4 w-4 mr-1" />
-                              Clone
-                            </Button>
+                          <div className="relative group">
+                            <img src={sampleProduct.image} alt={sampleProduct.name} className="w-full h-32 object-cover rounded-md mb-2" />
+                            <h3 className="font-semibold text-sm mb-1">{sampleProduct.name}</h3>
+                            <p className="text-xs text-muted-foreground mb-2">{sampleProduct.description}</p>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-bold">${sampleProduct.price}</span>
+                              <Button 
+                                size="sm" 
+                                className="opacity-0 group-hover:opacity-100 transition-opacity" 
+                                onClick={() => handleCloneProduct(sampleProduct)}
+                              >
+                                <Copy className="h-4 w-4 mr-1" />
+                                Clone
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -254,16 +236,17 @@ export default function SimplifiedProductCreatePage() {
         </Card>
 
         <div className="mt-6 flex justify-end">
-        {setProduct ? ( <Button type="submit">
-            <Upload className="h-4 w-4 mr-2" />
-            Start from Scratch
-          </Button>) : ( <Button type="submit">
-            <Upload className="h-4 w-4 mr-2" />
-            Create Product
-          </Button>)}
-
-       
-           
+          {isCloned ? (
+            <Button onClick={handleStartFromScratch}>
+              <Upload className="h-4 w-4 mr-2" />
+              Start from Scratch
+            </Button>
+          ) : (
+            <Button type="submit">
+              <Upload className="h-4 w-4 mr-2" />
+              Create Product
+            </Button>
+          )}
         </div>
       </form>
     </div>
