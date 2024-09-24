@@ -495,18 +495,7 @@ const handleSave = async () => {
     return;
   }
 
-  const { 
-    name, 
-    description, 
-    price, 
-    quantity, 
-    category, 
-    primaryPhoto, 
-    imageGallery, 
-    ogImage 
-  } = productData;
-  
-  
+  const { id, name, description, price, quantity, category } = productData;
   const parsedPrice = parseFloat(price as unknown as string);
   const parsedQuantity = parseInt(quantity as unknown as string);
 
@@ -532,7 +521,7 @@ const handleSave = async () => {
         },
         primaryPhoto,
         ogImage,
-        imageGallery: imageGallery?.filter(Boolean), // If img is already a string (URL), just filter out falsy values
+        imageGallery: imageGallery.map((img) => img?.url).filter(Boolean), // Filter out any falsy values (null or undefined)Save the updated image gallery order
       },
     });
 
@@ -662,7 +651,6 @@ const handleSave = async () => {
   };
 
 
-  
     useEffect(() => {
       if (primaryPhoto) {
         localStorage.setItem('primaryPhoto', primaryPhoto);
