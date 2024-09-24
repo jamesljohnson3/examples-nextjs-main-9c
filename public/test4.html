@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Card Creation</title>
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css">
+
+    <style>
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .card {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            width: 200px;
+        }
+        .card img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container"></div>
+<a href="/sentry-example-page">Next page</a>
+    <template id="card-template">
+        <div class="card">
+            <a id="card-link" href="#">
+                <img id="logo-img" src="" alt="Logo">
+                <h2 id="card-title"></h2>
+                <p id="card-details"></p>
+                <img id="cover-img" src="" alt="Cover">
+            </a>
+            <div id="card-footer"></div>
+        </div>
+    </template>
+ <!-- Install ION ICONS via CDN -->
+ <script
+ type="module"
+ src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+></script>
+<script
+ nomodule
+ src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.querySelector(".container");
+            const cardTemplate = document.getElementById("card-template");
+
+            fetch("/api/data5")
+                .then(response => response.json())
+                .then(posts => {
+                    container.innerHTML = "";
+                    posts.forEach(post => {
+                        const cardClone = cardTemplate.content.cloneNode(true);
+                        cardClone.getElementById("card-link").href = post.link;
+                        cardClone.getElementById("logo-img").src = post.logoImage;
+                        cardClone.getElementById("card-title").textContent = post.title;
+                        cardClone.getElementById("card-details").textContent = post.details;
+                        cardClone.getElementById("cover-img").src = post.coverImage;
+                        cardClone.getElementById("card-footer").innerHTML = `
+                            <ion-icon name="arrow-up"></ion-icon>
+                            <ion-icon name="chatbox-ellipses"></ion-icon>
+                            <ion-icon name="bookmark"></ion-icon>
+                            <button class="snipcart-add-item" 
+                                data-item-id="brand-kit" 
+                                data-item-price="79.99" 
+                                data-item-url="/paintings/brand-kit" 
+                                data-item-description="High-quality brand kit." 
+                                data-item-image="https://imagedelivery.net/bZDd7YtBQY8eStrpLECtzA/9257154d-953b-4dc8-3a2a-e6e90b8cec00/sqaure" 
+                                data-item-name="Brand-kit" 
+                                data-item-custom1-name="I agree to the terms and conditions" 
+                                data-item-custom1-type="checkbox"> Boost 
+                            </button>`;
+                        container.append(cardClone);
+                    });
+                });
+        });
+    </script>
+</body>
+</html>
