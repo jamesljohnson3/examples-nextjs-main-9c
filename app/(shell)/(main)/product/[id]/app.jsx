@@ -28,6 +28,9 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
   const [newSegmentName, setNewSegmentName] = useState(''); // For creating a new segment
   const [domainId, setDomainId] = useState('cm14mvs4l000jue6y5eo3ngku');
 
+  const [slug, setSlug] = useState('new-segment-slug');
+
+  const [post, setPost] = useState('{"key": "value"}');
   const handleUpdate = async () => {
     try {
       const { data } = await updateProductAndInsertSegment({
@@ -37,7 +40,7 @@ const UpdateProductAndInsertSegment = ({ productId }) => {
           description,
           segmentId,
           slug,
-          segmentName,
+          segmentName: segmentId === 'create-new' ? newSegmentName : existingSegments.find(segment => segment.id === segmentId)?.name,
           domainId,
           post,
         },
