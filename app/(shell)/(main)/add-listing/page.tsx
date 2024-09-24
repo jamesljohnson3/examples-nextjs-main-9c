@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, Copy, Zap, User, Sparkles as SparklesIcon, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, Copy, Zap, User, Sparkles as SparklesIcon, Image as ImageIcon, PlusSquare } from 'lucide-react';
 import useWindowSize from "@/hooks/use-window-size";
 import Link from 'next/link';
 import api from "@/api";
@@ -221,8 +221,8 @@ export default function EnhancedSegmentCreatePage() {
                                 <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
                                 <div className="ml-auto flex items-center">
                                   <Button   type="button" size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
-                                    <Copy className="h-3 w-3 mr-1" />
-                                    Clone
+                                    <PlusSquare className="h-3 w-3 mr-1" />
+                                    Add
                                   </Button>
                                 </div>
                               </div>

@@ -167,10 +167,7 @@ export default function SimplifiedProductPage() {
   return (<div>
     
 
-
-  <div className="container mx-auto p-4 max-w-3xl">
-      
-   <div className="flex items-center justify-between mb-2">
+    <div className="p-1 flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
           <Link href={'/'}>
             <Button variant="ghost" size="sm" className="h-6">
@@ -201,6 +198,9 @@ export default function SimplifiedProductPage() {
           </PopoverContent>
         </Popover>
       </div>
+
+  <div className="container mx-auto p-4 max-w-3xl">
+      
       <div className='h-7'/>
 
       <form onSubmit={handleSubmit}>
@@ -261,12 +261,12 @@ export default function SimplifiedProductPage() {
                 <Label htmlFor="inStock">In Stock</Label>
               </div>
             </div>
-            <h1 className="text-lg font-bold text-center mt-6">Product Image</h1>
+
 
             <div className="space-y-4">
               {product.images.length > 0 ? (
                 <div className="relative">
-                  <img src={product.images[0]} alt="Product" className="w-full h-48 object-cover rounded-md" />
+                  <img src={product.images[0]} alt="Product" className="w-48 h-48 object-cover rounded-md" />
                   <Button 
                     size="sm" 
                     variant="destructive" 
@@ -277,7 +277,7 @@ export default function SimplifiedProductPage() {
                   </Button>
                 </div>
               ) : (
-                <label className="w-full h-48 flex flex-col items-center justify-center bg-muted rounded-md cursor-pointer">
+                <label className="w-48 h-48 flex flex-col items-center justify-center bg-muted rounded-md cursor-pointer">
                   <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
                   <ImageIcon className="h-8 w-8 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Upload an Image</p>
