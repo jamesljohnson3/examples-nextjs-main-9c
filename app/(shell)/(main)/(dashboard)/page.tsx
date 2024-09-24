@@ -21,12 +21,12 @@ export default async function DashboardPage() {
 
     // Render content specific to Next-Auth user only
     return (
-      <>
+      <div className="flex flex-col">
           <Suspense fallback={<LoadingAnimation/>}>
   <ShowVehicles/></Suspense>        
   
 
     
-       </>
+       </div>
     );
   }
