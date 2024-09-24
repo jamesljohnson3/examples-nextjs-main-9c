@@ -267,14 +267,15 @@ export default function SimplifiedProductCreatePage() {
           {isCloned ? (
             <Button onClick={handleStartFromScratch}>
               <Upload className="h-4 w-4 mr-2" />
-              Start from Scratch
+              Create Product
             </Button>
           ) : (
             <Button type="submit" disabled={loading}>
               {loading ? "Submitting..." : (
                 <>
                   <Upload className="h-4 w-4 mr-2" />
-                  Create Product
+                  Start from Scratch
+
                 </>
               )}
             </Button>

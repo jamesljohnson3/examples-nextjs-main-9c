@@ -233,7 +233,7 @@ export default function EnhancedSegmentCreatePage() {
                   </ScrollArea>
 
                   <AccordionItem value="basic-info">
-                    <AccordionTrigger className="text-xs font-semibold">Basic Information</AccordionTrigger>
+                    <AccordionTrigger className="text-xs font-semibold">Segment Details</AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-2">
                         <div>
@@ -277,7 +277,7 @@ export default function EnhancedSegmentCreatePage() {
               </CardContent>
 
             </Card>
-            <Button type="submit" className="mt-4 w-full h-8">Create Link</Button>
+            <Button type="submit" className="mt-4 w-full h-8">Add Link</Button>
 
 
           </ResizablePanel>
