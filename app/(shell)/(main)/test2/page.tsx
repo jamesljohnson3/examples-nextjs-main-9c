@@ -21,6 +21,8 @@ import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 import { Badge } from "@/components/ui/badge";
 
+
+
 // Define the type for your product
 interface Product {
   name: string;
@@ -57,7 +59,6 @@ export default function EnhancedSegmentCreatePage() {
 
   const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
   const [loading, setLoading] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[]>([]);
   const { isMobile, isDesktop } = useWindowSize();
 
   // Fetch vehicles from the API
@@ -82,10 +83,6 @@ export default function EnhancedSegmentCreatePage() {
     setProduct(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCategoryChange = (value: string) => {
-    setProduct(prev => ({ ...prev, category: value }));
-  };
-
   const handleCloneVehicle = (vehicle: VehicleRecord) => {
     setProduct({
       name: vehicle.fields.Name,
@@ -102,19 +99,6 @@ export default function EnhancedSegmentCreatePage() {
     });
   };
 
-
-  // Simulate continuous AI suggestions update
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAiSuggestions(prev => {
-        const newId = Date.now().toString();
-        const newSuggestion = { id: newId, text: `New insight: ${newId}` };
-        return [...prev.slice(1), newSuggestion];
-      });
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -123,13 +107,24 @@ export default function EnhancedSegmentCreatePage() {
       alert('Please fill in all required fields.');
       return;
     }
+    if (isNaN(parseFloat(product.price))) {
+      alert('Please enter a valid price.');
+      return;
+    }
 
     setLoading(true); // Show loading state
     try {
       console.log('Submitting product:', product);
       // Submit the form data to your backend here
-      // const response = await api.submitProduct(product);
-      // Handle response...
+      const response = {"id":"test"}
+
+      // Check if the response is successful
+      if (response && response.id) {
+        // Use window.location.replace to redirect to the product ID page
+        window.location.replace(`/product/${response.id}`); // Redirect to the product page
+      } else {
+        alert('Product submission failed. Please try again.'); // Handle submission error
+      }
       
       // Optionally clear the input fields after submission
       setProduct({
@@ -149,8 +144,7 @@ export default function EnhancedSegmentCreatePage() {
     } finally {
       setLoading(false); // Hide loading state
     }
-};
-
+  };
 
   return (
     <div className="container mx-auto p-2 space-y-2 text-xs">
@@ -217,10 +211,13 @@ export default function EnhancedSegmentCreatePage() {
                               <div className="text-xs font-bold flex items-center justify-between">
                                 <span>Price:</span> 
                                 <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
-                                <div className="ml-auto flex items-center">
-                                  <Button size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
-                                    <Copy className="h-3 w-3 mr-1" />
-                                    Clone
+                                <div className="ml-auto">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-xs h-6" 
+                                    onClick={() => handleCloneVehicle(vehicle)}>
+                                    <Copy className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
@@ -230,86 +227,70 @@ export default function EnhancedSegmentCreatePage() {
                       </div>
                     )}
                   </ScrollArea>
-
-                  <AccordionItem value="basic-info">
-                    <AccordionTrigger className="text-xs font-semibold">Basic Information</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2">
-                      <div>
-                          <Label htmlFor="productName" className="text-xs">Product Name</Label>
-                          <Input
-                            disabled
-                            id="productName"
-                            name="productName"
-                            value={product.name}
-                            onChange={handleInputChange}
-                            className="h-7 text-xs"
-                          />
-                        </div>
-
-                        <div>
-                          <Label htmlFor="segmentName" className="text-xs">Segment Name</Label>
-                          <Input
-                            disabled
-                            id="segmentName"
-                            name="segmentName"
-                            value={product.name}
-                            onChange={handleInputChange}
-                            className="h-7 text-xs"
-                          />
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
                 </Accordion>
               </CardContent>
             </Card>
-            <Button type="submit" className="w-full h-8 mt-4">Submit</Button>
           </ResizablePanel>
-
-          <ResizablePanel className="hidden md:flex" defaultSize={30}>
+          <ResizablePanel defaultSize={30}>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Segment Preview & AI Insights</CardTitle>
+                <CardTitle className="text-sm">Create Product</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {product.images.length > 0 ? (
-                    <a target="_blank" rel="noopener noreferrer" href={product.description}>
-                      <img 
-                        src={product.images[0]} 
-                        alt="Product preview" 
-                        className="w-full h-40 object-cover rounded" 
-                      />
-                    </a>
-                  ) : (
-                    <div className="w-full h-40 bg-muted rounded flex items-center justify-center">
-                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-sm">{product.name || 'Product Name'}</h3>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 gap-1">
+                    <Label htmlFor="name">Product Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={product.name}
+                      onChange={handleInputChange}
+                      placeholder="Enter product name"
+                    />
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-sm">{product.price || '0.00'}</span>
-                    <Badge>{product.category || 'Category'}</Badge>
+                  <div className="grid grid-cols-1 gap-1">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      value={product.description}
+                      onChange={handleInputChange}
+                      placeholder="Enter product description"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-1">
+                    <Label htmlFor="price">Price</Label>
+                    <Input
+                      id="price"
+                      name="price"
+                      type="number"
+                      value={product.price}
+                      onChange={handleInputChange}
+                      placeholder="Enter price"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-1">
+                    <Label htmlFor="category">Category</Label>
+                    <Input
+                      id="category"
+                      name="category"
+                      value={product.category}
+                      onChange={handleInputChange}
+                      placeholder="Enter category"
+                    />
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                    <span className="text-xs">{product.inStock ? 'In Stock' : 'Out of Stock'}</span>
+                    <Label htmlFor="inStock">In Stock</Label>
+                    <Switch
+                      id="inStock"
+                      checked={product.inStock}
+                      onCheckedChange={(checked) => setProduct({ ...product, inStock: checked })}
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-xs">AI Suggestions</h4>
-                    <ul className="space-y-1">
-                      {aiSuggestions.map(({ id, text }) => (
-                        <li key={id} className="flex items-start space-x-2 text-xs">
-                          <SparklesIcon className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                          <a href={`/suggestion/${id}`} className="text-blue-500 hover:underline">
-                            {text}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="mt-4">
+                    <Button type="submit" className="w-full">
+                      Submit Product
+                    </Button>
                   </div>
                 </div>
               </CardContent>

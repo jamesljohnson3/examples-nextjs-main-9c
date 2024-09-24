@@ -396,7 +396,7 @@ const ProductListHomepage: React.FC = () => {
           <QuickStats vehicles={vehicles} />
 
 
-          <Card className="col-span-3 bg-white backdrop-blur-lg border-0">
+          <Card className="col-span-3 bg-white backdrop-blur-lg border">
             <CardContent className="p-2">
               <nav className="space-y-1">
                 {['Add Listing', 'Create Product','Advanced Options','Inventory Settings'  ].map((item) => (
