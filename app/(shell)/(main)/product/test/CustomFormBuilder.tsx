@@ -794,6 +794,7 @@ useEffect(() => {
       }
       setFiles(uppyInstance.getFiles());
       setHasUnsavedImageGalleryChanges(true); // Mark as changed
+      setHasUnsavedChanges(true)
 
     }
   };
