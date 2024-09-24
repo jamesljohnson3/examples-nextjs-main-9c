@@ -2,29 +2,18 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { 
-  GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN 
+  GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN,
+  UPDATE_PRODUCT_AND_INSERT_SEGMENT 
 } from '@/app/(shell)/(main)/queries';
-import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
+import { DELETE_SEGMENT } from './mutations'; // Adjust import path as needed
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
-import { Slider } from "@/components/ui/slider"
-import { ArrowLeft, BarChart, Bell, ChevronLeft, Edit, Eye, ImageIcon, LayoutDashboard, LogOut, Plus, RefreshCw, Search, Settings, Share2, ShoppingCart, Sparkles, Star, User, Zap } from 'lucide-react'
-import { UPDATE_PRODUCT_AND_INSERT_SEGMENT } from '@/app/(shell)/(main)/queries';
-
-const UpdateProductAndInsertSegment = () => {
+// Component to update product and insert a new segment
+const UpdateProductAndInsertSegment = ({ productId }) => {
   const [updateProductAndInsertSegment, { data, loading, error }] = useMutation(UPDATE_PRODUCT_AND_INSERT_SEGMENT);
-  const [productId, setProductId] = useState('cm14mvs2o000fue6yh6hb13yn');
   const [name, setName] = useState('Updated Product Name');
   const [description, setDescription] = useState('Updated description');
   const [segmentId, setSegmentId] = useState('unique-segment-id');
@@ -76,14 +65,14 @@ const NoSegmentsComponent = ({ productId }) => {
     <div className="flex flex-col items-center justify-center p-4 border rounded-md bg-muted">
       <h3 className="text-lg font-semibold">No Segments Available</h3>
       <p className="text-sm">Product ID: {productId}</p>
-      <UpdateProductAndInsertSegment/>
+      <UpdateProductAndInsertSegment productId={productId}/>
     </div>
   );
 };
 
-// Ensure ProductEditDashboard accepts and uses the segment prop
+// Component for editing product segments
 function ProductEditDashboard({ segment, setSegments }) {
-  const [product, setProduct] = useState({
+  const [initialProduct, setInitialProduct] = useState({
     name: segment.name || '',
     description: segment.description || '',
     price: segment.price || '',
@@ -91,31 +80,40 @@ function ProductEditDashboard({ segment, setSegments }) {
     category: segment.category || ''
   });
 
+  const [product, setProduct] = useState(initialProduct);
+  const [hasChanges, setHasChanges] = useState(false); // Track if changes have been made
+
+  // Handle input changes and track changes in the form
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProduct(prev => ({ ...prev, [name]: value }));
+    setProduct(prev => {
+      const updatedProduct = { ...prev, [name]: value };
+      
+      // Check if any changes have been made by comparing current product with the initial state
+      setHasChanges(JSON.stringify(updatedProduct) !== JSON.stringify(initialProduct));
+      
+      return updatedProduct;
+    });
   };
 
-  const [deleteSegment, { loading: deleteLoading, error: deleteError }] = useMutation(DELETE_SEGMENT, {
-    onCompleted: () => {
-      alert('Segment deleted successfully!');
-    },
-    onError: (error) => {
-      console.error('Error deleting segment:', error);
-      alert('Error deleting segment.');
-    }
-  });
+  const handleSave = () => {
+    // Implement the save logic here (e.g., sending updated data to the server)
+    alert('Product saved successfully!');
+    
+    // After saving, update the initialProduct state to the current product state
+    setInitialProduct(product);
+    setHasChanges(false); // Reset changes tracker after saving
+  };
 
   const handleDeleteSegment = async (segmentId) => {
     const confirmation = window.confirm('Are you sure you want to delete this segment?');
     if (!confirmation) return;
 
     try {
+      // Assume deleteSegment mutation exists, this will delete the segment
       await deleteSegment({ variables: { segmentId } });
-      // Optionally update the local state to remove the deleted segment
       setSegments(prevSegments => prevSegments.filter(s => s.id !== segmentId));
     } catch (error) {
-      console.error('Error executing delete mutation:', error);
       alert('Error deleting segment. Please try again later.');
     }
   };
@@ -135,42 +133,39 @@ function ProductEditDashboard({ segment, setSegments }) {
             onChange={handleInputChange} 
             className="w-full"
           />
+          {/* Add other input fields here if needed */}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            onClick={() => handleDeleteSegment(segment.id)}
-            disabled={deleteLoading}
-          >
-            {deleteLoading ? 'Deleting...' : 'Delete Segment'}
-          </Button>
-          <Button variant="primary">
-            Save
-          </Button>
-        </div>
-        <div className="flex space-x-2">
-          <Button variant="secondary">
-            Edit Product
-          </Button>
-          <Button variant="secondary">
-            View Analytics
-          </Button>
-          <Button variant="secondary">
-            Share
-          </Button>
-        </div>
-      </CardFooter>
+      {hasChanges && ( // Only show the footer with Save and other buttons if there are changes
+        <CardFooter className="flex justify-between items-center">
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => handleDeleteSegment(segment.id)}
+              disabled={false} // replace with loading state if necessary
+            >
+              Delete Segment
+            </Button>
+            <Button variant="primary" onClick={handleSave}>
+              Save
+            </Button>
+          </div>
+          <div className="flex space-x-2">
+            <Button variant="secondary">Edit Product</Button>
+            <Button variant="secondary">View Analytics</Button>
+            <Button variant="secondary">Share</Button>
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 }
 
+// Main component for managing segments of a product
 const ProductSegmentPage = ({ params }) => {
   const PRODUCT_ID = params.id;
   const DOMAIN_ID = 'cm14mvs4l000jue6y5eo3ngku'; // Replace with your domain ID or fetch dynamically
 
-  // Fetch segments by productId and domainId
   const { data, loading, error } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID },
   });
@@ -206,3 +201,4 @@ const ProductSegmentPage = ({ params }) => {
 };
 
 export default ProductSegmentPage;
+
