@@ -200,6 +200,7 @@ function VersionControl({
       setProductData(latestVersion.data);
       setPrimaryPhoto(latestVersion.data.primaryPhoto || null);
       setOgImage(latestVersion.data.ogImage || null);
+      setImageGallery(latestVersion.data.imageGallery || []);
     }
   }, [data]); // Re-run when data updates
 
@@ -660,10 +661,7 @@ const handleSave = async () => {
     }
   };
 
-    // Save gallery and primary photo to localStorage whenever they change
-    useEffect(() => {
-      localStorage.setItem('imageGallery', JSON.stringify(imageGallery));
-    }, [imageGallery]);
+
   
     useEffect(() => {
       if (primaryPhoto) {
