@@ -1,4 +1,33 @@
-// types/types.ts
+// types.ts
+
+// Type for uploaded image in the gallery
+export interface UploadedImage {
+  id: string; // Unique identifier for the image
+  url: string; // URL of the uploaded image
+}
+
+// Type for the expected response from the S3 upload
+export interface UploadResponse {
+  url: string; // The URL to access the uploaded file
+}
+
+// Type for the result of processing a Uppy file
+export interface ProcessResult {
+  success: boolean; // Indicates if the processing was successful
+  message?: string; // Additional message or URL if successful
+}
+
+// Extend the UppyFile type from Uppy
+import { UppyFile } from '@uppy/core';
+
+// Make sure to include any custom properties you might be using
+export interface CustomUppyFile extends UppyFile {
+  uploadURL?: string; // Optional property to store the upload URL
+  // Add other custom properties as needed
+}
+
+
+
 
 
 export interface Thumbnail {

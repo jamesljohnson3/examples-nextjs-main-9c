@@ -64,6 +64,9 @@ import { MagicWandIcon } from "@radix-ui/react-icons";
 import axios from 'axios';
 import Link from 'next/link';
 
+import { processUppyFile } from '@/utils/uppy-s3'; // Import your utility function
+import { ProcessResult, UploadedImage } from "@/types/api";
+
 
  const TRANSLOADIT_KEY = '5fbf6af63e0e445abcc83a050048a887';
  const TEMPLATE_ID = '9e9d24fbce8146369ce9faab869bfba1';
@@ -653,6 +656,16 @@ export default function EnhancedProductMoodboard() {
       setHasUnsavedImageGalleryChanges(true);
     }
   };
+ // Save uploaded image from S3 Bucket (simulating database save here)
+const saveImageS3 = (uploadedUrl: string): void => {
+  if (uploadedUrl) {
+    setImageGallery((prev) => {
+      const newGallery: UploadedImage[] = [...prev, { id: uuidv4(), url: uploadedUrl }];
+      return removeDuplicates(newGallery); // Remove duplicates after adding
+    });
+    setHasUnsavedImageGalleryChanges(true);
+  }
+};
 
 
     useEffect(() => {
@@ -706,8 +719,8 @@ export default function EnhancedProductMoodboard() {
       }
     };
   
-  // Handle Uppy events and completion
-  useEffect(() => {
+   // Handle Uppy events and completion
+   useEffect(() => {
     uppyInstance.on('upload', () => {
       setIsUploading(true);
     });
@@ -717,11 +730,11 @@ export default function EnhancedProductMoodboard() {
     });
 
     uppyInstance.on('upload-success', (file, response) => {
-      if (file) { // Ensure 'file' is not undefined
+      if (file) {
         const uploadedUrl = response.body.url; // Ensure URL exists
         if (uploadedUrl) {
           setImageGallery((prev) => {
-            const newGallery = [...prev, { id: file.id, url: uploadedUrl }];
+            const newGallery = [...prev, { id: uuidv4(), url: uploadedUrl }];
             return removeDuplicates(newGallery); // Ensure no duplicates are added
           });
           setUploadProgress(0);
@@ -734,17 +747,26 @@ export default function EnhancedProductMoodboard() {
       
       // Filter out any empty or invalid image objects
       const validImages = uploadedImages.filter(file => file.uploadURL);
-      
+     
       for (const file of validImages) {
-        await saveImage(file); // Save each image and ensure no duplicates
+    // Cast file to UppyFile
+    const uppyFile = file as UppyFile; // Use type assertion
+
+    const processResult: ProcessResult = await processUppyFile(uppyFile); // Process each uploaded file
+           if (processResult.success && processResult.message) {
+          await saveImageS3(processResult.message); // Save each image to S3 gallery
+        } else {
+          console.error('Processing failed:', processResult.message);
+        }
       }
       setIsUploading(false);
     });
 
+
     return () => {
       uppyInstance.close(); // Cleanup Uppy instance on unmount
     };
-  }, []);
+  }, [uppyInstance]);
   
   if (loadingProduct || loadingSegments) {
     return <div>Loading...</div>;
