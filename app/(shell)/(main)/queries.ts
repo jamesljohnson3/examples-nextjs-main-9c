@@ -78,7 +78,7 @@ export const UPDATE_PRODUCT_AND_INSERT_SEGMENT = gql`
     $productId: String!,
     $name: String!,
     $description: String!,
-    $price: Float!,
+    $price: float8!,
     $quantity: Int!,
     $category: String!,
     $primaryPhoto: String!,
