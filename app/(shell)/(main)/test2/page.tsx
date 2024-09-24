@@ -265,9 +265,9 @@ export default function EnhancedSegmentCreatePage() {
                   </AccordionItem>
                 </Accordion>
               </CardContent>
-              <Button type="submit" className="w-full h-8">Submit</Button>
 
             </Card>
+            <Button type="submit" className="mt-4 w-full h-8">Submit</Button>
 
 
           </ResizablePanel>

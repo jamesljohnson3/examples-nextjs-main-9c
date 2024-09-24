@@ -179,16 +179,11 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
           </div>
           <div className="flex justify-between items-center">
             <span className="font-bold">{vehicle.fields["Vehicle details 1"] || 0}</span>
-            <div className="flex space-x-2">
-              <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Product</Button>
-              <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
-                <Button size="sm">Edit Product</Button>
-              </a>
-            </div>
+            
           </div>
           {/* Conditional rendering based on selectedVehicle */}
           {selectedVehicle && selectedVehicle.id === vehicle.id && (
-            <Card className="mt-2">
+            <Card className="flex mt-2">
               <CardContent className="p-2">
                 <h2 className="font-semibold mb-1">Live Product Preview</h2>
                 <div className="bg-muted p-2 rounded space-y-1">
@@ -207,6 +202,12 @@ const VehicleItem: React.FC<VehicleItemProps> = ({ vehicle, onDelete, onSelect, 
                   </div>
                 </div>
               </CardContent>
+              <div className="flex mx-auto gap-4 flex-col items-center justify-center space-x-2">
+              <Button size="sm" onClick={() => onDelete(vehicle.id)}>Delete Product</Button>
+              <a href={`/product/${extractProductId(vehicle.fields.Notes)}`}>
+                <Button size="sm">Edit Product</Button>
+              </a>
+            </div>
             </Card>
           )}
         </div>
