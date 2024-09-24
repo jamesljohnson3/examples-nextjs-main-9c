@@ -58,7 +58,10 @@ export default function EnhancedSegmentCreatePage() {
   const [loading, setLoading] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<{ id: string; text: string }[]>([]);
   const { isMobile, isDesktop } = useWindowSize();
-
+  const extractProductId = (url: string) => {
+    const parts = new URL(url).pathname.split('/');
+    return parts[parts.length - 1].replace('.html', '');
+  };
   // Fetch vehicles from the API
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -206,29 +209,42 @@ export default function EnhancedSegmentCreatePage() {
                       </div>
                     ) : (
                       <div className="p-4 grid grid-cols-3 gap-4">
-                        {vehicles.map((vehicle) => (
-                          <Card key={vehicle.id} className="overflow-hidden">
-                            <CardContent className="p-2">
-                              <img 
-                                src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
-                                alt={vehicle.fields.Name} 
-                                className="w-full h-36 object-cover rounded mb-2" />
-                              <h3 className="font-semibold text-xs mb-1">
-                                <span>{vehicle.fields.Name}</span>
-                              </h3>
-                              <div className="text-xs font-bold flex items-center justify-between">
-                                <span>Price:</span> 
-                                <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
-                                <div className="ml-auto flex items-center">
-                                  <Button   type="button" size="sm" className="h-6 text-[10px]" onClick={() => handleCloneVehicle(vehicle)}>
-                                    <PlusSquare className="h-3 w-3 mr-1" />
-                                    Add
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                       {vehicles.map((vehicle) => (
+  <Card key={vehicle.id} className="overflow-hidden">
+    <CardContent className="p-2">
+      <img 
+        src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
+        alt={vehicle.fields.Name} 
+        className="w-full h-36 object-cover rounded mb-2" />
+      <h3 className="font-semibold text-xs mb-1">
+        <span>{vehicle.fields.Name}</span>
+      </h3>
+      <div className="text-xs font-bold flex items-center justify-between">
+        <span>Price:</span> 
+        <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
+        <div className="ml-auto flex items-center">
+          <Button 
+            type="button" 
+            size="sm" 
+            className="h-6 text-[10px]" 
+            onClick={() => handleCloneVehicle(vehicle)}
+          >
+            <PlusSquare className="h-3 w-3 mr-1" />
+            Add
+          </Button>
+
+          {/* Edit Button */}
+          <Link 
+            className="bg-black text-white h-6 text-[10px] transition duration-300 ease-in-out transform hover:opacity-80 hover:shadow-lg ml-2" 
+            href={`product/${extractProductId(vehicle.fields.Notes)}`} // Use extractProductId to get the product ID
+          >
+            Edit
+          </Link>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+))}
                       </div>
                     )}
                   </ScrollArea>

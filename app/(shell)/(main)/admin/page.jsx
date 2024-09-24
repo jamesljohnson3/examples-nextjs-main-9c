@@ -11,8 +11,8 @@ import Link from 'next/link';
 import api from "@/api";
 
 const getStartedItems = [
-  { href: '/add-listing', title: 'Add to Inventtory', description: 'Add a new listing to your website', icon: Plus },
-  { href: '/admin/settings', title: 'Update Settings', description: 'Configure your store preferences', icon: Settings2 },
+  { href: '/add-listing', title: 'Add to Inventory', description: 'Create or add an existing product listing on your site', icon: Plus },
+  { href: '/admin/settings', title: 'Update Settings', description: 'Configure your site settings', icon: Settings2 },
 ];
 
 const documentationSections = [
@@ -42,11 +42,11 @@ export default function UpdatedDashboard() {
 
   return (
     <div className="  w-full rounded-md mx-auto p-2 space-y-4 text-sm">
-      <header className="p-4">
+      <header >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Link href={'/'}>
-              <div className="text-muted-foreground">Dashboard / Product List</div>
+              <div className="text-muted-foreground">Dashboard / Admin</div>
             </Link>
           </div>
           <div className="flex items-center space-x-2">
@@ -107,7 +107,7 @@ export default function UpdatedDashboard() {
                 Manage your store efficiently with these quick actions
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <CardContent className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
               {getStartedItems.map((item, index) => (
                 <Link key={index} href={item.href}>
                   <Button variant="outline" className="h-auto flex flex-col items-start space-y-2 p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -132,7 +132,15 @@ export default function UpdatedDashboard() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {vehicles.map((vehicle) => (
-                  <Card key={vehicle.id} className="shadow-sm hover:shadow-md transition-shadow">
+                  <a 
+  key={vehicle.id} 
+  href={vehicle.fields.Notes} 
+  target="_blank" 
+  rel="noopener noreferrer"
+>
+  
+
+<Card  className="shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-2">
                       <img 
                         src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
@@ -143,6 +151,7 @@ export default function UpdatedDashboard() {
                       <p className="text-xs text-gray-500">Price: {vehicle.fields["Vehicle details 1"] || 0}</p>
                     </CardContent>
                   </Card>
+                  </a>
                 ))}
               </div>
             </CardContent>

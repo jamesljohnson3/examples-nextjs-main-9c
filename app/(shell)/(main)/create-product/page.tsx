@@ -13,6 +13,7 @@ import Link from 'next/link';
 import api from "@/api";
 import type { VehicleRecord } from '@/types/api';
 import { nanoid } from 'nanoid'; // Import nanoid for unique ID generation
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -123,10 +124,10 @@ export default function SimplifiedProductPage() {
     });
     setIsCloned(true); // Mark as cloned
   };
-
+const newProductId = nanoid();
   const handleStartFromScratch = () => {
     setProduct({
-      id: nanoid(), // Generate a unique ID for the new product
+      id: newProductId, // Generate a unique ID for the new product
       name: '',
       description: '',
       price: '',
@@ -137,7 +138,6 @@ export default function SimplifiedProductPage() {
         Attachments: [] // Initialize the fields.Attachments property
       }
     });
-    setIsCloned(false); // Reset clone state
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -151,7 +151,7 @@ export default function SimplifiedProductPage() {
       const response = { id: "test" }; // Replace with actual API call
 
       if (response && response.id) {
-        window.location.replace(`/product/${response.id}`); // Redirect to the product page
+        window.location.replace(`/product/${response.id}?productId=${newProductId}`); // Redirect to the product page
       } else {
         alert('Product submission failed. Please try again.'); // Handle submission error
       }
@@ -219,15 +219,9 @@ export default function SimplifiedProductPage() {
                   onChange={handleInputChange} 
                 />
               </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea 
-                  id="description" 
-                  name="description" 
-                  value={product.description} 
-                  onChange={handleInputChange} 
-                />
-              </div>
+              
+              
+              
               <div>
                 <Label htmlFor="price">Price</Label>
                 <Input 
@@ -238,27 +232,16 @@ export default function SimplifiedProductPage() {
                   onChange={handleInputChange} 
                 />
               </div>
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Select value={product.category} onValueChange={handleCategoryChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="electronics">Electronics</SelectItem>
-                    <SelectItem value="clothing">Clothing</SelectItem>
-                    <SelectItem value="books">Books</SelectItem>
-                    <SelectItem value="furniture">Furniture</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center space-x-2">
+             
+             
+
+              <div className="mb-4 flex items-center space-x-2">
                 <Switch 
                   id="inStock" 
                   checked={product.inStock} 
                   onCheckedChange={handleStockToggle}
                 />
-                <Label htmlFor="inStock">In Stock</Label>
+                <Label htmlFor="inStock">Publish</Label>
               </div>
             </div>
 
@@ -296,45 +279,52 @@ export default function SimplifiedProductPage() {
               <AccordionItem value="item-1">
                 <AccordionTrigger>Available Vehicles</AccordionTrigger>
                 <AccordionContent>
+
+                <ScrollArea className="bg-slate-50 h-96 w-full rounded-md ">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {vehicles.map((vehicle) => (
-                      <Card key={vehicle.id}
-                      
-                      className="overflow-hidden cursor-pointer group"
-                      onClick={() => handleCloneVehicle(vehicle)} // Clone product when the card is clicked
-                    >
-                    <CardContent className="p-4">
-                    <div className="relative">
-                            <img 
-                              src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
-                              alt={vehicle.fields.Name} 
-                              className="w-full h-32 object-cover mb-2 rounded-md"
-                            />
-                            <h3 className="font-semibold text-sm mb-1">{vehicle.fields.Name}</h3>
-                            <p className="text-xs text-muted-foreground mb-2">{vehicle.fields.Notes}</p>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm font-bold">{vehicle.fields["Vehicle details 1"]}</span>
-                              <Button 
-                                size="sm" 
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Prevent the card's onClick from firing when the button is clicked
-                                  handleCloneVehicle(vehicle);
-                                }}
-                              >
-                                <Copy className="h-4 w-4 mr-1" />
-                                Clone
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+  <Card 
+    key={vehicle.id}
+    className="overflow-hidden cursor-pointer group"
+    onClick={() => handleCloneVehicle(vehicle)} // Clone product when the card is clicked
+  >
+    <CardContent className="p-4">
+      <div className="relative">
+        <img 
+          src={vehicle.fields.Attachments[0]?.thumbnails.large.url} 
+          alt={vehicle.fields.Name || "Vehicle Image"} 
+          className="w-full h-32 object-cover mb-2 rounded-md"
+        />
+        <h3 className="font-semibold text-sm mb-1">{vehicle.fields.Name || "Unnamed Vehicle"}</h3>
+        <div className="text-xs font-bold flex items-center justify-between">
+          <span>Price:</span> 
+          <span>{vehicle.fields["Vehicle details 1"] || 0}</span>
+          <div className="ml-auto flex items-center">
+            <Button 
+              size="sm" 
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent the card's onClick from firing when the button is clicked
+                handleCloneVehicle(vehicle);
+              }}
+            >
+              <Copy className="h-4 w-4 mr-1" />
+              Clone
+            </Button>
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+))}
+
                   </div>
+                  </ScrollArea>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
+
           </CardContent>
         </Card>
 

@@ -394,7 +394,7 @@ const ProductListHomepage: React.FC = () => {
         <ResizablePanel defaultSize={80}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Segments / Inventory</CardTitle>
+              <CardTitle className="text-xs">Segments / Inventory</CardTitle>
             </CardHeader>
             <CardContent>
             <VehicleList
