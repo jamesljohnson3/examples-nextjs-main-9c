@@ -62,32 +62,45 @@
             segmentDiv.classList.add('segment');
 
             segmentDiv.innerHTML = `
-                <h3>Segment Name: ${segment.segment.name}</h3>
-                <p><strong>User ID:</strong> ${segment.userId}</p>
-                <p><strong>Segment ID:</strong> ${segment.segment.id}</p>
-                                <p><strong>Segment ID:</strong> ${segment.segment.product.primaryPhoto}</p>
+    <h3>Segment Name: ${segment.segment.name}</h3>
+    <p><strong>User ID:</strong> ${segment.userId}</p>
+    <p><strong>Segment ID:</strong> ${segment.segment.id}</p>
+    <p><strong>Primary Photo:</strong> <img src="${segment.segment.product.primaryPhoto}" alt="Primary Photo"></p>
 
-                <h4>Product Details:</h4>
-                <div class="product">
-                    <p><strong>Name:</strong> ${segment.segment.product.name}</p>
-                    <p><strong>Description:</strong> ${segment.segment.product.description}</p>
-                    <p><strong>Price:</strong> $${segment.segment.product.price}</p>
-                    <p><strong>Quantity:</strong> ${segment.segment.product.quantity}</p>
-                    <p><strong>Category:</strong> ${segment.segment.product.category}</p>
-                    <p><strong>Created By:</strong> ${segment.segment.product.createdById}</p>
-                    <p><strong>Organization ID:</strong> ${segment.segment.product.organizationId}</p>
-                    <h4>Image Gallery:</h4>
-                    <div>
-                        ${segment.segment.product.imageGallery.map(image => `<img src="${image}" alt="Product Image">`).join('')}
-                    </div>
-                    <p><strong>Metadata:</strong></p>
-                    <ul>
-                        <li><strong>Title:</strong> ${segment.segment.product.metadata.title}</li>
-                        <li><strong>Description:</strong> ${segment.segment.product.metadata.description}</li>
-                        <li><strong>Keywords:</strong> ${segment.segment.product.metadata.keywords || 'N/A'}</li>
-                    </ul>
-                </div>
-            `;
+    <h4>Product Details:</h4>
+    <div class="product">
+        <h5>Name: ${segment.segment.product.name}</h5>
+        <p><strong>Description:</strong> ${segment.segment.product.description}</p>
+        <p><strong>Price:</strong> $${segment.segment.product.price}</p>
+        <p><strong>Quantity:</strong> ${segment.segment.product.quantity}</p>
+        <p><strong>Category:</strong> ${segment.segment.product.category}</p>
+        <p><strong>Created By:</strong> ${segment.segment.product.createdById}</p>
+        <p><strong>Organization ID:</strong> ${segment.segment.product.organizationId}</p>
+
+        <h4>Additional Product Details:</h4>
+        <ul>
+            ${Object.entries(segment.segment.post).map(([key, value]) => {
+                if (value.type && value.value) {
+                    return `<li><strong>${value.label || key}:</strong> ${value.value}</li>`;
+                }
+                return '';
+            }).join('')}
+        </ul>
+
+        <h4>Image Gallery:</h4>
+        <div>
+            ${segment.segment.product.imageGallery.map(image => `<img src="${image}" alt="Product Image" style="width: 100px; height: auto; margin: 5px;">`).join('')}
+        </div>
+
+        <h4>Metadata:</h4>
+        <ul>
+            <li><strong>Title:</strong> ${segment.segment.product.metadata.title || 'N/A'}</li>
+            <li><strong>Description:</strong> ${segment.segment.product.metadata.description || 'N/A'}</li>
+            <li><strong>Keywords:</strong> ${segment.segment.product.metadata.keywords || 'N/A'}</li>
+        </ul>
+    </div>
+`;
+
 
             container.appendChild(segmentDiv);
         });
