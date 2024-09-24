@@ -488,69 +488,74 @@ export default function EnhancedProductMoodboard() {
     setFormFields(reorderedFields);
     setHasUnsavedChanges(true);
   };
-const handleSave = async () => {
-  if (!productData) {
-    alert('No product data to save!');
-    return;
-  }
 
-  const { id, name, description, price, quantity, category } = productData;
-  const parsedPrice = parseFloat(price as unknown as string);
-  const parsedQuantity = parseInt(quantity as unknown as string);
-
-  if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
-    alert('Invalid price or quantity');
-    return;
-  }
-
-  try {
-    // Save product information including metadata, primary photo, OG image, and gallery
-    await saveProduct({
-      variables: {
-        productId: PRODUCT_ID,
-        name,
-        description,
-        price: parsedPrice,
-        quantity: parsedQuantity,
-        category,
-        metadata: {
-          title: metadata.title,
-          description: metadata.description,
-          keywords: metadata.keywords,
+  
+  const handleSave = async () => {
+    if (!productData) {
+      alert('No product data to save!');
+      return;
+    }
+  
+    const { id, name, description, price, quantity, category } = productData;
+    const parsedPrice = parseFloat(price as unknown as string);
+    const parsedQuantity = parseInt(quantity as unknown as string);
+  
+    if (isNaN(parsedPrice) || isNaN(parsedQuantity)) {
+      alert('Invalid price or quantity');
+      return;
+    }
+  
+    try {
+      // Save product information including metadata, primary photo, OG image, and gallery
+      await saveProduct({
+        variables: {
+          productId: PRODUCT_ID,
+          name,
+          description,
+          price: parsedPrice,
+          quantity: parsedQuantity,
+          category,
+          metadata: {
+            title: metadata.title,
+            description: metadata.description,
+            keywords: metadata.keywords,
+          },
+          primaryPhoto,
+          ogImage,
+          imageGallery: imageGallery.map((img) => img?.url).filter(Boolean), // Filter out any falsy values (null or undefined)
         },
-        primaryPhoto,
-        ogImage,
-        imageGallery: imageGallery.map((img) => img?.url).filter(Boolean), // Filter out any falsy values (null or undefined)Save the updated image gallery order
-      },
-    });
-
-    // Detect changes and update product version with appropriate message
-    const changes = detectChanges();
-
-    const versionNumber = Math.floor(Date.now() / 1000);
-    const uuid = uuidv4();
-
-    await updateProductVersion({
-      variables: {
-        productId: PRODUCT_ID,
-        versionNumber,
-        changes,
-        data: productData,
-        id: uuid,
-      },
-    });
-
-    localStorage.setItem('productVersionId', uuid);
-    setHasUnsavedChanges(false);
-    await refetchVersions();  // This will refetch the version history
-
-    alert('Product version updated and saved with message: ' + changes);
-  } catch (error) {
-    console.error('Error saving product:', error);
-    alert('Failed to save product.');
-  }
-};
-
+      });
+  
+      // Detect changes and update product version with appropriate message
+      const changes = detectChanges();
+  
+      const versionNumber = Math.floor(Date.now() / 1000);
+      const uuid = uuidv4();
+  
+      await updateProductVersion({
+        variables: {
+          productId: PRODUCT_ID,
+          versionNumber,
+          changes,
+          data: {
+            ...productData, // Spread existing product data
+            imageGallery: imageGallery.map((img) => img.url).filter(Boolean) // Include updated image gallery here
+          },
+          id: uuid,
+        },
+      });
+  
+      localStorage.setItem('productVersionId', uuid);
+      setHasUnsavedChanges(false);
+      await refetchVersions(); // This will refetch the version history
+  
+      alert('Product version updated and saved with message: ' + changes);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Failed to save product.');
+    }
+  };
+  
 
   const handlePublish = async () => {
     try {
