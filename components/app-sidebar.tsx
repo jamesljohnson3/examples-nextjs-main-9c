@@ -80,6 +80,10 @@ const data = {
           title: "Pages",
           url: "/",
         },
+        {
+          title: "products",
+          url: "/dashboard",
+        },
       ],
     },
   ],

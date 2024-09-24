@@ -38,12 +38,19 @@ function ProductEditDashboard({ segment }) {
   });
 
   const handleDeleteSegment = async (segmentId) => {
+    const confirmation = window.confirm('Are you sure you want to delete this segment?');
+    if (!confirmation) return;
+
     try {
-      await deleteSegment({ variables: { segmentId } });
+        await deleteSegment({ variables: { segmentId } });
+        // Optionally update the local state to remove the deleted segment
+        setSegments(prevSegments => prevSegments.filter(segment => segment.id !== segmentId));
     } catch (error) {
-      console.error('Error executing delete mutation:', error);
+        console.error('Error executing delete mutation:', error);
+        alert('Error deleting segment. Please try again later.');
     }
-  };
+};
+
 
   if (deleteLoading) return <p>Deleting...</p>;
   if (deleteError) return <p>Error deleting segment.</p>;
