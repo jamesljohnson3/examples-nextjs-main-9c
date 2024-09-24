@@ -62,7 +62,7 @@ const data = {
   
     {
       title: "Dashboard",
-      url: "/test3",
+      url: "/admin",
       icon: Home,
       items: [
         {
