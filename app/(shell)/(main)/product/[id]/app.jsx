@@ -7,10 +7,8 @@ import {
 import { DELETE_SEGMENT } from './mutations';  // Adjust import path as needed
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; 
-import { ChevronLeft, Save, Settings2 } from 'lucide-react';
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
