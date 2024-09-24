@@ -123,10 +123,6 @@ export default function EnhancedSegmentCreatePage() {
       alert('Please fill in all required fields.');
       return;
     }
-    if (isNaN(parseFloat(product.price))) {
-      alert('Please enter a valid price.');
-      return;
-    }
 
     setLoading(true); // Show loading state
     try {
@@ -257,7 +253,7 @@ export default function EnhancedSegmentCreatePage() {
                             disabled
                             id="segmentName"
                             name="segmentName"
-                            value={product.category}
+                            value={product.name}
                             onChange={handleInputChange}
                             className="h-7 text-xs"
                           />
@@ -268,7 +264,7 @@ export default function EnhancedSegmentCreatePage() {
                 </Accordion>
               </CardContent>
             </Card>
-            <Button type="submit" className="w-full h-8">Submit</Button>
+            <Button type="submit" className="w-full h-8 mt-4">Submit</Button>
           </ResizablePanel>
 
           <ResizablePanel className="hidden md:flex" defaultSize={30}>
