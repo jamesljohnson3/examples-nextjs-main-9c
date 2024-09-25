@@ -208,7 +208,7 @@ export default function EnhancedSegmentCreatePage() {
                         <span>Loading vehicles...</span>
                       </div>
                     ) : (
-                      <div className="p-4 grid grid-cols-3 gap-4">
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                      {vehicles.map((vehicle) => (
   <Card key={vehicle.id} className="overflow-hidden relative">
     <CardContent className="p-2">
