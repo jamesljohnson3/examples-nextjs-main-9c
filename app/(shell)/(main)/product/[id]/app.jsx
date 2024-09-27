@@ -235,7 +235,7 @@ const createNewSegment = async () => {}
 const NoSegmentsComponent = ({ productId }) => {
   return (
     <div className="flex flex-col items-center justify-center p-4 border rounded-md bg-muted">
-      <h3 className="text-lg font-semibold">No Segments Available</h3>
+      <h3 className="text-lg font-semibold">No Segments Available or product not found</h3>
       <p className="text-sm">Product ID: {productId}</p>
       <UpdateProductAndInsertSegment productId={productId}/>
     </div>
