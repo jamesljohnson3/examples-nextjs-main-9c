@@ -17,7 +17,7 @@ export const GET_SEGMENT_SLUG = gql`
 // Query to fetch matched segments for a user based on the slug
 export const GET_MATCHED_SEGMENTS = gql`
   query GetMatchedSegments($userId: String!, $slug: String!) {
-    UserSegment(where: {
+    user_segments(where: {
       userId: { _eq: $userId },
       Segment: { slug: { _ilike: $slug } }
     }) {
