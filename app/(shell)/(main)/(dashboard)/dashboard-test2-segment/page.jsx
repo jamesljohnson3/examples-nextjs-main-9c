@@ -1,11 +1,8 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import {  useQuery } from '@apollo/client';
+import { useQuery, useLazyQuery } from '@apollo/client';
+import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from './queries'; // Assuming you have these queries defined
 
-
-
-
-// Main component
 const App = () => {
   const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // replace with actual user ID
   const segmentId = "unique-segment-id"; // replace with actual segment ID
@@ -15,34 +12,35 @@ const App = () => {
     variables: { segmentId },
   });
 
-  const [matchedSegments, setMatchedSegments] = useState([]);
+  // Use LazyQuery for matched segments
+  const [getMatchedSegments, { loading: loadingSegments, error: errorSegments, data: dataSegments }] = useLazyQuery(GET_MATCHED_SEGMENTS);
 
   useEffect(() => {
-    if (!loadingSlug && dataSlug) {
+    if (dataSlug) {
       const slug = dataSlug.segments[0]?.slug;
 
-      // Fetch matched segments using the slug
-      const { loading: loadingSegments, error: errorSegments, data: dataSegments } = useQuery(GET_MATCHED_SEGMENTS, {
-        variables: { userId, slug: `%${slug}%` }, // Using LIKE to match slug
-      });
-
-      if (!loadingSegments && dataSegments) {
-        setMatchedSegments(dataSegments.user_segments);
+      if (slug) {
+        // Fetch matched segments using the slug
+        getMatchedSegments({
+          variables: { userId, slug: `%${slug}%` }, // Use LIKE for partial match
+        });
       }
     }
-  }, [loadingSlug, dataSlug, userId]);
+  }, [dataSlug, getMatchedSegments, userId]);
 
-  if (loadingSlug) return <div>Loading...</div>;
+  if (loadingSlug) return <div>Loading slug...</div>;
   if (errorSlug) return <div>Error fetching segment slug: {errorSlug.message}</div>;
+  if (loadingSegments) return <div>Loading matched segments...</div>;
+  if (errorSegments) return <div>Error fetching matched segments: {errorSegments.message}</div>;
 
   return (
     <div>
       <h1>Matched Segments</h1>
-      {matchedSegments.length === 0 ? (
+      {dataSegments?.user_segments?.length === 0 ? (
         <div>No segments found matching the criteria.</div>
       ) : (
         <ul>
-          {matchedSegments.map(({ segment }) => (
+          {dataSegments?.user_segments.map(({ segment }) => (
             <li key={segment.id}>
               <h2>{segment.name}</h2>
               <p>Slug: {segment.slug}</p>
@@ -55,4 +53,4 @@ const App = () => {
   );
 };
 
-export default App
+export default App;
