@@ -1,20 +1,26 @@
 // mutations or queries 
 import { gql } from '@apollo/client';
 
-// Query to fetch the slug of the specified segment
+
+
+// Query to fetch the segment slug by segmentId
 export const GET_SEGMENT_SLUG = gql`
   query GetSegmentSlug($segmentId: String!) {
-    Segment(where: { id: { _eq: $segmentId } }) {
+    segments(where: { id: { _eq: $segmentId } }) {
       slug
     }
   }
 `;
 
 
+
 // Query to fetch matched segments for a user based on the slug
 export const GET_MATCHED_SEGMENTS = gql`
   query GetMatchedSegments($userId: String!, $slug: String!) {
-    user_segments(where: { user_id: { _eq: $userId }, segment: { slug: { _ilike: $slug } } }) {
+    user_segments(where: {
+      userId: { _eq: $userId },
+      segment: { slug: { _ilike: $slug } }
+    }) {
       segment {
         id
         name
@@ -23,6 +29,8 @@ export const GET_MATCHED_SEGMENTS = gql`
     }
   }
 `;
+
+
 
 
 

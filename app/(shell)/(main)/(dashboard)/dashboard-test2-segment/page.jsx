@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from './queries'; // Assuming you have the queries defined
+import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from './queries'; // Ensure these queries are defined correctly
 
 const App = () => {
   const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // replace with actual user ID
@@ -16,8 +16,8 @@ const App = () => {
   const [getMatchedSegments, { loading: loadingSegments, error: errorSegments, data: dataSegments }] = useLazyQuery(GET_MATCHED_SEGMENTS);
 
   useEffect(() => {
-    if (dataSlug) {
-      const slug = dataSlug?.segments[0]?.slug;
+    if (dataSlug && dataSlug.segments.length > 0) {
+      const slug = dataSlug.segments[0]?.slug; // Get the slug of the segment
 
       if (slug) {
         // Fetch matched segments using the slug
@@ -28,11 +28,13 @@ const App = () => {
     }
   }, [dataSlug, getMatchedSegments, userId]);
 
+  // Handle loading and error states
   if (loadingSlug) return <div>Loading slug...</div>;
   if (errorSlug) return <div>Error fetching segment slug: {errorSlug.message}</div>;
   if (loadingSegments) return <div>Loading matched segments...</div>;
   if (errorSegments) return <div>Error fetching matched segments: {errorSegments.message}</div>;
 
+  // Render matched segments
   return (
     <div>
       <h1>Matched Segments</h1>
@@ -40,7 +42,7 @@ const App = () => {
         <div>No segments found matching the criteria.</div>
       ) : (
         <ul>
-          {dataSegments?.user_segments.map(({ segment }) => (
+          {dataSegments.user_segments.map(({ segment }) => (
             <li key={segment.id}>
               <h2>{segment.name}</h2>
               <p>Slug: {segment.slug}</p>
