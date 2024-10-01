@@ -6,7 +6,7 @@ import { gql } from '@apollo/client';
 // Query to fetch the segment slug by segmentId
 export const GET_SEGMENT_SLUG = gql`
   query GetSegmentSlug($segmentId: String!) {
-    segments(where: { id: { _eq: $segmentId } }) {
+    Segment(where: { id: { _eq: $segmentId } }) {
       slug
     }
   }
