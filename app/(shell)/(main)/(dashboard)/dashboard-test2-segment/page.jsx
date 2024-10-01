@@ -5,6 +5,8 @@ import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from '@/app/(shell)/(main)/que
 
 
 
+
+
 const App = () => {
   const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // Replace with actual user ID
   const segmentId = "unique-segment-id"; // Replace with actual segment ID
@@ -51,14 +53,35 @@ const App = () => {
             <li key={Segment.id}>
               <h2>{Segment.name}</h2>
               <p>Slug: {Segment.slug}</p>
-              <p>Post: {Segment.post}</p>
-              <p>Product ID: {Segment.productId}</p> {/* Include product ID */}
-              
+              <p>Product ID: {Segment.productId}</p>
+
+              {/* Render post details */}
+              <h3>Post Details:</h3>
+              <p>Name: {Segment.post.name.value}</p>
+              <p>Price: ${Segment.post.price.value}</p>
+              <p>Category: {Segment.post.category.value}</p>
+              <p>Quantity: {Segment.post.quantity.value || 'N/A'}</p>
+              <p>Description: {Segment.post.description.value}</p>
+
+              {/* Render additional post fields */}
+              {Object.entries(Segment.post).map(([key, field]) => {
+                if (field.type && field.label && key !== 'name' && key !== 'price' && key !== 'category' && key !== 'quantity' && key !== 'description') {
+                  return (
+                    <p key={key}>
+                      {field.label}: {field.value}
+                    </p>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Render Product details */}
               {Segment.Product && (
                 <div>
                   <h3>Product Details:</h3>
                   <p>Product Name: {Segment.Product.name}</p>
                   <p>Description: {Segment.Product.description}</p>
+
                   {Segment.Product.imageGallery && Segment.Product.imageGallery.length > 0 && (
                     <div>
                       <h4>Image Gallery:</h4>
@@ -71,6 +94,7 @@ const App = () => {
                       </ul>
                     </div>
                   )}
+
                   {Segment.Product.primaryPhoto && (
                     <div>
                       <h4>Primary Photo:</h4>
