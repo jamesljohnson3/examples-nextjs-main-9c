@@ -19,7 +19,7 @@ export const GET_MATCHED_SEGMENTS = gql`
   query GetMatchedSegments($userId: String!, $slug: String!) {
     UserSegment(where: {
       userId: { _eq: $userId },
-      segment: { slug: { _ilike: $slug } }
+      Segment: { slug: { _ilike: $slug } }
     }) {
       Segment {
         id
