@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from '@/app/(shell)/(main)/queries'; // Assuming you have these queries defined
+import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from './queries'; // Assuming you have the queries defined
 
 const App = () => {
   const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // replace with actual user ID
@@ -17,7 +17,7 @@ const App = () => {
 
   useEffect(() => {
     if (dataSlug) {
-      const slug = dataSlug.segments[0]?.slug;
+      const slug = dataSlug?.segments[0]?.slug;
 
       if (slug) {
         // Fetch matched segments using the slug
@@ -44,7 +44,6 @@ const App = () => {
             <li key={segment.id}>
               <h2>{segment.name}</h2>
               <p>Slug: {segment.slug}</p>
-              <p>Product: {segment.product?.name}</p>
             </li>
           ))}
         </ul>
