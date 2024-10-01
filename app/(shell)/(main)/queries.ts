@@ -21,7 +21,7 @@ export const GET_MATCHED_SEGMENTS = gql`
       userId: { _eq: $userId },
       segment: { slug: { _ilike: $slug } }
     }) {
-      segment {
+      Segment {
         id
         name
         slug
