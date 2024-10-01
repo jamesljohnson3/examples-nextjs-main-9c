@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
-import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from './queries'; // Ensure these queries are defined correctly
+import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from '@/app/(shell)/(main)/queries'; // Assuming you have these queries defined
 
 const App = () => {
   const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // replace with actual user ID
