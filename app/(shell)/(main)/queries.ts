@@ -25,6 +25,8 @@ export const GET_MATCHED_SEGMENTS = gql`
         id
         name
         slug
+        post
+        productId
       }
     }
   }

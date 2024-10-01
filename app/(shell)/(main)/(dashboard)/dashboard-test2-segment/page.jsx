@@ -4,7 +4,6 @@ import { useQuery, useLazyQuery } from '@apollo/client';
 import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from '@/app/(shell)/(main)/queries'; // Assuming you have these queries defined
 
 
-
 const App = () => {
     const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // Replace with actual user ID
     const segmentId = "unique-segment-id"; // Replace with actual segment ID
@@ -36,7 +35,7 @@ const App = () => {
     if (loadingSegments) return <div>Loading matched segments...</div>;
     if (errorSegments) return <div>Error fetching matched segments: {errorSegments.message}</div>;
   
-    // Log the fetched segments data
+    // Log the fetched segments data for debugging
     console.log(dataSegments);
   
     // Render matched segments
@@ -51,6 +50,8 @@ const App = () => {
               <li key={Segment.id}>
                 <h2>{Segment.name}</h2>
                 <p>Slug: {Segment.slug}</p>
+                <p>Post: {Segment.post}</p> {/* Include post information */}
+                <p>Product ID: {Segment.productId}</p> {/* Include product ID */}
               </li>
             ))}
           </ul>
