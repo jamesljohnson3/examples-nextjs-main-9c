@@ -27,6 +27,16 @@ export const GET_MATCHED_SEGMENTS = gql`
         slug
         post
         productId
+        Product {           
+          id
+          name
+          description
+          imageGallery
+          primaryPhoto
+          ogImage
+          metadata
+          
+        }
       }
     }
   }
