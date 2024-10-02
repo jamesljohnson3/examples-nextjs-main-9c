@@ -36,7 +36,7 @@ interface DataSegments {
 
 const App: React.FC = () => {
   const userId: string = "cm14mvrxe0002ue6ygbc4yyzr"; // Replace with actual user ID
-  const segmentId: string = "unique-segment-id2"; // Replace with actual segment ID
+  const segmentId: string = "unique-segment-id"; // Replace with actual segment ID
 
   // Fetch the segment slug
   const { loading: loadingSlug, error: errorSlug, data: dataSlug } = useQuery<DataSlug>(GET_SEGMENT_SLUG, {
