@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client"
 import React, { useEffect } from 'react';
 import { useQuery, useLazyQuery } from '@apollo/client';
@@ -48,12 +47,12 @@ const App = () => {
         <div>No segments found matching the criteria.</div>
       ) : (
         <ul>
-          {userSegments.map((userSegment: { Segment: any; }, index: any) => {
+          {userSegments.map((userSegment, index) => {
             const segment = userSegment.Segment;
             const product = segment?.Product;
 
             return (
-              <li key={segment?.id || index} style={{ border: '1px solid #ccc', padding: '16px', margin: '8px 0', borderRadius: '8px' }}>
+              <li key={segment?.id || `user-segment-${index}`} style={{ border: '1px solid #ccc', padding: '16px', margin: '8px 0', borderRadius: '8px' }}>
                 <h2>{segment?.name}</h2>
                 <div><strong>Segment ID:</strong> {segment?.id}</div>
                 <div><strong>Slug:</strong> {segment?.slug}</div>
@@ -69,8 +68,8 @@ const App = () => {
                     <div>
                       <strong>Images:</strong>
                       <div>
-                        {product.imageGallery?.map((image: string | undefined, index: React.Key | null | undefined) => (
-                          <img key={index} src={image} alt={`Image ${index + 1}`} style={{ width: '100px', margin: '5px' }} />
+                        {product.imageGallery?.map((image, imageIndex) => (
+                          <img key={imageIndex} src={image} alt={`Image ${imageIndex + 1}`} style={{ width: '100px', margin: '5px' }} />
                         ))}
                       </div>
                     </div>
