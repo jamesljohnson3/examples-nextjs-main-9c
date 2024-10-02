@@ -68,7 +68,7 @@ const App = () => {
   }, [dataSlug, getMatchedSegments, userId]);
 
   // Ensure matchedSegments exist before mapping
-  const matchedSegments: UserSegmentResponse[] = dataSegments?.matchedSegments?.map(segment => ({
+  const matchedSegments: UserSegmentResponse[] = dataSegments?.matchedSegments?.map((segment: { id: any; userId: any; segmentId: any; segment: { id: any; slug: any; name: any; post: string | number | boolean | JsonObject | JsonArray | null; product: { id: any; name: any; description: any; price: any; category: any; quantity: any; primaryPhoto: any; imageGallery: any; createdAt: { toString: () => any; }; updatedAt: { toString: () => any; }; metadata: string | number | boolean | JsonObject | JsonArray | null; ogImage: any; }; domainId: any; }; }) => ({
     id: segment.id,
     userId: segment.userId ?? null,
     segmentId: segment.segmentId ?? null,
