@@ -9,7 +9,7 @@ import { GET_SEGMENT_SLUG, GET_MATCHED_SEGMENTS } from '@/app/(shell)/(main)/que
 
 const App = () => {
   const userId = "cm14mvrxe0002ue6ygbc4yyzr"; // Replace with actual user ID
-  const segmentId = "unique-segment-id"; // Replace with actual segment ID
+  const segmentId = "unique-segment-id2"; // Replace with actual segment ID
 
   // Fetch the segment slug
   const { loading: loadingSlug, error: errorSlug, data: dataSlug } = useQuery(GET_SEGMENT_SLUG, {
