@@ -16,6 +16,8 @@ declare module "next-auth/jwt" {
     website?: string | null;
     gender?: string | null;
     name?: string | null;
+    token?: string | null; // Add token to JWT
+
   }
 }
 
@@ -31,7 +33,10 @@ export interface ExtendedUser {
   name?: string | null;
   email?: string | null;
   image?: string | null;
+
   // Add custom properties for NextAuth JWT and session
+  token?: string | null; // Add token to JWT
+
 }
 
 const handler = NextAuth({
