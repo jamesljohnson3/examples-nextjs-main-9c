@@ -12,7 +12,7 @@ export default async function Page() {
     >
       <AppSidebar />
       <main className="flex flex-1 flex-col p-2 transition-all duration-300 ease-in-out">
-        <div className="h-full rounded-md border-2 border-dashed p-2">
+        <div className="bg-white rounded-lg h-full pb-4 shadow">
           <SidebarTrigger />
         </div>
       </main>
