@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSession } from "next-auth/react";
-
-
 import { ApolloLink, HttpLink } from "@apollo/client";
 import {
   ApolloNextAppProvider,
@@ -52,8 +50,8 @@ export function ApolloWrapper({ children }: React.PropsWithChildren) {
   }, []);
 
   if (!client) {
-    // Render nothing or a loader until the client is initialized
-    return null;
+    // Render a loading spinner or message while the client is being initialized
+    return <div>Loading...</div>;
   }
 
   return <ApolloNextAppProvider makeClient={() => client}>{children}</ApolloNextAppProvider>;
