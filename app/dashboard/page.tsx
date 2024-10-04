@@ -9,13 +9,16 @@ export default async function Page() {
   return (
     <SidebarLayout
       defaultOpen={cookies().get("sidebar:state")?.value === "true"}
-    >
-      <AppSidebar />
+    ><div className="gap-4">
+
+<AppSidebar />
       <main className="flex flex-1 flex-col p-2 transition-all duration-300 ease-in-out">
         <div className="bg-white rounded-lg h-full pb-4 shadow">
           <SidebarTrigger />
         </div>
       </main>
+    </div>
+      
     </SidebarLayout>
   )
 }
