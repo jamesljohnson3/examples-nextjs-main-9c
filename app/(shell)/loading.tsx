@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Menu } from 'lucide-react'
 
 export default function MobileResponsiveAppLayoutLoadingSkeleton() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
 
+    
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       {/* Top Header */}
@@ -16,7 +16,6 @@ export default function MobileResponsiveAppLayoutLoadingSkeleton() {
               variant="ghost"
               size="icon"
               className="mr-2 md:hidden"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               <Menu className="h-6 w-6" />
             </Button>
@@ -30,8 +29,9 @@ export default function MobileResponsiveAppLayoutLoadingSkeleton() {
       </header>
 
       <div className="flex-grow flex flex-col md:flex-row p-4 space-y-4 md:space-y-0 md:space-x-4">
-        {/* Sidebar */}
-        <aside className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-full md:w-64 bg-white p-4 rounded-2xl shadow-sm`}>
+        {/* Sidebar          <aside className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-full md:w-64 bg-white p-4 rounded-2xl shadow-sm`}>
+  */}
+        <aside className={`block md:block w-full md:w-64 bg-white p-4 rounded-2xl shadow-sm`}>
           <Skeleton className="h-8 w-32 mb-4" />
           <div className="space-y-2">
             {[...Array(6)].map((_, i) => (
