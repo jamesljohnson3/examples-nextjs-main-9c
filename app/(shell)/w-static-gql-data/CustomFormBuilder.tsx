@@ -21,7 +21,7 @@ import {
   UPDATE_PRODUCT_AND_INSERT_SEGMENT, 
   ADD_DESIGN_ELEMENT_VERSION
 } from '@/app/queries';
-
+import LoadingSplitProductSegmentView from "./loading"
 const USER_ID = "cm14mvrxe0002ue6ygbc4yyzr";
 const PRODUCT_ID = "cm14mvs2o000fue6yh6hb13yn";
 const WORKSPACE_ID = 'cm14mvrze0008ue6y9xr15bph';
@@ -46,56 +46,57 @@ function SinglePost({ id }: { id: string }) {
   const [postKeys, setPostKeys] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  
   // Queries
-  const { data: productData } = useQuery(GET_PRODUCT, {
+  const { loading: loadingProduct, data: productData } = useQuery(GET_PRODUCT, {
     variables: { productId: PRODUCT_ID }
   });
 
-  const { data: segmentsData } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
+  const { loading: loadingSegments, data: segmentsData } = useQuery(GET_SEGMENTS_BY_PRODUCT_AND_DOMAIN, {
     variables: { productId: PRODUCT_ID, domainId: DOMAIN_ID }
   });
 
-  const { data: productVersionsData } = useQuery(GET_PRODUCT_VERSIONS, {
+  const { loading: loadingVersions, data: productVersionsData } = useQuery(GET_PRODUCT_VERSIONS, {
     variables: { productId: PRODUCT_ID }
   });
 
-  const { data: designConceptsData } = useQuery(GET_DESIGN_CONCEPTS, {
+  const { loading: loadingConcepts, data: designConceptsData } = useQuery(GET_DESIGN_CONCEPTS, {
     variables: { productId: PRODUCT_ID }
   });
 
-  const { data: aiSuggestionsData } = useQuery(GET_AI_SUGGESTIONS, {
+  const { loading: loadingAISuggestions, data: aiSuggestionsData } = useQuery(GET_AI_SUGGESTIONS, {
     variables: { productId: PRODUCT_ID }
   });
 
-  const { data: designElementsData } = useQuery(GET_DESIGN_ELEMENTS, {
+  const { loading: loadingElements, data: designElementsData } = useQuery(GET_DESIGN_ELEMENTS, {
     variables: { domainId: DOMAIN_ID }
   });
 
-  const { data: mediaFilesData } = useQuery(GET_MEDIA_FILES, {
+  const { loading: loadingMediaFiles, data: mediaFilesData } = useQuery(GET_MEDIA_FILES, {
     variables: { designElementId: 'example-design-element-id' } // Replace with actual ID
   });
 
-  const { data: userDetailsData } = useQuery(GET_USER_DETAILS, {
+  const { loading: loadingUserDetails, data: userDetailsData } = useQuery(GET_USER_DETAILS, {
     variables: { userId: USER_ID }
   });
 
-  const { data: domainData } = useQuery(GET_DOMAIN, {
+  const { loading: loadingDomain, data: domainData } = useQuery(GET_DOMAIN, {
     variables: { domainId: DOMAIN_ID }
   });
 
-  const { data: designElementVersionsData } = useQuery(GET_DESIGN_ELEMENT_VERSIONS, {
+  const { loading: loadingElementVersions, data: designElementVersionsData } = useQuery(GET_DESIGN_ELEMENT_VERSIONS, {
     variables: { designElementId: 'example-design-element-id' } // Replace with actual ID
   });
 
-  const { data: workspaceData } = useQuery(GET_WORKSPACE, {
+  const { loading: loadingWorkspace, data: workspaceData } = useQuery(GET_WORKSPACE, {
     variables: { workspaceId: WORKSPACE_ID }
   });
 
-  const { data: organizationData } = useQuery(GET_ORGANIZATION, {
+  const { loading: loadingOrganization, data: organizationData } = useQuery(GET_ORGANIZATION, {
     variables: { organizationId: ORGANIZATION_ID }
   });
 
-  const { data: dashboardData } = useQuery(GET_DASHBOARD_DATA, {
+  const { loading: loadingDashboard, data: dashboardData } = useQuery(GET_DASHBOARD_DATA, {
     variables: { organizationId: ORGANIZATION_ID, userId: USER_ID }
   });
 
@@ -215,10 +216,15 @@ function SinglePost({ id }: { id: string }) {
       console.error('Error adding design element version:', err.message);
     }
   };
+  if (loadingProduct || loadingSegments || loadingVersions || loadingConcepts || loadingAISuggestions || loadingElements || loadingMediaFiles || loadingUserDetails || loadingDomain || loadingElementVersions || loadingWorkspace || loadingOrganization || loadingDashboard) {
+    return <LoadingSplitProductSegmentView/>; // Display a loading message while fetching data
+  }
 
   if (!post) {
-    return null;
+    return null; // Handle case where post data is not available
   }
+
+  
 
   return (
     <div>

@@ -9,7 +9,7 @@ import {
   SSRMultipartLink,
 } from "@apollo/experimental-nextjs-app-support";
 import { setVerbosity } from "ts-invariant";
-
+import MobileResponsiveAppLayoutLoadingSkeleton from './loading'
 setVerbosity("debug");
 
 function createApolloClient(token: string | null) {
@@ -51,7 +51,7 @@ export function ApolloWrapper({ children }: React.PropsWithChildren) {
 
   if (!client) {
     // Render a loading spinner or message while the client is being initialized
-    return <div>Loading...</div>;
+    return <MobileResponsiveAppLayoutLoadingSkeleton/>;
   }
 
   return <ApolloNextAppProvider makeClient={() => client}>{children}</ApolloNextAppProvider>;
