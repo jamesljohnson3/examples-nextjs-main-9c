@@ -54,7 +54,7 @@ const SidebarLayout = React.forwardRef<
           } as React.CSSProperties
         }
         className={cn(
-          "flex min-h-screen bg-accent/50 pl-0 transition-all duration-300 ease-in-out data-[sidebar=closed]:pl-0 sm:pl-[--sidebar-width]",
+          "flex min-h-screen bg-accent/50 pl-0 mt-2 transition-all duration-300 ease-in-out data-[sidebar=closed]:pl-0 sm:pl-[--sidebar-width]",
           className
         )}
         {...props}
@@ -94,7 +94,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
     const sidebar = (
       <div
         ref={ref}
-        className={cn("flex h-full flex-col border-r bg-background", className)}
+        className={cn("flex h-full flex-col  bg-background", className)}
       >
         {children}
       </div>
@@ -114,7 +114,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
     }
 
     return (
-      <aside className="fixed inset-y-0 left-0 p-4 z-10 hidden w-[--sidebar-width] transition-all duration-300 ease-in-out md:block [[data-sidebar=closed]_&]:left-[calc(var(--sidebar-width)*-1)]">
+      <aside className="fixed p-4 inset-y-0 left-0 z-5 hidden w-[--sidebar-width] transition-all duration-300 ease-in-out md:block [[data-sidebar=closed]_&]:left-[calc(var(--sidebar-width)*-1)]">
         {sidebar}
       </aside>
     )
@@ -129,7 +129,7 @@ const SidebarHeader = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center border-b px-2.5 py-2", className)}
+      className={cn("flex items-center px-2.5 py-2", className)}
       {...props}
     />
   )
@@ -143,7 +143,7 @@ const SidebarFooter = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center border-t px-2.5 py-2", className)}
+      className={cn("flex items-center  px-2.5 py-2", className)}
       {...props}
     />
   )
